@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
+import AddPersonnelModal from '../modal/addPersonnelModal';  // Import the modal
 import addBtn from "./dashboardAssets/plus.png";
 import bfpPro from "./dashboardAssets/bfpPersonnel.jpg";
 import arrow from "./dashboardAssets/right-arrow.png";
 
 function DashboardBody() {
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+
+  const openModal = () => setIsModalOpen(true); // Function to open the modal
+  const closeModal = () => setIsModalOpen(false); // Function to close the modal
+
   return (
     <div className="p-4 h-screen flex flex-col lg:bg-white">
-
+      
       {/* Header Section */}
       <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
         {/* Left Column */}
@@ -17,7 +23,12 @@ function DashboardBody() {
 
         {/* Right Column */}
         <div className="ml-4 flex items-center">
-          <img src={addBtn} alt="Add Button" className='w-10 h-10 mr-2' />
+          <img
+            src={addBtn}
+            alt="Add Button"
+            className="w-10 h-10 mr-2 cursor-pointer"
+            onClick={openModal}  // Open the modal when clicked
+          />
           <p className="text-xl font-semibold">Add personnel</p>
         </div>
       </div>
@@ -26,7 +37,6 @@ function DashboardBody() {
 
       {/* Main container with responsive grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_16rem] gap-4 text-white h-full">
-        
         {/* Column 1 - Profile with centered image, name, age, and helmet status */}
         <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-br from-start-gradient to-end-gradient h-full flex flex-col justify-center items-center">
           <img src={bfpPro} alt="Profile" className='h-72 w-72 rounded-full mb-4' />
@@ -46,7 +56,7 @@ function DashboardBody() {
             <p>Inactive</p>
           </div>
         </div>
-        
+
         {/* Column 2 with individual cards */}
         <div className="flex flex-col h-full">
           <div className="flex-grow grid grid-rows-2 gap-4"> {/* Ensure this takes available height */}
@@ -75,6 +85,8 @@ function DashboardBody() {
                 </div>
               </div>
             </div>
+
+            {/* Analytics Preview Section */}
             <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient">
               <div className="flex justify-between">
                 <p className="text-white font-bold text-[28px]">Analytics Preview</p>
@@ -102,14 +114,12 @@ function DashboardBody() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
         {/* Column 3 - Fixed width column */}
         <div className="flex flex-col h-full justify-end w-64">
           <div className="flex-grow grid grid-rows-[auto_1fr_1fr] gap-4 justify-self-end">
-
             <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient h-fit">
               <p className="font-bold text-[26px]">Other Personnel</p>
             </div>
@@ -118,7 +128,7 @@ function DashboardBody() {
             <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
               <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
               <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-              <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
+                <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
               </button>
             </div>
 
@@ -126,13 +136,15 @@ function DashboardBody() {
             <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
               <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
               <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-              <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
+                <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
               </button>
             </div>
-
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      <AddPersonnelModal isOpen={isModalOpen} closeModal={closeModal} />
     </div>
   );
 }

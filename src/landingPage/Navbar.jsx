@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import hardhat from "./landingAssets/labour.png";
 import profileIcon from "./landingAssets/profile1.jpg";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+
+  // Toggle dropdown visibility
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  // Logout functionality
+  const handleLogout = () => {
+    localStorage.removeItem("user"); // Clear session
+    navigate("/", {replace : true}); // Redirect to login page
+  };
+
   return (
-    <nav className="flex items-center justify-between p-4 lg:bg-white shadow-md">
+    <nav className="flex items-center justify-between p-4 lg:bg-white relative">
       {/* Left: Logo and Text */}
       <div className="flex items-center space-x-2">
         <img src={hardhat} alt="Bureau of Fire Protection" className="w-14 h-14" />
@@ -25,13 +39,26 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Right: Profile Image */}
-      <div className="flex items-center space-x-2">
+      {/* Right: Profile Image with Dropdown */}
+      <div className="relative">
         <img 
           src={profileIcon} 
           alt="Profile" 
-          className="w-20 h-20 rounded-full border-2 border-gray-500"
+          className="w-20 h-20 rounded-full border-2 border-gray-500 cursor-pointer"
+          onClick={toggleDropdown} // Toggle dropdown on click
         />
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg z-10">
+            <ul>
+              <li 
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={handleLogout}
+              >
+                Logout
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </nav>
   );
