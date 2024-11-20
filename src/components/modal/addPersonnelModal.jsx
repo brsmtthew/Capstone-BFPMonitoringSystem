@@ -8,6 +8,7 @@ function AddPersonnelModal({ isOpen, closeModal }) {
     birthdate: '',
     phone: '',
   });
+  const [image, setImage] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -17,22 +18,56 @@ function AddPersonnelModal({ isOpen, closeModal }) {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => setImage(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    // You can process the data here (e.g., send it to a server or save it locally)
     console.log('Personnel Info Submitted:', personnelInfo);
-    closeModal(); // Close modal after submission
+    console.log('Uploaded Image:', image);
+    closeModal();
   };
 
   return (
     <div
       className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${!isOpen && 'hidden'}`}
     >
-      <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-1/3 relative">
         <button onClick={closeModal} className="absolute top-2 right-2 text-black">
           X
         </button>
         <h2 className="text-xl font-bold mb-4">Add Personnel Information</h2>
+        
+        {/* Image Upload Section */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700">Upload Image</label>
+          <div className="mt-2 flex items-center space-x-4">
+            {image ? (
+              <img
+                src={image}
+                alt="Preview"
+                className="h-16 w-16 rounded-full object-cover border border-gray-300"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300">
+                <span className="text-gray-500 text-sm">No Image</span>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="text-sm text-gray-600"
+            />
+          </div>
+        </div>
+
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
@@ -100,17 +135,17 @@ function AddPersonnelModal({ isOpen, closeModal }) {
 
           <div className="flex justify-between mt-4">
             <button
-              type="button"
-              onClick={closeModal}  // Cancel button closes the modal
-              className="w-1/2 py-2 bg-cardHolderColor text-white font-semibold rounded-full hover:bg-gray-600"
-            >
-              Cancel
-            </button>
-            <button
               type="submit"
               className="w-1/2 py-2 bg-cardHolderColor text-white font-semibold rounded-full hover:bg-blue-600"
             >
               Save Information
+            </button>
+            <button
+              type="button"
+              onClick={closeModal}
+              className="w-1/2 py-2 bg-cardHolderColor text-white font-semibold rounded-full hover:bg-gray-600"
+            >
+              Cancel
             </button>
           </div>
         </form>
