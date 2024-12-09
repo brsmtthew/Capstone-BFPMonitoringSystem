@@ -1,144 +1,174 @@
-import React, { useState } from 'react';
-import AddPersonnelModal from '../modal/addPersonnelModal';  // Import the modal
-import addBtn from "./dashboardAssets/plus.png";
-import bfpPro from "./dashboardAssets/bfpPersonnel.jpg";
-import arrow from "./dashboardAssets/greater-than.png";
-import { ChevronDoubleRightIcon } from '@heroicons/react/24/solid';
+import React, { useState, useEffect } from 'react';
+import AddPersonnelModal from '../modal/addPersonnelModal';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { db } from '../../firebase/Firebase'; // Ensure correct import
+import { collection, getDocs } from 'firebase/firestore';
 
 function DashboardBody() {
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [personnel, setPersonnel] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const openModal = () => setIsModalOpen(true); // Function to open the modal
-  const closeModal = () => setIsModalOpen(false); // Function to close the modal
+  // Open/close modal functions
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  // Fetch personnel data from Firestore
+  const fetchPersonnelData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'personnelInfo'));
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPersonnel(data);
+    } catch (error) {
+      console.error('Error fetching personnel data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPersonnelData();
+  }, []); // Fetch data once when the component mounts
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % personnel.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? personnel.length - 1 : prevIndex - 1
+    );
+  };
+
+  // Fetch image dynamically if the image is just a path
+  const fetchImageUrl = async (imagePath) => {
+    const storage = getStorage();
+    const imageRef = ref(storage, imagePath); // Path from Firestore
+    try {
+      const url = await getDownloadURL(imageRef);
+      return url;
+    } catch (error) {
+      console.error('Error fetching image from Firebase Storage:', error);
+      return 'https://via.placeholder.com/300x300'; // Fallback image URL
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return <p className="text-center mt-10 text-lg text-gray-700">Loading...</p>;
+  }
+
+  // If no personnel data is found
+  if (personnel.length === 0) {
+    return <p>No personnel data found.</p>;
+  }
 
   return (
-    <div className="p-4 h-screen flex flex-col lg:bg-white">
-      
+    <div className="p-4 h-screen flex flex-col lg:bg-gray-50">
       {/* Header Section */}
-      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        {/* Left Column */}
-        <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div> 
-          <p className="text-[26px] font-bold">PERSONNEL DETAILS</p>            
-        </div>
-
-        {/* Right Column */}
-        <div className="ml-4 flex items-center">
-          <img
-            src={addBtn}
-            alt="Add Button"
-            className="w-10 h-10 mr-2 cursor-pointer"
-            onClick={openModal}  // Open the modal when clicked
-          />
-          <p className="text-xl font-semibold">Add personnel</p>
-        </div>
+      <div className="flex justify-between items-center text-black px-4 lg:px-20">
+        <h1 className="text-[26px] font-bold flex items-center">
+          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div>
+          PERSONNEL DETAILS
+        </h1>
       </div>
 
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-4 h-[2px] bg-gray w-[80%] mx-auto" />
 
-      {/* Main container with responsive grid layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr_16rem] gap-4 text-white h-full">
-        {/* Column 1 - Profile with centered image, name, age, and helmet status */}
-        <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-br from-start-gradient to-end-gradient h-full flex flex-col justify-center items-center">
-          <img src={bfpPro} alt="Profile" className='h-72 w-72 rounded-full mb-4' />
-          <p className='text-[28px] text-white font-montserrat font-bold'>Name</p>
-          
-          {/* Row for Age and Helmet Status */}
-          <div className="flex justify-evenly w-full mt-4 text-[18px] text-white">
-            <p>Age</p>
-            <p>Helmet Status</p>
-          </div>
-
-          <div className="my-4 w-3/4 h-px bg-separator"></div>
-
-          {/* Row for Actual Age and Helmet Status Data */}
-          <div className="flex justify-evenly w-full text-[18px] text-white">
-            <p>32</p>
-            <p>Inactive</p>
-          </div>
-        </div>
-
-        {/* Column 2 with individual cards */}
-        <div className="flex flex-col h-full">
-          <div className="flex-grow grid grid-rows-2 gap-4"> {/* Ensure this takes available height */}
-            <div className="p-4 rounded-2xl shadow bg-gradient-to-tr from-start-gradient to-end-gradient pt-14 text-white flex flex-col">
-              <p className='font-bold text-[28px]'>Name: Acer Nitro</p>
-
-              {/* Row for ID, Date of Birth, and Contact Number Labels */}
-              <div className="flex justify-between w-full pt-20 text-[16px] text-white">
-                <div className="flex flex-col items-center">
-                  <p>ID</p>
-                  <p className="text-white">12082342</p>
-                </div>
-
-                <div className="h-16 w-1 rounded-full bg-separator mr-2"></div> 
-
-                <div className="flex flex-col items-center">
-                  <p>Date of Birth</p>
-                  <p className="text-white">September 24, 2024</p>
-                </div>
-
-                <div className="h-16 w-1 rounded-full bg-separator mr-2"></div> 
-
-                <div className="flex flex-col items-center">
-                  <p>Contact Number</p>
-                  <p className="text-white">09123456789</p>
-                </div>
-              </div>
+      {/* Main Card */}
+      <div className="bg-offWhite shadow-md rounded-xl p-6 lg:p-10">
+        {/* Bento Grid */}
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:grid-rows-2">
+          {/* 1st card - Personnel Profile */}
+          <div className="relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow bg-offWhite h-64">
+            <div className="absolute top-0 left-0 bg-opacity-50 bg-black w-full p-4 text-white rounded-t-lg">
+              <h4 className="text-xl font-semibold">{personnel[currentImageIndex].name}</h4>
+              <p className="text-sm">{personnel[currentImageIndex].position}</p>
             </div>
-
-            {/* Analytics Preview Section */}
-            <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient">
-              <div className="flex justify-between">
-                <p className="text-white font-bold text-[28px]">Analytics Preview</p>
-                <button className="text-black bg-white px-4 py-2 rounded-lg flex items-center">See All Analytics
-                  <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
-                </button>
-              </div>
-              <p className='mt-4'>Previous Reading</p>
-
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-black items-center">
-                <div className="bg-white p-4 rounded shadow text-center">
-                  <p className="text-blue font-bold text-[24px]">70 BPM</p>
-                  <div className="my-4 w-full h-px bg-separator"></div>
-                  <p className="text-[14px]">Heart Rate</p>
-                </div>
-                <div className="bg-white p-4 rounded shadow text-center">
-                  <p className="text-blue font-bold text-[24px]">37°C</p>
-                  <div className="my-4 w-full h-px bg-separator"></div>
-                  <p className="text-[14px">Body Temp</p>
-                </div>
-                <div className="bg-white p-4 rounded shadow text-center">
-                  <p className="text-blue font-bold text-[24px]">60°F</p>
-                  <div className="my-4 w-full h-px bg-separator"></div>
-                  <p className="text-[14px]">Environment Temp</p>
-                </div>
-              </div>
+            <div className="p-6 mt-12">
+              <h3 className="text-lg font-medium text-gray-800 mt-4">Personnel</h3>
+              <p className="text-sm text-gray-600">Swipe to view different personnel profiles.</p>
             </div>
-          </div>
-        </div>
-
-        {/* Column 3 - Fixed width column */}
-        <div className="flex flex-col h-full justify-end w-64">
-          <div className="flex-grow grid grid-rows-[auto_1fr_1fr] gap-4 justify-self-end">
-            <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient h-fit">
-              <p className="font-bold text-[26px] text-center">Other Personnel</p>
+            <div className="relative grow flex items-center justify-center">
+              {/* Fetch image URL dynamically if the image is a path */}
+              <img
+                className="h-52 w-52 rounded-full object-cover"
+                src={personnel[currentImageIndex].image.startsWith('https') // Check if it's already a URL
+                  ? personnel[currentImageIndex].image 
+                  : fetchImageUrl(personnel[currentImageIndex].image)} 
+                alt={`Personnel ${currentImageIndex + 1}`}
+              />
             </div>
-
-            {/* Row 2 */}
-            <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
-              <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
-              <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-                <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
+            <div className="flex justify-between p-4">
+              <button className="text-sm text-gray-600" onClick={prevImage}>
+                Previous
+              </button>
+              <button className="text-sm text-gray-600" onClick={nextImage}>
+                Next
               </button>
             </div>
+          </div>
 
-            {/* Row 3 */}
-            <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
-              <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
-              <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-                <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
-              </button>
+          {/* Other Cards */}
+          {/* 2nd card - Battery/Power Status */}
+          <div className="bg-white relative flex flex-col bg-gray-100 rounded-lg shadow h-48">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-800">Battery Status</h3>
+              <p className="text-sm text-gray-600">Live monitoring of device battery levels.</p>
+            </div>
+            <div className="relative grow flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-gray-800">85%</p>
+                <p className="text-sm text-gray-600">Battery Remaining</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 3rd card - Health Status */}
+          <div className="bg-white relative flex flex-col bg-gray-100 rounded-lg shadow h-48">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-800">Health Status</h3>
+              <p className="text-sm text-gray-600">
+                Monitoring heart rate and body temperature.
+              </p>
+            </div>
+            <div className="relative grow flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-lg text-gray-800">Heart Rate: 72 BPM</p>
+                <p className="text-lg text-gray-800">Temperature: 36.5°C</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 4th card - Environmental Conditions */}
+          <div className="bg-white relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow h-48">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-800">Environmental Conditions</h3>
+              <p className="text-sm text-gray-600">
+                Real-time environmental data: temperature, smoke, etc.
+              </p>
+            </div>
+            <div className="relative grow flex flex-col items-center justify-center">
+              <p className="text-lg text-gray-800">Temperature: 30°C</p>
+              <p className="text-lg text-gray-800">Smoke: Normal</p>
+              <p className="text-lg text-gray-800">Gas Levels: Safe</p>
+            </div>
+          </div>
+
+          {/* 5th card - System Overview */}
+          <div className="bg-white relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow h-48">
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-gray-800">System Overview</h3>
+              <p className="text-sm text-gray-600">Summary of active alerts and system status.</p>
+            </div>
+            <div className="relative grow flex flex-col items-center justify-center">
+              <p className="text-lg text-gray-800">Active Alerts: 3</p>
+              <p className="text-lg text-gray-800">Resolved Alerts: 12</p>
+              <p className="text-lg text-gray-800">System Uptime: 24 hrs</p>
             </div>
           </div>
         </div>

@@ -28,6 +28,15 @@ export default {
       btnFontActive: "#02F690",
       yellow: "#FFD700", 
       histoColor: "#284B63",
+      red: "#FF0000",
+      solidGreen: "#00FF00",
+      gray: "#808080",
+      modalCard: "#374151",
+      modalButton: "#1F2937",
+      tableColor: "#111827",
+      searchTable: "#374151",
+      offWhite: "#F8FAFB",
+
     }
   },
   plugins: [],

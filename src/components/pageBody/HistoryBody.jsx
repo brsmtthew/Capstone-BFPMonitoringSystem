@@ -1,104 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import sortIcon from "./dashboardAssets/sort.png";
 import filterIcon from "./dashboardAssets/filter.png";
 import moreIcon from "./dashboardAssets/more.png";
 import searchIcon from "./dashboardAssets/glass.png";
 
 function HistoryBody() {
-  // Sample state for fetched data (replace with your actual Firebase data fetching logic)
   const [historyData, setHistoryData] = useState([]);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    // Simulate fetching data from Firebase
     const fetchData = async () => {
-      // Replace this with your Firebase fetching logic
       const data = [
         {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
+          name: "Ace Bernard Malasaga",
+          date: "December 23, 2025",
+          healthSensors: "Average",
+          envSensors: "Good",
+          remarks: "Average",
         },
         {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
+          name: "Neil Sims",
+          date: "November 11, 2024",
+          healthSensors: "Good",
+          envSensors: "Excellent",
+          remarks: "Great",
         },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        {
-          name: 'Ace Bernard Malasaga',
-          date: 'December 23, 2025',
-          healthSensors: 'Average',
-          envSensors: 'Good',
-          remarks: 'Average'
-        },
-        
-        // Add more sample data as needed
       ];
       setHistoryData(data);
     };
@@ -107,83 +33,114 @@ function HistoryBody() {
   }, []);
 
   return (
-    <div className='p-4 min-h-screen flex flex-col lg:bg-white'>
+    <div className="p-4 min-h-screen flex flex-col ">
       {/* Header Section */}
       <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        {/* Left Column */}
         <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div> 
-          <p className="text-[26px] font-bold">HISTORY</p>            
+          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div>
+          <p className="text-[26px] font-bold">HISTORY</p>
         </div>
 
-        {/* Right Column with Dropdown */}
-        <div className="ml-4 flex items-center">
-          <select className="text-xl text-white bg-primeColor font-semibold border text-center rounded-lg px-4 py-2">
+        {/* <div className="ml-4">
+          <select className="text-xl text-white bg-primeColor font-semibold border border-white rounded-lg px-4 py-2">
             <option>Select Personnel</option>
             <option>Personnel 1</option>
             <option>Personnel 2</option>
-            {/* Add more personnel options as needed */}
           </select>
-        </div>
+        </div> */}
       </div>
+
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
-      {/* Icon Section */}
-      <div className="flex justify-between items-center my-6 mx-40">
-      <button className="text-[18px] border border-separatorLine bg-primeColor text-white px-4 py-2 rounded-lg font-semibold cursor-pointer">
-        See All
-      </button>
-        <div className="flex space-x-4">
-          {/* Card for Search Icon */}
-          <div className="bg-white p-2 rounded-lg shadow-md flex items-center justify-center cursor-pointer">
-            <img src={searchIcon} alt="Search" className="h-8 w-8" />
-          </div>
-          {/* Card for Sort Icon */}
-          <div className="bg-white p-2 rounded-lg shadow-md flex items-center justify-center cursor-pointer">
-            <img src={sortIcon} alt="Sort" className="h-8 w-8" />
-          </div>
-          {/* Card for Filter Icon */}
-          <div className="bg-white p-2 rounded-lg shadow-md flex items-center justify-center cursor-pointer">
-            <img src={filterIcon} alt="Filter" className="h-8 w-8" />
-          </div>
-          {/* Card for More Icon */}
-          <div className="bg-white p-2 rounded-lg shadow-md flex items-center justify-center cursor-pointer">
-            <img src={moreIcon} alt="More" className="h-8 w-8" />
-          </div>
-        </div>
-      </div>
+      {/* Table Section in Card */}
+      <div className="bg-cardHolderColor rounded-lg shadow-md p-6">
+        <div className="relative overflow-x-auto">
+          {/* Search and Action Buttons */}
+          <div className="flex items-center justify-between flex-wrap md:flex-row space-y-4 md:space-y-0 pb-4">
+            <button
+              onClick={() => setDropdownOpen(!isDropdownOpen)}
+              className={`inline-flex items-center text-white font-medium rounded-lg text-sm px-3 py-1.5 focus:outline-none border ${
+                isDropdownOpen ? "bg-searchTable" : "bg-tableColor"
+              }`}
+            >
+              Action
+              <svg
+                className="w-2.5 h-2.5 ml-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 6"
+                aria-hidden="true"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m1 1 4 4 4-4"
+                />
+              </svg>
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute mt-2 bg-searchTable rounded-lg shadow-lg w-44">
+                <ul className="py-1 text-sm text-white">
+                  <li className="px-4 py-2 hover:bg-primeColor">Reward</li>
+                  <li className="px-4 py-2 hover:bg-primeColor">Promote</li>
+                  <li className="px-4 py-2 hover:bg-primeColor">Activate Account</li>
+                  <li className="px-4 py-2 hover:bg-primeColor text-red">Delete User</li>
+                </ul>
+              </div>
+            )}
 
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for users"
+                className="block p-2 pl-10 text-sm text-white bg-searchTable border border-white rounded-lg w-80 focus:ring-solidGreen focus:border-solidGreen"
+              />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <img src={searchIcon} alt="Search" className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
 
-      {/* Table Section */}
-      <div className="overflow-x-auto">
-      <div className="max-h-[600px] overflow-y-auto w-full flex justify-center">
-        <table className="min-w-fit text-[20px]">
-          <thead className="bg-histoColor sticky top-0 z-10">
-            <tr>
-              <th className="px-4 py-2 text-left text-white">Name</th>
-              <th className="px-4 py-2 text-left text-white">Date</th>
-              <th className="px-4 py-2 text-left text-white">Health Related Sensors</th>
-              <th className="px-4 py-2 text-left text-white">Environmental Related Sensors</th>
-              <th className="px-4 py-2 text-left text-white">Remarks</th>
-              <th className="px-4 py-2 text-left text-white">Action</th>
-            </tr>
-          </thead>
-          <tbody className="max-h-[400px] overflow-y-auto text-[18px] text-center">
-            {historyData.map((entry, index) => (
-              <tr key={index} className="hover:bg-gray-100">
-                <td className="px-4 py-2">{entry.name}</td>
-                <td className="px-4 py-2">{entry.date}</td>
-                <td className="px-4 py-2">{entry.healthSensors}</td>
-                <td className="px-4 py-2">{entry.envSensors}</td>
-                <td className="px-4 py-2">{entry.remarks}</td>
-                <td className="px-4 py-2">
-                  <button className="bg-black text-white rounded px-4 py-1">See Full</button>
-                </td>
+          {/* Table */}
+          <table className="w-full text-sm text-left text-white bg-tableColor">
+            <thead className="text-xs uppercase bg-searchTable text-white">
+              <tr>
+                <th className="p-4">
+                  <input type="checkbox" className="w-4 h-4 rounded text-green" />
+                </th>
+                <th className="px-6 py-3">Name</th>
+                <th className="px-6 py-3">Date</th>
+                <th className="px-6 py-3">Status</th>
+                <th className="px-6 py-3">Health Sensors</th>
+                <th className="px-6 py-3">Environmental Sensors</th>
+                <th className="px-6 py-3">Remarks</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {historyData.map((data, index) => (
+                <tr
+                  key={index}
+                  className="border-b bg-cardHolderColor hover:bg-searchTable"
+                >
+                  <td className="p-4">
+                    <input type="checkbox" className="w-4 h-4 rounded text-green" />
+                  </td>
+                  <td className="px-6 py-3">{data.name}</td>
+                  <td className="px-6 py-3">{data.date}</td>
+                  <td className="px-6 py-3 flex items-center">
+                  <div className="h-2.5 w-2.5 rounded-full bg-green mr-2"></div>
+                    Online
+                  </td>
+                  <td className="px-6 py-3">{data.healthSensors}</td>
+                  <td className="px-6 py-3">{data.envSensors}</td>
+                  <td className="px-6 py-3">{data.remarks}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
