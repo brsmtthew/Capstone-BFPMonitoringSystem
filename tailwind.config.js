@@ -36,7 +36,8 @@ export default {
       tableColor: "#111827",
       searchTable: "#374151",
       offWhite: "#F8FAFB",
-
+      headerDash: "#091057",
+      bodyDash: "#FDF7F4",
     }
   },
   plugins: [],

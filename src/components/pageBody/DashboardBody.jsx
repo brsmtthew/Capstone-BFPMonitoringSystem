@@ -80,18 +80,18 @@ function DashboardBody() {
       <div className="my-4 h-[2px] bg-gray w-[80%] mx-auto" />
 
       {/* Main Card */}
-      <div className="bg-offWhite shadow-md rounded-xl p-6 lg:p-10">
+      <div className="bg-bodyDash shadow-md rounded-xl p-6 lg:p-10">
         {/* Bento Grid */}
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:grid-rows-2">
           {/* 1st card - Personnel Profile */}
-          <div className="relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow bg-offWhite h-64">
-            <div className="absolute top-0 left-0 bg-opacity-50 bg-black w-full p-4 text-white rounded-t-lg">
+          <div className="relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow bg-white h-64">
+            <div className="absolute top-0 left-0 bg-headerDash w-full p-4 text-white rounded-t-lg rounded-xl">
               <h4 className="text-xl font-semibold">{personnel[currentImageIndex].name}</h4>
               <p className="text-sm">{personnel[currentImageIndex].position}</p>
             </div>
-            <div className="p-6 mt-12">
-              <h3 className="text-lg font-medium text-gray-800 mt-4">Personnel</h3>
-              <p className="text-sm text-gray-600">Swipe to view different personnel profiles.</p>
+            <div className="p-6 mt-12 text-black">
+              <h3 className="text-lg font-medium mt-4">Personnel</h3>
+              <p className="text-sm">Swipe to view different personnel profiles.</p>
             </div>
             <div className="relative grow flex items-center justify-center">
               {/* Fetch image URL dynamically if the image is a path */}
@@ -104,10 +104,10 @@ function DashboardBody() {
               />
             </div>
             <div className="flex justify-between p-4">
-              <button className="text-sm text-gray-600" onClick={prevImage}>
+              <button className="text-sm text-white bg-blue px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-solidGreen" onClick={prevImage}>
                 Previous
               </button>
-              <button className="text-sm text-gray-600" onClick={nextImage}>
+              <button className="text-sm text-white bg-blue px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-solidGreen" onClick={nextImage}>
                 Next
               </button>
             </div>
@@ -116,9 +116,9 @@ function DashboardBody() {
           {/* Other Cards */}
           {/* 2nd card - Battery/Power Status */}
           <div className="bg-white relative flex flex-col bg-gray-100 rounded-lg shadow h-48">
-            <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-800">Battery Status</h3>
-              <p className="text-sm text-gray-600">Live monitoring of device battery levels.</p>
+            <div className="p-4 bg-headerDash rounded-lg text-white">
+              <h3 className="text-lg font-medium">Battery Status</h3>
+              <p className="text-sm">Live monitoring of device battery levels.</p>
             </div>
             <div className="relative grow flex items-center justify-center">
               <div className="text-center">
@@ -130,7 +130,7 @@ function DashboardBody() {
 
           {/* 3rd card - Health Status */}
           <div className="bg-white relative flex flex-col bg-gray-100 rounded-lg shadow h-48">
-            <div className="p-6">
+            <div className="p-4 bg-headerDash rounded-lg text-white">
               <h3 className="text-lg font-medium text-gray-800">Health Status</h3>
               <p className="text-sm text-gray-600">
                 Monitoring heart rate and body temperature.
@@ -146,7 +146,7 @@ function DashboardBody() {
 
           {/* 4th card - Environmental Conditions */}
           <div className="bg-white relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow h-48">
-            <div className="p-6">
+            <div className="p-4 bg-headerDash rounded-lg text-white">
               <h3 className="text-lg font-medium text-gray-800">Environmental Conditions</h3>
               <p className="text-sm text-gray-600">
                 Real-time environmental data: temperature, smoke, etc.
@@ -161,7 +161,7 @@ function DashboardBody() {
 
           {/* 5th card - System Overview */}
           <div className="bg-white relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow h-48">
-            <div className="p-6">
+            <div className="p-4 bg-headerDash rounded-lg text-white">
               <h3 className="text-lg font-medium text-gray-800">System Overview</h3>
               <p className="text-sm text-gray-600">Summary of active alerts and system status.</p>
             </div>

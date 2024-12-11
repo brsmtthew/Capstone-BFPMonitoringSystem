@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, storage } from '../../firebase/Firebase';
-import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import DeletePersonnelModal from '../modal/deletePersonnelModal';
 import AddPersonnelModal from '../modal/addPersonnelModal';
@@ -15,24 +15,19 @@ function PersonnelBody() {
   const [selectedImagePath, setSelectedImagePath] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch personnel data from Firestore
+  // Fetch personnel data in real-time using onSnapshot
   useEffect(() => {
-    const fetchPersonnel = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'personnelInfo'));
-        const personnelData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPersonnel(personnelData);
-      } catch (error) {
-        console.error('Error fetching personnel data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const unsubscribe = onSnapshot(collection(db, 'personnelInfo'), (querySnapshot) => {
+      const personnelData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPersonnel(personnelData);
+      setLoading(false); // Set loading to false once data is loaded
+    });
 
-    fetchPersonnel();
+    // Cleanup function to unsubscribe when the component is unmounted
+    return () => unsubscribe();
   }, []);
 
   // Open and Close Modals
@@ -113,65 +108,49 @@ function PersonnelBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* Card for Personnel Data */}
-      <div className="bg-modalCard shadow-2xl rounded-xl p-6">
+      <div className="bg-bodyDash shadow-2xl rounded-xl p-6">
         {/* Grid for Personnel Data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {personnel.length > 0 ? (
             personnel.map((member) => (
-              <div
-                key={member.id}
-                className="bg-primeColor shadow-lg rounded-xl overflow-hidden"
-              >
+              <div key={member.id} className="bg-headerDash shadow-lg rounded-xl overflow-hidden">
                 {/* Image Section */}
-                <div className="p-4 flex flex-col items-center">
-                  <img
-                    src={member.image || 'https://via.placeholder.com/150'}
-                    alt={`${member.name}'s avatar`}
-                    className="h-48 w-48 object-cover rounded-full shadow-md"
-                  />
-                  <h3 className="text-2xl font-bold text-center mt-4 text-white">
-                    {member.name}
-                  </h3>
-                  <p className="text-lg font-medium text-center text-white">
-                    {member.position}
-                  </p>
-                </div>
+                <img
+                  src={member.image || 'https://via.placeholder.com/150'}
+                  alt={`${member.name}'s avatar`}
+                  className="w-full h-64 object-cover rounded-t-lg shadow-md"
+                />
 
                 {/* Details Section */}
-                <div className="text-white px-8 py-2">
-                  <div className="space-y-2">
-                    <p>
-                      <span className="font-semibold">ID:</span> {member.gearId}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Age:</span> {member.age}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Birthdate:</span> {member.birthdate}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Phone:</span> {member.phone}
-                    </p>
+                <div className="p-4">
+                  <h3 className="text-2xl font-bold text-center text-white">{member.name}</h3>
+                  <p className="text-lg font-medium text-center text-white">{member.position}</p>
+
+                  {/* Personnel Details */}
+                  <div className="text-white mt-4">
+                    <div className="space-y-2">
+                      <p><span className="font-semibold">ID:</span> {member.gearId}</p>
+                      <p><span className="font-semibold">Age:</span> {member.age}</p>
+                      <p><span className="font-semibold">Birthdate:</span> {member.birthdate}</p>
+                      <p><span className="font-semibold">Phone:</span> {member.phone}</p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Separator */}
-                <div className="my-4 w-3/4 h-px bg-separator mx-auto"></div>
-
-                {/* Button Section */}
-                <div className="flex justify-around p-4">
-                  <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => handleDisplay(member)}
-                  >
-                    Display
-                  </button>
-                  <button
-                    className="bg-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => openDeleteModal(member.id, member.imagePath)} // Pass imagePath here
-                  >
-                    Delete
-                  </button>
+                  {/* Buttons Section */}
+                  <div className="flex justify-between mt-4">
+                    <button
+                      className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                      onClick={() => handleDisplay(member)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                      onClick={() => openDeleteModal(member.id, member.imagePath)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -191,7 +170,7 @@ function PersonnelBody() {
         <DeletePersonnelModal
           isOpen={isDeleteModalOpen}
           closeModal={closeDeleteModal}
-          handleDelete={handleDeletePersonnel} // Pass delete handler
+          handleDelete={handleDeletePersonnel}
         />
       )}
     </div>
