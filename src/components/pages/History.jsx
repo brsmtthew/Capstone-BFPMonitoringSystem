@@ -1,6 +1,6 @@
 import React from 'react'
-import Navbar from '@/landingPage/Navbar'
-import HistoryBody from '@/dashboard/HistoryBody'
+import Navbar from '../landingPage/Navbar'
+import HistoryBody from '../pageBody/HistoryBody'
 
 function History() {
   return (

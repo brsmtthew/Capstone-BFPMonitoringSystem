@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import hardhat from "./landingAssets/labour.png";
-import profileIcon from "./landingAssets/profile1.jpg";
+import profileIcon from "./landingAssets/user (1).png";
 import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
@@ -44,7 +44,7 @@ const Navbar = () => {
         <img 
           src={profileIcon} 
           alt="Profile" 
-          className="w-20 h-20 rounded-full border-2 border-gray-500 cursor-pointer"
+          className="w-14 h-14 rounded-full cursor-pointer"
           onClick={toggleDropdown} // Toggle dropdown on click
         />
         {isDropdownOpen && (

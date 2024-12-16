@@ -1,6 +1,6 @@
 import React from 'react'
 import Navbar from '../landingPage/Navbar'
-import MonitoringBody from '../dashboard/MonitoringBody'
+import MonitoringBody from '../pageBody/MonitoringBody'
 
 function Monitoring() {
   return (
