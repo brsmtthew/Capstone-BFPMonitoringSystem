@@ -1,6 +1,6 @@
 import React from 'react'
-import Navbar from '../landingPage/Navbar'
-import PersonnelBody from '../pageBody/PersonnelBody'
+import Navbar from '@/landingPage/Navbar'
+import PersonnelBody from '../dashboard/PersonnelBody'
 
 function Personnel() {
   return (

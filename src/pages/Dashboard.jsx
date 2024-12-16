@@ -1,6 +1,7 @@
 import React from 'react';
-import Navbar from '../landingPage/Navbar'
-import DashboardBody from '../pageBody/DashboardBody';
+import Navbar from '@/LandingPage/Navbar';
+import DashboardBody from '@/Dashboard/DashboardBody';
+import Footer from '@/LandingPage/Footer';
 
 const Dashboard = () => {
   return (

@@ -1,6 +1,6 @@
 import React from 'react'
-import Navbar from '../landingPage/Navbar'
-import AnalyticsBody from '../pageBody/AnalyticsBody'
+import Navbar from '@/landingPage/Navbar'
+import AnalyticsBody from '../dashboard/AnalyticsBody'
 
 function Analytics() {
   return (

@@ -113,7 +113,7 @@ function HistoryBody() {
         {/* Left Column */}
         <div className="flex items-center">
           <div className="h-10 w-2 rounded-full bg-separator mr-2"></div> 
-          <p className="text-[26px] font-bold">HISTORY</p>            
+          <p className="text-[26px] font-bold">History</p>            
         </div>
 
         {/* Right Column with Dropdown */}

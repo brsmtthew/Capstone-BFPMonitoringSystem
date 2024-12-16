@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
-import { auth } from "../../firebase/Firebase"; 
+import { auth } from "../firebase/Firebase"; // Firebase config
 import { toast, ToastContainer } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from './LoginAssets/firefighter2.jpg';

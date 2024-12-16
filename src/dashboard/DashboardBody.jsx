@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import AddPersonnelModal from '../modal/addPersonnelModal';  // Import the modal
 import addBtn from "./dashboardAssets/plus.png";
 import bfpPro from "./dashboardAssets/bfpPersonnel.jpg";
-import arrow from "./dashboardAssets/greater-than.png";
-import { ChevronDoubleRightIcon } from '@heroicons/react/24/solid';
+import arrow from "./dashboardAssets/right-arrow.png";
 
 function DashboardBody() {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
@@ -92,7 +91,7 @@ function DashboardBody() {
               <div className="flex justify-between">
                 <p className="text-white font-bold text-[28px]">Analytics Preview</p>
                 <button className="text-black bg-white px-4 py-2 rounded-lg flex items-center">See All Analytics
-                  <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
+                  <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
                 </button>
               </div>
               <p className='mt-4'>Previous Reading</p>
@@ -122,14 +121,14 @@ function DashboardBody() {
         <div className="flex flex-col h-full justify-end w-64">
           <div className="flex-grow grid grid-rows-[auto_1fr_1fr] gap-4 justify-self-end">
             <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient h-fit">
-              <p className="font-bold text-[26px] text-center">Other Personnel</p>
+              <p className="font-bold text-[26px]">Other Personnel</p>
             </div>
 
             {/* Row 2 */}
             <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
               <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
               <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-                <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
+                <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
               </button>
             </div>
 
@@ -137,7 +136,7 @@ function DashboardBody() {
             <div className="bg-gray-100 p-4 rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-center">
               <img src={bfpPro} alt="Profile Icon" className='w-36 h-36 rounded-full' />
               <button className='bg-white text-black px-8 py-1 rounded-lg mt-4 flex items-center'>See All
-                <ChevronDoubleRightIcon className="w-6 h-6 ml-2" />
+                <img src={arrow} alt="Arrow Icon" className="w-4 h-4 ml-2"/>
               </button>
             </div>
           </div>

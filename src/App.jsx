@@ -1,12 +1,12 @@
 // src/App.jsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Dashboard from './components/pages/Dashboard';
-import Login from './components/login/Login';
-import History from './components/pages/History';
-import Analytics from './components/pages/Analytics';
-import Personnel from './components/pages/Personnel';
-import Monitoring from './components/pages/Monitoring';
+import Dashboard from '@/pages/Dashboard';
+import Login from './Login/Login';
+import History from '@/pages/History';
+import Analytics from './pages/Analytics';
+import Personnel from './pages/Personnel';
+import Monitoring from './pages/Monitoring';
 
 function App() {
   return (

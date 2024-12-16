@@ -11,19 +11,9 @@ function AnalyticsBody() {
   ];
 
   return (
-    <div className="p-4 min-h-screen flex flex-col lg:bg-white">
-      {/* Header Section */}
-      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        {/* Left Column */}
-        <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div> 
-          <p className="text-[26px] font-bold">ANALYTICS OVERVIEW</p>            
-        </div>
-      </div>
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
-
-      {/* Grid for Analytics Data */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 mx-40">
+    <div className="p-8">
+      <h2 className="text-3xl font-semibold mb-6">Analytics Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {data.map((item) => (
           <div key={item.label} className="bg-white shadow-md rounded-lg p-6">
             <h3 className="text-xl font-bold">{item.label}</h3>
