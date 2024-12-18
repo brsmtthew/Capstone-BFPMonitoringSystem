@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db, storage } from '../../firebase/Firebase';
-import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import DeletePersonnelModal from '../modal/deletePersonnelModal';
 import AddPersonnelModal from '../modal/addPersonnelModal';
-import HeaderSection from '../header/HeaderSection';
+import EditPersonnelModal from '../modal/editPersonnelModal'; 
 
 function PersonnelBody() {
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const [isEditModalOpen, setEditModalOpen] = useState(false); // State for edit modal
   const [selectedId, setSelectedId] = useState(null);
   const [selectedImagePath, setSelectedImagePath] = useState(null);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null); // State for selected personnel
   const navigate = useNavigate();
 
-  // Fetch personnel data with real-time updates
+  // Fetch personnel data in real-time using onSnapshot
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'personnelInfo'), (querySnapshot) => {
       const personnelData = querySnapshot.docs.map((doc) => ({
@@ -24,10 +26,10 @@ function PersonnelBody() {
         ...doc.data(),
       }));
       setPersonnel(personnelData);
-      setLoading(false);
+      setLoading(false); // Set loading to false once data is loaded
     });
 
-    // Cleanup listener on unmount
+    // Cleanup function to unsubscribe when the component is unmounted
     return () => unsubscribe();
   }, []);
 
@@ -47,6 +49,16 @@ function PersonnelBody() {
   const openAddModal = () => setAddModalOpen(true);
   const closeAddModal = () => setAddModalOpen(false);
 
+  const openEditModal = (personnelData) => {
+    setSelectedPersonnel(personnelData); // Pass the selected personnel's data
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setSelectedPersonnel(null); // Clear selected personnel
+  };
+
   // Handle display personnel
   const handleDisplay = (member) => {
     navigate('/dashboard', { state: member });
@@ -65,12 +77,10 @@ function PersonnelBody() {
         console.log('Image deleted successfully');
       }
 
-      // Update the personnel state
-      setPersonnel((prev) => prev.filter((member) => member.id !== selectedId));
+      // Update the local state to reflect the deletion
+      setPersonnel(personnel.filter((member) => member.id !== selectedId));
     } catch (error) {
       console.error('Error deleting personnel or image:', error);
-    } finally {
-      closeDeleteModal();
     }
   };
 
@@ -81,92 +91,79 @@ function PersonnelBody() {
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white">
       {/* Header */}
-      <HeaderSection
-        title="PERSONNEL LIST"
-        extraContent={
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="text-white inline-flex items-center bg-blue hover:bg-yellow font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
+      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
+        <div className="flex items-center">
+          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div>
+          <p className="text-[26px] font-bold">PERSONNEL LIST</p>
+        </div>
+        {/* Add Personnel Button */}
+        <button
+          type="button"
+          onClick={openAddModal}
+          className="text-white inline-flex items-center bg-blue hover:bg-yellow font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
+        >
+          <svg
+            className="me-1 -ms-1 w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              className="me-1 -ms-1 w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-            Add Personnel
-          </button>
-        }
-      />
+            <path
+              fillRule="evenodd"
+              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+              clipRule="evenodd"
+            ></path>
+          </svg>
+          Add Personnel
+        </button>
+      </div>
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* Card for Personnel Data */}
-      <div className="bg-modalCard shadow-2xl rounded-xl p-6">
+      <div className="bg-bodyDash shadow-2xl rounded-xl p-6">
+        {/* Grid for Personnel Data */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {personnel.length > 0 ? (
             personnel.map((member) => (
-              <div
-                key={member.id}
-                className="bg-primeColor shadow-lg rounded-xl overflow-hidden"
-              >
+              <div key={member.id} className="bg-headerDash shadow-lg rounded-xl overflow-hidden">
                 {/* Image Section */}
-                <div className="p-4 flex flex-col items-center">
-                  <img
-                    src={member.image || 'https://via.placeholder.com/150'}
-                    alt={`${member.name}'s avatar`}
-                    className="h-48 w-48 object-cover rounded-full shadow-md"
-                  />
-                  <h3 className="text-2xl font-bold text-center mt-4 text-white">
-                    {member.name}
-                  </h3>
-                  <p className="text-lg font-medium text-center text-white">
-                    {member.position}
-                  </p>
-                </div>
+                <img
+                  src={member.image || 'https://via.placeholder.com/150'}
+                  alt={`${member.name}'s avatar`}
+                  className="w-full h-64 object-cover rounded-t-lg shadow-md"
+                />
 
                 {/* Details Section */}
-                <div className="text-white px-8 py-2">
-                  <div className="space-y-2">
-                    <p>
-                      <span className="font-semibold">ID:</span> {member.gearId}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Age:</span> {member.age}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Birthdate:</span> {member.birthdate}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Phone:</span> {member.phone}
-                    </p>
+                <div className="p-4">
+                  <h3 className="text-2xl font-bold text-center text-white">{member.name}</h3>
+                  <p className="text-lg font-medium text-center text-white">{member.position}</p>
+
+                  {/* Personnel Details */}
+                  <div className="text-white mt-4">
+                    <div className="space-y-2">
+                      <p><span className="font-semibold">ID:</span> {member.gearId}</p>
+                      <p><span className="font-semibold">Age:</span> {member.age}</p>
+                      <p><span className="font-semibold">Birthdate:</span> {member.birthdate}</p>
+                      <p><span className="font-semibold">Phone:</span> {member.phone}</p>
+                    </div>
                   </div>
-                </div>
 
-                {/* Separator */}
-                <div className="my-4 w-3/4 h-px bg-separator mx-auto"></div>
-
-                {/* Button Section */}
-                <div className="flex justify-around p-4">
-                  <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => handleDisplay(member)}
-                  >
-                    Display
-                  </button>
-                  <button
-                    className="bg-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => openDeleteModal(member.id, member.imagePath)}
-                  >
-                    Delete
-                  </button>
+                  {/* Buttons Section */}
+                  <div className="flex justify-between mt-4">
+                    <button
+                      className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                      onClick={() => openEditModal(member)} // Open Edit Modal
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                      onClick={() => openDeleteModal(member.id, member.imagePath)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
@@ -185,9 +182,18 @@ function PersonnelBody() {
       {isDeleteModalOpen && (
         <DeletePersonnelModal
           isOpen={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          selectedId={selectedId}
-          updatePersonnel={setPersonnel}  // Pass the update function
+          closeModal={closeDeleteModal}
+          handleDelete={handleDeletePersonnel}
+        />
+      )}
+
+      {/* Edit Personnel Modal */}
+      {isEditModalOpen && (
+        <EditPersonnelModal
+          isOpen={isEditModalOpen}
+          closeModal={closeEditModal}
+          personnelId={selectedPersonnel?.id}
+          existingData={selectedPersonnel}
         />
       )}
     </div>
