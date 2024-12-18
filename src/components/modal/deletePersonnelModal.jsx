@@ -1,7 +1,25 @@
 import React from 'react';
+import { deleteDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase/Firebase';
 
-function deletePersonnelModal({ isOpen, closeModal, handleDelete }) {
+function DeletePersonnelModal({ isOpen, onClose, selectedId, updatePersonnel }) {
   if (!isOpen) return null;
+
+  const handleDelete = async () => {
+    try {
+      if (selectedId) {
+        // Delete from Firestore
+        await deleteDoc(doc(db, 'personnelInfo', selectedId));
+        
+        // Update personnel list in the parent
+        updatePersonnel((prev) => prev.filter((member) => member.id !== selectedId));
+      }
+    } catch (error) {
+      console.error('Error deleting personnel:', error);
+    } finally {
+      onClose();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -10,7 +28,7 @@ function deletePersonnelModal({ isOpen, closeModal, handleDelete }) {
           <button
             type="button"
             className="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-            onClick={closeModal}
+            onClick={onClose}
           >
             <svg
               className="w-3 h-3"
@@ -51,14 +69,14 @@ function deletePersonnelModal({ isOpen, closeModal, handleDelete }) {
             <button
               type="button"
               className="text-white bg-red hover:bg-gray focus:ring-4 focus:outline-none focus:ring-red dark:focus:ring-red font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
-              onClick={handleDelete} // Trigger delete action
+              onClick={handleDelete}
             >
               Yes, I'm sure
             </button>
             <button
               type="button"
               className="text-white py-2.5 px-5 ml-3 text-sm font-medium text-gray-900 focus:outline-none bg-modalButton rounded-lg border border-gray hover:bg-gray hover:text-blue focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
-              onClick={closeModal}
+              onClick={onClose}
             >
               No, cancel
             </button>
@@ -69,4 +87,4 @@ function deletePersonnelModal({ isOpen, closeModal, handleDelete }) {
   );
 }
 
-export default deletePersonnelModal;
+export default DeletePersonnelModal;

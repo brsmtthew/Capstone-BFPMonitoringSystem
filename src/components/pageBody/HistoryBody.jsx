@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import sortIcon from "./dashboardAssets/sort.png";
-import filterIcon from "./dashboardAssets/filter.png";
-import moreIcon from "./dashboardAssets/more.png";
 import searchIcon from "./dashboardAssets/glass.png";
+import HeaderSection from "../header/HeaderSection";
 
 function HistoryBody() {
   const [historyData, setHistoryData] = useState([]);
@@ -35,20 +34,10 @@ function HistoryBody() {
   return (
     <div className="p-4 min-h-screen flex flex-col ">
       {/* Header Section */}
-      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div>
-          <p className="text-[26px] font-bold">HISTORY</p>
-        </div>
-
-        {/* <div className="ml-4">
-          <select className="text-xl text-white bg-primeColor font-semibold border border-white rounded-lg px-4 py-2">
-            <option>Select Personnel</option>
-            <option>Personnel 1</option>
-            <option>Personnel 2</option>
-          </select>
-        </div> */}
-      </div>
+      <HeaderSection
+      title="HISTORY"
+      />
+      
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 

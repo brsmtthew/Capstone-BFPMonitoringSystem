@@ -38,6 +38,8 @@ export default {
       offWhite: "#F8FAFB",
       headerDash: "#091057",
       bodyDash: "#FDF7F4",
+      bfpNavy: "#010044",
+      bfpOrange: "#FF6700",
     }
   },
   plugins: [],

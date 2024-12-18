@@ -1,21 +1,32 @@
+// Updated MonitoringBody.js
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../firebase/Firebase';
+import { db, realtimeDb } from '../../firebase/Firebase'; // Import Firestore and Realtime DB
+import { ref, onValue } from 'firebase/database'; // Firebase Realtime Database imports
 import heartIcon from "./dashboardAssets/heart-attack.png";
 import enviTemp from "./dashboardAssets/room-temperature.png";
 import toxicSmoke from "./dashboardAssets/mask.png";
 import bodytem from "./dashboardAssets/measure.png";
-import bfpPro from "./dashboardAssets/bfpPersonnel.jpg";
-import toxicIcon from "./dashboardAssets/toxic.png";
-import quesmarkIcon from "./dashboardAssets/question-mark.png"; // Ensure this file exists
 import warningIcon from "./dashboardAssets/warning.png";
 import flamesIcon from "./dashboardAssets/flames.png";
 import likeIcon from "./dashboardAssets/like.png";
+import HeaderSection from '../header/HeaderSection';
+import ProfileMonitoring from '../MonitoringCards/ProfileMonitoring';
+import MonitoringSection from '../monitoringCards/MonitoringSection';
 
 function MonitoringBody() {
-  const [personnel, setPersonnel] = useState([]);
+  const [personnel, setPersonnel] = useState([]); // Firestore data
   const [selectedPersonnel, setSelectedPersonnel] = useState(null);
+  const [temperature, setTemperature] = useState(null); // Real-time temperature data
+  const [environmentalTemperature, setEnvironmentalTemperature] = useState(null); // Real-time environmental data
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdatedTemp, setLastUpdatedTemp] = useState(null);
+  const [hasTempTimeout, setHasTempTimeout] = useState(false);
 
+  const [lastUpdatedEnvTemp, setLastUpdatedEnvTemp] = useState(null);
+  const [hasEnvTempTimeout, setHasEnvTempTimeout] = useState(false);
+
+  // Fetch personnel data from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'personnelInfo'), (querySnapshot) => {
       const personnelData = querySnapshot.docs.map((doc) => ({
@@ -24,9 +35,65 @@ function MonitoringBody() {
       }));
       setPersonnel(personnelData);
     });
-
     return () => unsubscribe();
   }, []);
+
+  // Fetch body temperature from Realtime Database
+  useEffect(() => {
+    const tempRef = ref(realtimeDb, 'Temperature');
+    const unsubscribeTemp = onValue(tempRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setTemperature(data);
+        setLastUpdatedTemp(Date.now());
+        setHasTempTimeout(false);
+      } else {
+        setTemperature(null);
+      }
+      setIsLoading(false);
+    });
+    return () => unsubscribeTemp();
+  }, []);
+
+  // Fetch environmental temperature from Realtime Database
+  useEffect(() => {
+    const envTempRef = ref(realtimeDb, 'EnvironmentalTemperature');
+    const unsubscribeEnvTemp = onValue(envTempRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setEnvironmentalTemperature(data);
+        setLastUpdatedEnvTemp(Date.now());
+        setHasEnvTempTimeout(false);
+      } else {
+        setEnvironmentalTemperature(null);
+      }
+    });
+    return () => unsubscribeEnvTemp();
+  }, []);
+
+  // Handle body temperature timeout
+  useEffect(() => {
+    if (lastUpdatedTemp) {
+      const timer = setInterval(() => {
+        if (Date.now() - lastUpdatedTemp > 30000) {
+          setHasTempTimeout(true);
+        }
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [lastUpdatedTemp]);
+
+  // Handle environmental temperature timeout
+  useEffect(() => {
+    if (lastUpdatedEnvTemp) {
+      const timer = setInterval(() => {
+        if (Date.now() - lastUpdatedEnvTemp > 30000) {
+          setHasEnvTempTimeout(true);
+        }
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [lastUpdatedEnvTemp]);
 
   const handleSelectChange = (e) => {
     const selectedId = e.target.value;
@@ -34,15 +101,70 @@ function MonitoringBody() {
     setSelectedPersonnel(selected);
   };
 
+  const healthMonitoringData = [
+    {
+      icon: heartIcon,
+      title: "Heart Rate",
+      value: "120 BPM",
+      description: "Elevated Heart Rate",
+      warningIcon: warningIcon,
+    },
+    {
+      icon: bodytem,
+      title: "Body Temperature",
+      value: isLoading
+        ? "Loading..."
+        : hasTempTimeout
+        ? "No current data"
+        : temperature
+        ? `${temperature}°C`
+        : "No data available",
+      description: hasTempTimeout
+        ? "Data timeout"
+        : temperature >= 40
+        ? "Critical Temperature"
+        : "Normal Temperature",
+      warningIcon: temperature >= 40 ? flamesIcon : likeIcon,
+    },
+  ];
+
+  const environmentalMonitoringData = [
+    {
+      icon: toxicSmoke,
+      title: "Toxic Gas",
+      value: "5 PPM",
+      description: "Optimal Range",
+      warningIcon: likeIcon,
+    },
+    {
+      icon: toxicSmoke,
+      title: "Smoke",
+      value: "100 PPM",
+      description: "Safe Level",
+      warningIcon: likeIcon,
+    },
+    {
+      icon: enviTemp,
+      title: "Environmental Temp",
+      value: hasEnvTempTimeout
+        ? "No current data"
+        : environmentalTemperature
+        ? `${environmentalTemperature}°C`
+        : "No data available",
+      description: hasEnvTempTimeout
+        ? "Data timeout"
+        : environmentalTemperature >= 40
+        ? "Critical Temperature"
+        : "Normal Temperature",
+      warningIcon: environmentalTemperature >= 40 ? flamesIcon : likeIcon,
+    },
+  ];
+
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white">
-      {/* Header Section */}
-      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2" />
-          <p className="text-[26px] font-bold">REAL-TIME MONITORING</p>
-        </div>
-        <div className="ml-4 flex items-center">
+      <HeaderSection
+        title="REAL-TIME MONITORING"
+        extraContent={
           <select
             className="text-xl text-white bg-primeColor font-semibold border border-gray-300 rounded-lg px-4 py-2"
             onChange={handleSelectChange}
@@ -54,117 +176,31 @@ function MonitoringBody() {
               </option>
             ))}
           </select>
-        </div>
-      </div>
+        }
+      />
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 text-white min-h-full pb-2">
-        {/* Left Column: Personnel Details */}
         <div className="lg:col-span-1 flex flex-col justify-center">
-          <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col">
-            {selectedPersonnel ? (
-              <>
-                <img
-                  src={selectedPersonnel.image || bfpPro}
-                  alt="Profile"
-                  className="w-full h-96 object-cover rounded-3xl"
-                />
-                <div className="p-4 flex flex-col items-center">
-                  <p className="text-[24px] font-bold text-center">{selectedPersonnel.name}</p>
-                  <p className="text-center text-gray">{selectedPersonnel.position}</p>
-                  <div className="text-center mt-4">
-                    <button className="px-8 py-3 text-[18px] bg-blue rounded-2xl text-white active:bg-blue-dark">
-                      Save Recordings
-                    </button>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-center text-lg text-gray-300">Select a personnel to view details</p>
-            )}
-          </div>
+          <ProfileMonitoring personnel={selectedPersonnel} />
         </div>
 
-        {/* Right Column: Monitoring Sections */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          <div className="p-4 rounded-lg shadow bg-primeColor">
-            <p className="font-bold text-[26px] text-center">Health Monitoring Section</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <MonitoringCard
-                icon={heartIcon}
-                title="Body Temperature"
-                value="120 BPM"
-                description="Elevated Heart Rate"
-                warningIcon={warningIcon}
-              />
-              <MonitoringCard
-                icon={bodytem}
-                title="Heart Rate"
-                value="50°C"
-                description="Critical Temperature"
-                warningIcon={flamesIcon}
-              />
-            </div>
-          </div>
+          <MonitoringSection
+            title="Health Monitoring Section"
+            monitoringData={healthMonitoringData}
+          />
 
-          <div className="p-4 rounded-lg shadow bg-primeColor">
-            <p className="font-bold text-[26px] text-center">Environmental Monitoring Section</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-              <MonitoringCard
-                icon={toxicSmoke}
-                title="Toxic Gas"
-                value="5 PPM"
-                description="Optimal Range"
-                warningIcon={likeIcon}
-              />
-              <MonitoringCard
-                icon={toxicSmoke}
-                title="Smoke"
-                value="100 PPM"
-                description="Safe Level"
-                warningIcon={likeIcon}
-              />
-              <MonitoringCard
-                icon={enviTemp}
-                title="Environmental Temp"
-                value="25°C"
-                description="Normal Temperature"
-                warningIcon={likeIcon}
-              />
-            </div>
-          </div>
+          <MonitoringSection
+            title="Environmental Monitoring Section"
+            monitoringData={environmentalMonitoringData}
+            gridCols={3}
+          />
         </div>
       </div>
     </div>
   );
 }
-
-const MonitoringCard = ({ icon, title, value, description, warningIcon }) => (
-  <div className="rounded-2xl shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col items-center justify-start">
-    <div className="p-4 rounded-lg text-white flex flex-col items-center w-full">
-      <div className="flex justify-between items-center w-full">
-        <div className="flex items-center gap-2">
-          <img src={icon} alt={title} className="w-10 h-10" />
-          <span className="font-semibold text-[18px]">{title}</span>
-        </div>
-        <div className="flex space-x-2 items-center">
-          <button className="bg-btnActive text-btnFontActive px-4 py-1 rounded-2xl text-[18px]">Active</button>
-          <img src={quesmarkIcon} alt="Question Mark" className="w-8 h-8" />
-        </div>
-      </div>
-
-      <div className="my-4 h-[1px] bg-separatorLine w-full" />
-
-      <div className="text-center">
-        <p className="text-[42px] font-bold">{value}</p>
-        <div className="flex items-center justify-center text-[24px] text-yellow">
-          <p className="mr-2">{description}</p>
-          <img src={warningIcon} alt="Status Icon" className="w-10 h-10" />
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export default MonitoringBody;
