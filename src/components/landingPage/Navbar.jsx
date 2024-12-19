@@ -22,12 +22,12 @@ const Navbar = () => {
       {/* Left: Logo and Text */}
       <div className="flex items-center space-x-2">
         <img src={hardhat} alt="Bureau of Fire Protection" className="w-10 h-10 sm:w-14 sm:h-14" />
-        <p className="font-semibold font-serif sm:text-32px md:text:text-52 lg:text-64px">SMART HARD HAT.CO</p>
+        <p className="font-semibold font-serif sm:text-[6px] md:text-[14px] lg:text-[24px]">SMART HARD HAT.CO</p>
       </div>
 
       {/* Center: Navigation Links */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
-        <div className="hidden sm:flex space-x-4 md:space-x-6 lg:space-x-8 bg-primeColor rounded-full text-white px-6 py-3">
+        <div className="hidden sm:flex space-x-4 md:space-x-6 lg:space-x-8 bg-bfpNavy rounded-full text-white px-6 py-3">
           <Link
             to="/dashboard"
             className="text-sm md:text-base lg:text-lg hover:text-gray-300"

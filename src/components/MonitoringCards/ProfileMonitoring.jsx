@@ -4,7 +4,7 @@ import bfpPro from "../pageBody/dashboardAssets/bfpPersonnel.jpg";
 
 function ProfileMonitoring({ personnel }) {
   return (
-    <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col">
+    <div className="p-4 rounded-lg shadow bg-bfpNavy">
       {personnel ? (
         <>
           <img
@@ -23,7 +23,7 @@ function ProfileMonitoring({ personnel }) {
           </div>
         </>
       ) : (
-        <p className="text-center text-lg text-gray-300">Select a personnel to view details</p>
+        <p className="text-center text-lg text-white">Select a personnel to view details</p>
       )}
     </div>
   );

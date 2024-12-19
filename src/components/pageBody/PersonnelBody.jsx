@@ -6,6 +6,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import DeletePersonnelModal from '../modal/deletePersonnelModal';
 import AddPersonnelModal from '../modal/addPersonnelModal';
 import EditPersonnelModal from '../modal/editPersonnelModal'; 
+import HeaderSection from '../header/HeaderSection';
 
 function PersonnelBody() {
   const [personnel, setPersonnel] = useState([]);
@@ -91,12 +92,9 @@ function PersonnelBody() {
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white">
       {/* Header */}
-      <div className="flex justify-between items-center gap-x-40 text-black px-4 sm:px-10 md:px-20 lg:px-40">
-        <div className="flex items-center">
-          <div className="h-10 w-2 rounded-full bg-separator mr-2"></div>
-          <p className="text-[26px] font-bold">PERSONNEL LIST</p>
-        </div>
-        {/* Add Personnel Button */}
+      <HeaderSection
+      title="PERSONNEL LIST"
+      extraContent={
         <button
           type="button"
           onClick={openAddModal}
@@ -116,7 +114,9 @@ function PersonnelBody() {
           </svg>
           Add Personnel
         </button>
-      </div>
+      }
+      />
+      
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
