@@ -12,7 +12,7 @@ import flamesIcon from "./dashboardAssets/flames.png";
 import likeIcon from "./dashboardAssets/like.png";
 import HeaderSection from '../header/HeaderSection';
 import ProfileMonitoring from '../MonitoringCards/ProfileMonitoring';
-import MonitoringSection from '../monitoringCards/MonitoringSection';
+import MonitoringSection from '../MonitoringCards/MonitoringSection';
 
 function MonitoringBody() {
   const [personnel, setPersonnel] = useState([]); // Firestore data
