@@ -1,30 +1,41 @@
 import React from 'react';
-
 import bfpPro from "../pageBody/dashboardAssets/bfpPersonnel.jpg";
 
 function ProfileMonitoring({ personnel }) {
   return (
-    <div className="p-4 rounded-lg shadow bg-gradient-to-tl from-start-gradient to-end-gradient flex flex-col">
-      {personnel ? (
-        <>
+    <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col ">
+      {/* Navbar section */}
+      <div className="p-2 bg-bfpNavy rounded-lg text-white flex flex-col items-start">
+        {personnel ? (
+          <>
+            <h3 className="text-lg font-bold">{personnel.name}</h3>
+            <p className="text-sm text-gray-300">{personnel.position}</p>
+          </>
+        ) : (
+          <>
+            <h3 className="text-lg font-bold">Select Personnel</h3>
+            <p className="text-sm text-gray-300">Personnel Position</p>
+          </>
+        )}
+      </div>
+
+      {/* Content section */}
+      <div className="flex-grow p-4 flex flex-col items-center justify-center">
+        {/* Profile image */}
+        <div className="h-52 w-52 rounded-full overflow-hidden mb-2">
           <img
-            src={personnel.image || bfpPro}
+            src={personnel?.image || 'https://via.placeholder.com/300x300'}
             alt="Profile"
-            className="w-full h-96 object-cover rounded-3xl"
+            className="h-full w-full object-cover"
           />
-          <div className="p-4 flex flex-col items-center">
-            <p className="text-[24px] font-bold text-center">{personnel.name}</p>
-            <p className="text-center text-gray">{personnel.position}</p>
-            <div className="text-center mt-4">
-              <button className="px-8 py-3 text-[18px] bg-blue rounded-2xl text-white active:bg-blue-dark">
-                Save Recordings
-              </button>
-            </div>
-          </div>
-        </>
-      ) : (
-        <p className="text-center text-lg text-gray-300">Select a personnel to view details</p>
-      )}
+        </div>
+        {/* Action button */}
+        <div className="text-center mt-4">
+          <button className="px-6 py-2 text-[18px] bg-bfpNavy rounded-2xl text-white active:bg-bfpOrange mb-2">
+            Save Recordings
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

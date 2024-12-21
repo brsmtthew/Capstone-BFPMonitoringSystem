@@ -35,11 +35,13 @@ export default {
       modalButton: "#1F2937",
       tableColor: "#111827",
       searchTable: "#374151",
-      offWhite: "#F8FAFB",
+      offWhite: "#EDEAE5",
       headerDash: "#091057",
       bodyDash: "#FDF7F4",
       bfpNavy: "#010044",
       bfpOrange: "#FF6700",
+      'start-gradient': '#FF4500', // Vibrant reddish-orange
+      'end-gradient': '#FFCC80',  // Soft, light orange-yellow
     }
   },
   plugins: [],

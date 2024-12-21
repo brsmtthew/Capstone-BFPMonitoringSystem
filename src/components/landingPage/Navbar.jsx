@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import hardhat from "./landingAssets/labour.png";
 import profileIcon from "./landingAssets/user (1).png";
 import { FaTachometerAlt, FaEye, FaHistory, FaChartBar, FaUsers } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // To track the current route
+  const [activeLink, setActiveLink] = useState(location.pathname); // Initialize with current path
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -15,6 +17,10 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     navigate("/", { replace: true });
+  };
+
+  const handleLinkClick = (path) => {
+    setActiveLink(path); // Update active link state
   };
 
   return (
@@ -27,65 +33,80 @@ const Navbar = () => {
 
       {/* Center: Navigation Links */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
-        <div className="hidden sm:flex space-x-4 md:space-x-6 lg:space-x-8 bg-primeColor rounded-full text-white px-6 py-3">
-          <Link
-            to="/dashboard"
-            className="text-sm md:text-base lg:text-lg hover:text-gray-300"
-          >
-            Dashboard
-          </Link>
-          <Link
-            to="/monitoring"
-            className="text-sm md:text-base lg:text-lg hover:text-gray"
-          >
-            Monitoring
-          </Link>
-          <Link
-            to="/history"
-            className="text-sm md:text-base lg:text-lg hover:text-gray"
-          >
-            History
-          </Link>
-          <Link
-            to="/analytics"
-            className="text-sm md:text-base lg:text-lg hover:text-gray"
-          >
-            Analytics
-          </Link>
-          <Link
-            to="/personnel"
-            className="text-sm md:text-base lg:text-lg hover:text-gray"
-          >
-            Personnel
-          </Link>
+        <div className="hidden sm:flex space-x-4 md:space-x-6 lg:space-x-8 bg-bfpNavy rounded-full text-white px-6 py-3">
+          {[
+            { path: "/dashboard", label: "Dashboard" },
+            { path: "/monitoring", label: "Monitoring" },
+            { path: "/history", label: "History" },
+            { path: "/analytics", label: "Analytics" },
+            { path: "/personnel", label: "Personnel" },
+          ].map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`text-sm md:text-base lg:text-lg px-4 py-2 relative transition transform duration-300 ${
+                activeLink === link.path
+                  ? "text-white font-bold after:block after:bg-bfpOrange after:h-1 after:absolute after:bottom-0 after:left-0 after:right-0 after:rounded-full"
+                  : "hover:text-gray-300 hover:scale-105"
+              }`}
+              onClick={() => handleLinkClick(link.path)}
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
 
         {/* Icons for Small Screens */}
         <div className="flex space-x-4 sm:hidden text-xl text-gray">
           <FaTachometerAlt
-            className="cursor-pointer hover:text-gray"
+            className={`cursor-pointer transition transform duration-300 ${
+              activeLink === "/dashboard" ? "text-bfpOrange" : "hover:text-gray hover:scale-110"
+            }`}
             title="Dashboard"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => {
+              setActiveLink("/dashboard");
+              navigate("/dashboard");
+            }}
           />
           <FaEye
-            className="cursor-pointer hover:text-gray"
+            className={`cursor-pointer transition transform duration-300 ${
+              activeLink === "/monitoring" ? "text-bfpOrange" : "hover:text-gray hover:scale-110"
+            }`}
             title="Monitoring"
-            onClick={() => navigate("/monitoring")}
+            onClick={() => {
+              setActiveLink("/monitoring");
+              navigate("/monitoring");
+            }}
           />
           <FaHistory
-            className="cursor-pointer hover:text-gray"
+            className={`cursor-pointer transition transform duration-300 ${
+              activeLink === "/history" ? "text-bfpOrange" : "hover:text-gray hover:scale-110"
+            }`}
             title="History"
-            onClick={() => navigate("/history")}
+            onClick={() => {
+              setActiveLink("/history");
+              navigate("/history");
+            }}
           />
           <FaChartBar
-            className="cursor-pointer hover:text-gray"
+            className={`cursor-pointer transition transform duration-300 ${
+              activeLink === "/analytics" ? "text-bfpOrange" : "hover:text-gray hover:scale-110"
+            }`}
             title="Analytics"
-            onClick={() => navigate("/analytics")}
+            onClick={() => {
+              setActiveLink("/analytics");
+              navigate("/analytics");
+            }}
           />
           <FaUsers
-            className="cursor-pointer hover:text-gray"
+            className={`cursor-pointer transition transform duration-300 ${
+              activeLink === "/personnel" ? "text-bfpOrange" : "hover:text-gray hover:scale-110"
+            }`}
             title="Personnel"
-            onClick={() => navigate("/personnel")}
+            onClick={() => {
+              setActiveLink("/personnel");
+              navigate("/personnel");
+            }}
           />
         </div>
       </div>

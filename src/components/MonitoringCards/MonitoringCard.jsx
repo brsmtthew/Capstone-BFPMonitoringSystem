@@ -2,7 +2,7 @@
 import React from 'react';
 
 const MonitoringCard = ({ icon, title, value, description, warningIcon }) => (
-  <div className="rounded-2xl shadow bg-bfpNavy mx-4 flex flex-col items-center justify-start">
+  <div className="rounded-2xl shadow bg-bfpNavy mx-4 flex flex-col items-center justify-start h-72 w-auto">
     <div className="p-4 rounded-lg text-white flex flex-col items-center w-full">
       <div className="flex justify-between items-center w-full">
         <div className="flex items-center gap-2">

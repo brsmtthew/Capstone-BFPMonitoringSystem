@@ -37,7 +37,6 @@ function HistoryBody() {
       <HeaderSection
       title="HISTORY"
       />
-      
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
