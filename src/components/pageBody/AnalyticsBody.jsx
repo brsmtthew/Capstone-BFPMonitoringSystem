@@ -1,5 +1,6 @@
 import React from 'react';
 import HeaderSection from '../header/HeaderSection';
+import BodyCard from '../parentCard/BodyCard';
 
 function AnalyticsBody() {
   // Example data
@@ -22,14 +23,16 @@ function AnalyticsBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* Grid for Analytics Data */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 mx-40">
-        {data.map((item) => (
-          <div key={item.label} className="bg-white shadow-md rounded-lg p-6">
-            <h3 className="text-xl font-bold">{item.label}</h3>
-            <p className="text-lg text-gray-700">{item.value}</p>
-          </div>
-        ))}
-      </div>
+      <BodyCard>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6 mx-40">
+          {data.map((item) => (
+            <div key={item.label} className="bg-white shadow-md rounded-lg p-6">
+              <h3 className="text-xl font-bold">{item.label}</h3>
+              <p className="text-lg text-gray-700">{item.value}</p>
+            </div>
+          ))}
+        </div>
+      </BodyCard>
     </div>
   );
 }

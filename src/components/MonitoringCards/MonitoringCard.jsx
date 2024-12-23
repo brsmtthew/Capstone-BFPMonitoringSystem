@@ -11,7 +11,7 @@ const MonitoringCard = ({ icon, title, value, description, warningIcon }) => (
         </div>
         <div className="flex space-x-2 items-center">
           <button className="bg-btnActive text-btnFontActive px-4 py-1 rounded-2xl text-[18px]">Active</button>
-          <img src={warningIcon} alt="Question Mark" className="w-8 h-8" />
+          {/* <img src={warningIcon} alt="Question Mark" className="w-8 h-8" /> */}
         </div>
       </div>
 

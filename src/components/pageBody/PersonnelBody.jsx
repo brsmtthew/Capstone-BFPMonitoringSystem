@@ -6,6 +6,7 @@ import { ref, deleteObject } from 'firebase/storage';
 import DeletePersonnelModal from '../modal/deletePersonnelModal';
 import AddPersonnelModal from '../modal/addPersonnelModal';
 import HeaderSection from '../header/HeaderSection';
+import BodyCard from '../parentCard/BodyCard';
 
 function PersonnelBody() {
   const [personnel, setPersonnel] = useState([]);
@@ -14,6 +15,8 @@ function PersonnelBody() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedImagePath, setSelectedImagePath] = useState(null);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
+  
   const navigate = useNavigate();
 
   // Fetch personnel data with real-time updates
@@ -44,12 +47,22 @@ function PersonnelBody() {
     setSelectedImagePath(null); // Clear the image path
   };
 
-  const openAddModal = () => setAddModalOpen(true);
-  const closeAddModal = () => setAddModalOpen(false);
+  const openAddModal = (personnel = null) => {
+    setSelectedPersonnel(null); // Set selected personnel for editing (or null for adding)
+    setAddModalOpen(true);
+  };
+
+  const closeAddModal = () => {
+    setAddModalOpen(false);
+    setSelectedPersonnel(null); // Clear selected personnel on close
+  };
+
+  // const openAddModal = () => setAddModalOpen(true);
+  // const closeAddModal = () => setAddModalOpen(false);
 
   // Handle display personnel
   const handleDisplay = (member) => {
-    navigate('/dashboard', { state: member });
+    openAddModal(member);
   };
 
   // Delete personnel and image
@@ -87,7 +100,7 @@ function PersonnelBody() {
           <button
             type="button"
             onClick={openAddModal}
-            className="text-white inline-flex items-center bg-blue hover:bg-yellow font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
+            className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
           >
             <svg
               className="me-1 -ms-1 w-5 h-5"
@@ -109,8 +122,8 @@ function PersonnelBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* Card for Personnel Data */}
-      <div className="bg-modalCard shadow-2xl rounded-xl p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <BodyCard>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {personnel.length > 0 ? (
             personnel.map((member) => (
               <div
@@ -156,13 +169,13 @@ function PersonnelBody() {
                 {/* Button Section */}
                 <div className="flex justify-around p-4">
                   <button
-                    className="bg-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                    className="bg-bfpNavy text-white px-4 py-2 rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105 hover:shadow-lg"
                     onClick={() => handleDisplay(member)}
                   >
-                    Display
+                    Edit
                   </button>
                   <button
-                    className="bg-red text-white px-4 py-2 rounded-lg hover:bg-red-700 transform transition duration-300 hover:scale-105 hover:shadow-lg"
+                    className="bg-red text-white px-4 py-2 rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105 hover:shadow-lg"
                     onClick={() => openDeleteModal(member.id, member.imagePath)}
                   >
                     Delete
@@ -176,10 +189,14 @@ function PersonnelBody() {
             </p>
           )}
         </div>
-      </div>
+      </BodyCard>
 
       {/* Add Personnel Modal */}
-      <AddPersonnelModal isOpen={isAddModalOpen} closeModal={closeAddModal} />
+      <AddPersonnelModal 
+      isOpen={isAddModalOpen} 
+      closeModal={closeAddModal} 
+      selectedPersonnel={selectedPersonnel}
+      />
 
       {/* Delete Personnel Modal */}
       {isDeleteModalOpen && (

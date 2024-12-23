@@ -80,13 +80,13 @@ const ProfileCard = ({
       {/* Navigation Buttons */}
       <div className="flex justify-between p-4">
         <button
-          className="text-sm text-white bg-gray px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-bfpOrange"
+          className="text-sm text-white bg-gray px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
           onClick={handlePrevious}
         >
           Previous
         </button>
         <button
-          className="text-sm text-white bg-bfpNavy px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-bfpOrange"
+          className="text-sm text-white bg-bfpNavy px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
           onClick={handleNext}
         >
           Next

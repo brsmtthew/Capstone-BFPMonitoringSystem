@@ -31,7 +31,7 @@ function ProfileMonitoring({ personnel }) {
         </div>
         {/* Action button */}
         <div className="text-center mt-4">
-          <button className="px-6 py-2 text-[18px] bg-bfpNavy rounded-2xl text-white active:bg-bfpOrange mb-2">
+          <button className="px-6 py-2 text-[18px] bg-bfpNavy rounded-2xl text-white active:bg-bfpOrange mb-2 transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn">
             Save Recordings
           </button>
         </div>

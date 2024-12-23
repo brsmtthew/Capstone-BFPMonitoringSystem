@@ -97,6 +97,7 @@ function DashboardBody() {
           {/* Other Cards */}
           <OverviewCard title="Total Personnel" description="The total number of personnel currently registered.">
             <p className="text-[64px] font-bold text-black">{personnel.length}</p>
+            <p className='text-[28px] font-bold text-black'>Total Personnel</p>
           </OverviewCard>
 
           <OverviewCard title="Battery Status" description="Live monitoring of device battery levels.">
