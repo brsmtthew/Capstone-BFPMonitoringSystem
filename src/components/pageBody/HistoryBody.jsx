@@ -15,6 +15,7 @@ function HistoryBody() {
         {
           name: "Ace Bernard Malasaga",
           date: "December 23, 2025",
+          time: "13:02",
           healthSensors: "Average",
           envSensors: "Good",
           remarks: "Average",
@@ -22,6 +23,7 @@ function HistoryBody() {
         {
           name: "Neil Sims",
           date: "November 11, 2024",
+          time: "15:34",
           healthSensors: "Good",
           envSensors: "Excellent",
           remarks: "Great",
@@ -129,6 +131,7 @@ function HistoryBody() {
                   </th>
                   <th className="px-6 py-3">Name</th>
                   <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">Time</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Health Sensors</th>
                   <th className="px-6 py-3">Environmental Sensors</th>
@@ -146,6 +149,7 @@ function HistoryBody() {
                     </td>
                     <td className="px-6 py-3">{data.name}</td>
                     <td className="px-6 py-3">{data.date}</td>
+                    <td className="px-6 py-3">{data.time}</td>
                     <td className="px-6 py-3 flex items-center">
                       <div className="h-2.5 w-2.5 rounded-full bg-green mr-2"></div>
                       Online

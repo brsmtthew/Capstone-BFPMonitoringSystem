@@ -1,101 +1,54 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
+import { useStore } from '../store/useStore';
 
-function NotificationCard({ temperature, environmentalTemperature, lastUpdatedTemp, lastUpdatedEnvTemp }) {
-  const [notifications, setNotifications] = useState([]);
-  const notificationSetRef = useRef(new Set()); // Tracks added notifications to prevent duplicates
+function NotificationCard() {
+  const { notifications, clearNotifications, selectedPersonnel } = useStore();
 
+  // Function to format timestamp to desired format
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
-    return `${date.toLocaleDateString()} ${date.getHours()}:${date.getMinutes()}`;
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const hour = String(date.getHours()).padStart(2, '0');
+    const minute = String(date.getMinutes()).padStart(2, '0');
+
+    return `${month}/${day}/${year} time ${hour}:${minute}`;
   };
 
-  // Monitor body temperature timeout
-  useEffect(() => {
-    if (lastUpdatedTemp) {
-      const timer = setInterval(() => {
-        if (Date.now() - lastUpdatedTemp > 30000) {
-          const message = 'No body temperature data received within 30 seconds';
-          if (!notificationSetRef.current.has(message)) {
-            notificationSetRef.current.add(message);
-            setNotifications((prev) => [
-              { message, timestamp: formatTimestamp(Date.now()) },
-              ...prev,
-            ]);
-          }
-        }
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [lastUpdatedTemp]);
-
-  // Monitor environmental temperature timeout
-  useEffect(() => {
-    if (lastUpdatedEnvTemp) {
-      const timer = setInterval(() => {
-        if (Date.now() - lastUpdatedEnvTemp > 30000) {
-          const message = 'No environmental temperature data received within 30 seconds';
-          if (!notificationSetRef.current.has(message)) {
-            notificationSetRef.current.add(message);
-            setNotifications((prev) => [
-              { message, timestamp: formatTimestamp(Date.now()) },
-              ...prev,
-            ]);
-          }
-        }
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [lastUpdatedEnvTemp]);
-
-  // Monitor critical body temperature
-  useEffect(() => {
-    if (temperature >= 40) {
-      const message = 'Critical Body Temperature Detected!';
-      if (!notificationSetRef.current.has(message)) {
-        notificationSetRef.current.add(message);
-        setNotifications((prev) => [
-          { message, timestamp: formatTimestamp(Date.now()) },
-          ...prev,
-        ]);
-      }
-    }
-  }, [temperature]);
-
-  // Monitor critical environmental temperature
-  useEffect(() => {
-    if (environmentalTemperature >= 40) {
-      const message = 'Critical Environmental Temperature Detected!';
-      if (!notificationSetRef.current.has(message)) {
-        notificationSetRef.current.add(message);
-        setNotifications((prev) => [
-          { message, timestamp: formatTimestamp(Date.now()) },
-          ...prev,
-        ]);
-      }
-    }
-  }, [environmentalTemperature]);
+  // Filter notifications based on selectedPersonnel's gearId
+  const filteredNotifications = selectedPersonnel
+    ? notifications.filter(
+        (notification) => notification.gearId === selectedPersonnel.gearId
+      )
+    : [];
 
   return (
     <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col">
-      {/* Header Section */}
-      <div className="p-2 bg-bfpNavy rounded-lg text-white">
+      <div className="p-2 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
         <h3 className="text-lg font-bold">Notification</h3>
+        <button
+          className="text-xs text-white bg-red px-3 py-2 rounded-md hover:bg-bfpOrange"
+          onClick={clearNotifications}
+        >
+          Clear
+        </button>
       </div>
-
-      {/* Scrollable Notifications Section */}
       <div className="flex-grow p-4 overflow-y-auto">
-        {notifications.length > 0 ? (
-          notifications.map((notification, index) => (
+        {filteredNotifications.length > 0 ? (
+          filteredNotifications.map((notification, index) => (
             <div
               key={index}
               className="flex justify-between items-center mb-2 p-2 bg-red text-white rounded-lg"
             >
               <span>{notification.message}</span>
-              <span className="text-xs text-white">{notification.timestamp}</span>
+              <span className="text-xs text-white">
+                {formatTimestamp(notification.timestamp)}
+              </span>
             </div>
           ))
         ) : (
-          <div className="text-gray">No notifications at the moment</div>
+          <div className="text-gray">No notifications for the selected personnel</div>
         )}
       </div>
     </div>
