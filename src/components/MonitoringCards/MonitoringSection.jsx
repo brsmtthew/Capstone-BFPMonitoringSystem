@@ -1,5 +1,5 @@
 import React from 'react';
-import MonitoringCard from '../monitoringCards/MonitoringCard';
+import MonitoringCard from '../MonitoringCards/MonitoringCard';
 
 function MonitoringSection({ title, monitoringData, gridCols = 2 }) {
   // Map gridCols to Tailwind classes

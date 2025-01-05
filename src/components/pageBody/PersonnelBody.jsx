@@ -19,7 +19,7 @@ function PersonnelBody() {
   
   const navigate = useNavigate();
 
-  // Fetch personnel data with real-time updates
+  // Fetch personnel data 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'personnelInfo'), (querySnapshot) => {
       const personnelData = querySnapshot.docs.map((doc) => ({

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { db } from '../../firebase/Firebase';
+import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 
 export const useStore = create((set, get) => ({
   personnel: [],
@@ -22,6 +24,8 @@ export const useStore = create((set, get) => ({
   })(),
   timeoutId: null,
   timeoutStartedAt: null,
+  timeoutIdTemp: null, // Added for body temperature timeout
+  timeoutIdEnvTemp: null, // Added for environmental temperature timeout
 
   // Set personnel data
   setPersonnel: (personnelData) => set({ personnel: personnelData }),
@@ -58,9 +62,22 @@ export const useStore = create((set, get) => ({
     const updatedNotification = {
       ...notification,
       gearId: state.selectedPersonnel?.gearId || null,
+      saved: true,  // Mark notification as saved immediately
     };
+
+    // Update the state with the new notification
     const updatedNotifications = [updatedNotification, ...state.notifications];
+    
+    // Store the updated notifications in localStorage
     localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
+
+    // Optionally, save to Firebase (if needed)
+    if (state.selectedPersonnel) {
+      const docRef = doc(db, 'personnelMonitoring', state.selectedPersonnel.gearId);
+      const notificationsCollection = collection(docRef, 'notifications');
+      addDoc(notificationsCollection, updatedNotification);
+    }
+
     return { notifications: updatedNotifications };
   }),
 
@@ -75,27 +92,26 @@ export const useStore = create((set, get) => ({
 
   setTimeoutStartedAt: (timestamp) => set({ timeoutStartedAt: timestamp }),
 
-  resetTimeout: () => {
-    const { timeoutId } = get();
+  resetTimeout: (isForTemp) => {
+    const timeoutId = isForTemp ? get().timeoutIdTemp : get().timeoutIdEnvTemp;
     if (timeoutId) clearTimeout(timeoutId);
-    set({ timeoutId: null, timeoutStartedAt: null });
+    set(isForTemp ? { timeoutIdTemp: null } : { timeoutIdEnvTemp: null });
   },
 
-  startGlobalTimeout: (callback, duration) => {
-    const { timeoutId, resetTimeout } = get();
-    if (timeoutId) resetTimeout(); 
+  startGlobalTimeout: (callback, duration, isForTemp) => {
+    const resetTimeout = get().resetTimeout;
+    resetTimeout(isForTemp);
 
-    const startTimestamp = Date.now();
     const newTimeoutId = setTimeout(() => {
       callback();
-      resetTimeout();
+      resetTimeout(isForTemp);
     }, duration);
 
-    set({ timeoutId: newTimeoutId, timeoutStartedAt: startTimestamp });
+    set(isForTemp ? { timeoutIdTemp: newTimeoutId } : { timeoutIdEnvTemp: newTimeoutId });
   },
 
-  isTimeoutActive: () => {
-    const { timeoutStartedAt } = get();
-    return timeoutStartedAt !== null;
+  isTimeoutActive: (isForTemp) => {
+    const timeoutId = isForTemp ? get().timeoutIdTemp : get().timeoutIdEnvTemp;
+    return timeoutId !== null;
   },
 }));

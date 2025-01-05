@@ -12,7 +12,7 @@ import flamesIcon from './dashboardAssets/flames.png';
 import likeIcon from './dashboardAssets/like.png';
 import HeaderSection from '../header/HeaderSection';
 import ProfileMonitoring from '../MonitoringCards/ProfileMonitoring';
-import MonitoringSection from '../monitoringCards/MonitoringSection';
+import MonitoringSection from '../MonitoringCards/MonitoringSection';
 import BodyCard from '../parentCard/BodyCard';
 import NotificationCard from '../MonitoringCards/NotificationCard';
 
@@ -34,11 +34,12 @@ function MonitoringBody() {
     setLastUpdatedTemp,
     lastUpdatedEnvTemp,
     setLastUpdatedEnvTemp,
+    addNotification,
+    startGlobalTimeout,
     hasTempTimeout,
     setHasTempTimeout,
     hasEnvTempTimeout,
     setHasEnvTempTimeout,
-    addNotification, // Add notification method from Zustand
   } = useStore();
 
   const prevTemperature = useRef(temperature);
@@ -46,6 +47,22 @@ function MonitoringBody() {
 
   const [showTempNotification, setShowTempNotification] = useState(false);
   const [showEnvTempNotification, setShowEnvTempNotification] = useState(false);
+
+  // Utility to fetch data from Firebase Realtime Database
+  const fetchData = (path, setter, loadingSetter, lastUpdatedSetter, timeoutSetter) => {
+    loadingSetter(true);
+    const dataRef = ref(realtimeDb, path);
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setter(data);
+        lastUpdatedSetter(Date.now());
+        timeoutSetter(false);
+      }
+      loadingSetter(false);
+    });
+    return unsubscribe;
+  };
 
   // Fetch personnel data from Firestore
   useEffect(() => {
@@ -61,120 +78,98 @@ function MonitoringBody() {
     }
   }, [personnel, setPersonnel]);
 
-  // Fetch body temperature
-  // Fetch body temperature
-useEffect(() => {
-  if (selectedPersonnel?.gearId === 'pr001' && !temperature) {
-    setIsLoadingBodyTemp(true);
-    const tempRef = ref(realtimeDb, 'Temperature');
-    const unsubscribeTemp = onValue(tempRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setTemperature(data);
-        setLastUpdatedTemp(Date.now());
-        setHasTempTimeout(false);
-      }
-      setIsLoadingBodyTemp(false);
-    });
-    return () => unsubscribeTemp();
-  }
-}, [selectedPersonnel, temperature, setTemperature, setIsLoadingBodyTemp, setLastUpdatedTemp, setHasTempTimeout]);
+  // Fetch body temperature data
+  useEffect(() => {
+    if (selectedPersonnel?.gearId === 'pr001' && !temperature) {
+      const unsubscribe = fetchData(
+        'Temperature',
+        setTemperature,
+        setIsLoadingBodyTemp,
+        setLastUpdatedTemp,
+        setHasTempTimeout
+      );
+      return () => unsubscribe();
+    }
+  }, [selectedPersonnel, temperature, setTemperature, setIsLoadingBodyTemp, setLastUpdatedTemp, setHasTempTimeout]);
 
-  // Fetch environmental temperature
-  // Fetch environmental temperature
-useEffect(() => {
-  if (selectedPersonnel?.gearId === 'pr001' && !environmentalTemperature) {
-    setIsLoadingEnvTemp(true);
-    const envTempRef = ref(realtimeDb, 'EnvironmentalTemperature');
-    const unsubscribeEnvTemp = onValue(envTempRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setEnvironmentalTemperature(data);
-        setLastUpdatedEnvTemp(Date.now());
-        setHasEnvTempTimeout(false);
-      }
-      setIsLoadingEnvTemp(false);
-    });
-    return () => unsubscribeEnvTemp();
-  }
-}, [selectedPersonnel, environmentalTemperature, setEnvironmentalTemperature, setIsLoadingEnvTemp, setLastUpdatedEnvTemp, setHasEnvTempTimeout]);
+  // Fetch environmental temperature data
+  useEffect(() => {
+    if (selectedPersonnel?.gearId === 'pr001' && !environmentalTemperature) {
+      const unsubscribe = fetchData(
+        'EnvironmentalTemperature',
+        setEnvironmentalTemperature,
+        setIsLoadingEnvTemp,
+        setLastUpdatedEnvTemp,
+        setHasEnvTempTimeout
+      );
+      return () => unsubscribe();
+    }
+  }, [selectedPersonnel, environmentalTemperature, setEnvironmentalTemperature, setIsLoadingEnvTemp, setLastUpdatedEnvTemp, setHasEnvTempTimeout]);
 
-
-  // Track body temperature changes
+  // Monitor temperature changes and add notifications
   useEffect(() => {
     if (temperature !== prevTemperature.current) {
-      if (temperature >= 40) {
-        setShowTempNotification(true);
-        addNotification({
-          message: 'Critical Body Temperature Detected!',
-          timestamp: Date.now(),
-        });
-      } else {
-        setShowTempNotification(false);
+      const isCritical = temperature >= 40;
+      setShowTempNotification(isCritical);
+      if (isCritical) {
+        addNotification({ message: 'Critical Body Temperature Detected!', timestamp: Date.now(), gearId: selectedPersonnel.gearId, sensor: 'Body Temperature', value: temperature });
       }
       prevTemperature.current = temperature;
     }
-  }, [temperature, addNotification]);
+  }, [temperature, addNotification, selectedPersonnel]);
 
-  // Track environmental temperature changes
+  // Monitor environmental temperature changes and add notifications
   useEffect(() => {
     if (environmentalTemperature !== prevEnvTemperature.current) {
-      if (environmentalTemperature >= 40) {
-        setShowEnvTempNotification(true);
-        addNotification({
-          message: 'Critical Environmental Temperature Detected!',
-          timestamp: Date.now(),
-        });
-      } else {
-        setShowEnvTempNotification(false);
+      const isCritical = environmentalTemperature >= 40;
+      setShowEnvTempNotification(isCritical);
+      if (isCritical) {
+        addNotification({ message: 'Critical Environmental Temperature Detected!', timestamp: Date.now(), gearId: selectedPersonnel.gearId, sensor: 'Environmental Temperature', value: environmentalTemperature});
       }
       prevEnvTemperature.current = environmentalTemperature;
     }
-  }, [environmentalTemperature, addNotification]);
+  }, [environmentalTemperature, addNotification, selectedPersonnel]);
 
-  // Handle timeouts for body temperature and environmental temperature
+  // Timeout handlers for temperature data
   useEffect(() => {
     if (lastUpdatedTemp) {
-      const timer = setTimeout(() => {
-        if (Date.now() - lastUpdatedTemp > 10000) {
-          setHasTempTimeout(true);
-          addNotification({
-            message: 'No body temperature data received within 30 seconds',
-            timestamp: Date.now(),
-          });
-        }
-      }, 10000);
-      return () => clearTimeout(timer);
+      if (!hasTempTimeout && !useStore.getState().isTimeoutActive(true)) {
+        startGlobalTimeout(() => {
+          if (Date.now() - lastUpdatedTemp > 10000) {
+            setHasTempTimeout(true);
+            addNotification({ message: 'No body temperature data received within 30 seconds', timestamp: Date.now(),gearId: selectedPersonnel?.gearId,saved: false, sensor: 'Body Temperature'});
+          }
+        }, 10000, true);
+      }
     }
-  }, [lastUpdatedTemp, setHasTempTimeout, addNotification]);
+  }, [lastUpdatedTemp, hasTempTimeout, addNotification, startGlobalTimeout]);
+  
 
   useEffect(() => {
     if (lastUpdatedEnvTemp) {
-      const timer = setTimeout(() => {
-        if (Date.now() - lastUpdatedEnvTemp > 10000) {
-          setHasEnvTempTimeout(true);
-          addNotification({
-            message: 'No environmental temperature data received within 30 seconds',
-            timestamp: Date.now(),
-          });
-        }
-      }, 10000);
-      return () => clearTimeout(timer);
+      if (!hasEnvTempTimeout && !useStore.getState().isTimeoutActive(false)) {
+        startGlobalTimeout(() => {
+          if (Date.now() - lastUpdatedEnvTemp > 10000) {
+            setHasEnvTempTimeout(true);
+            addNotification({ message: 'No environmental temperature data received within 30 seconds', timestamp: Date.now(), gearId: selectedPersonnel?.gearId,saved: false, sensor: 'environmental Temperature'});
+          }
+        }, 10000, false);
+      }
     }
-  }, [lastUpdatedEnvTemp, setHasEnvTempTimeout, addNotification]);
-
+  }, [lastUpdatedEnvTemp, hasEnvTempTimeout, addNotification, startGlobalTimeout]);
+  
   const handleSelectChange = (e) => {
     const selectedId = e.target.value;
     const selected = personnel.find((p) => p.id === selectedId);
     setSelectedPersonnel(selected);
-  
-    // Clear temperature data when switching personnel
+
+    // Reset temperature data when switching personnel
     if (selectedId !== 'pr001') {
       setTemperature(null);
       setEnvironmentalTemperature(null);
     }
   };
-  
+
   const healthMonitoringData = [
     {
       icon: heartIcon,
@@ -186,11 +181,9 @@ useEffect(() => {
     {
       icon: bodytem,
       title: 'Body Temperature',
-      value: isLoadingBodyTemp || hasTempTimeout
-        ? 'Loading...'
-        : temperature !== null
-        ? `${temperature}°C`
-        : 'No data available',
+      value: selectedPersonnel?.gearId === 'pr001'  // Only show "Loading..." for pr001
+        ? (isLoadingBodyTemp || hasTempTimeout ? 'Loading...' : temperature !== null ? `${temperature}°C` : 'No data available')
+        : 'No data available',  // Show "No data available" for others like pr002, pr003
       description: temperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: temperature >= 40 ? flamesIcon : likeIcon,
     },
@@ -214,11 +207,9 @@ useEffect(() => {
     {
       icon: enviTemp,
       title: 'Environmental Temp',
-      value: isLoadingEnvTemp || hasEnvTempTimeout
-        ? 'Loading...'
-        : environmentalTemperature !== null
-        ? `${environmentalTemperature}°C`
-        : 'No data available',
+      value: selectedPersonnel?.gearId === 'pr001'  // Only show "Loading..." for pr001
+        ? (isLoadingEnvTemp || hasEnvTempTimeout ? 'Loading...' : environmentalTemperature !== null ? `${environmentalTemperature}°C` : 'No data available')
+        : 'No data available',  // Show "No data available" for others like pr002, pr003
       description: environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: environmentalTemperature >= 40 ? flamesIcon : likeIcon,
     },
