@@ -26,20 +26,7 @@ function MonitoringBody() {
     setTemperature,
     environmentalTemperature,
     setEnvironmentalTemperature,
-    isLoadingBodyTemp,
-    setIsLoadingBodyTemp,
-    isLoadingEnvTemp,
-    setIsLoadingEnvTemp,
-    lastUpdatedTemp,
-    setLastUpdatedTemp,
-    lastUpdatedEnvTemp,
-    setLastUpdatedEnvTemp,
     addNotification,
-    startGlobalTimeout,
-    hasTempTimeout,
-    setHasTempTimeout,
-    hasEnvTempTimeout,
-    setHasEnvTempTimeout,
   } = useStore();
 
   const prevTemperature = useRef(temperature);
@@ -49,17 +36,13 @@ function MonitoringBody() {
   const [showEnvTempNotification, setShowEnvTempNotification] = useState(false);
 
   // Utility to fetch data from Firebase Realtime Database
-  const fetchData = (path, setter, loadingSetter, lastUpdatedSetter, timeoutSetter) => {
-    loadingSetter(true);
+  const fetchData = (path, setter, property) => {
     const dataRef = ref(realtimeDb, path);
     const unsubscribe = onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        setter(data);
-        lastUpdatedSetter(Date.now());
-        timeoutSetter(false);
+      if (data && data[property] !== undefined) {
+        setter(data[property]); // Use the specific property (e.g., Reading)
       }
-      loadingSetter(false);
     });
     return unsubscribe;
   };
@@ -78,33 +61,18 @@ function MonitoringBody() {
     }
   }, [personnel, setPersonnel]);
 
-  // Fetch body temperature data
   useEffect(() => {
-    if (selectedPersonnel?.gearId === 'pr001' && !temperature) {
-      const unsubscribe = fetchData(
-        'Temperature',
-        setTemperature,
-        setIsLoadingBodyTemp,
-        setLastUpdatedTemp,
-        setHasTempTimeout
-      );
-      return () => unsubscribe();
-    }
-  }, [selectedPersonnel, temperature, setTemperature, setIsLoadingBodyTemp, setLastUpdatedTemp, setHasTempTimeout]);
+    if (selectedPersonnel?.gearId === 'pr001') {
+      const unsubscribeTemp = fetchData('BodyTemperature', setTemperature, 'Reading');
+      const unsubscribeEnvTemp = fetchData('Environmental', setEnvironmentalTemperature, 'Reading');
 
-  // Fetch environmental temperature data
-  useEffect(() => {
-    if (selectedPersonnel?.gearId === 'pr001' && !environmentalTemperature) {
-      const unsubscribe = fetchData(
-        'EnvironmentalTemperature',
-        setEnvironmentalTemperature,
-        setIsLoadingEnvTemp,
-        setLastUpdatedEnvTemp,
-        setHasEnvTempTimeout
-      );
-      return () => unsubscribe();
+      // Cleanup subscriptions when component unmounts or personnel changes
+      return () => {
+        unsubscribeTemp();
+        unsubscribeEnvTemp();
+      };
     }
-  }, [selectedPersonnel, environmentalTemperature, setEnvironmentalTemperature, setIsLoadingEnvTemp, setLastUpdatedEnvTemp, setHasEnvTempTimeout]);
+  }, [selectedPersonnel, setTemperature, setEnvironmentalTemperature]);
 
   // Monitor temperature changes and add notifications
   useEffect(() => {
@@ -112,7 +80,13 @@ function MonitoringBody() {
       const isCritical = temperature >= 40;
       setShowTempNotification(isCritical);
       if (isCritical) {
-        addNotification({ message: 'Critical Body Temperature Detected!', timestamp: Date.now(), gearId: selectedPersonnel.gearId, sensor: 'Body Temperature', value: temperature });
+        addNotification({
+          message: 'Critical Body Temperature Detected!',
+          timestamp: Date.now(),
+          gearId: selectedPersonnel?.gearId,
+          sensor: 'Body Temperature',
+          value: temperature,
+        });
       }
       prevTemperature.current = temperature;
     }
@@ -124,40 +98,18 @@ function MonitoringBody() {
       const isCritical = environmentalTemperature >= 40;
       setShowEnvTempNotification(isCritical);
       if (isCritical) {
-        addNotification({ message: 'Critical Environmental Temperature Detected!', timestamp: Date.now(), gearId: selectedPersonnel.gearId, sensor: 'Environmental Temperature', value: environmentalTemperature});
+        addNotification({
+          message: 'Critical Environmental Temperature Detected!',
+          timestamp: Date.now(),
+          gearId: selectedPersonnel?.gearId,
+          sensor: 'Environmental Temperature',
+          value: environmentalTemperature,
+        });
       }
       prevEnvTemperature.current = environmentalTemperature;
     }
   }, [environmentalTemperature, addNotification, selectedPersonnel]);
 
-  // Timeout handlers for temperature data
-  useEffect(() => {
-    if (lastUpdatedTemp) {
-      if (!hasTempTimeout && !useStore.getState().isTimeoutActive(true)) {
-        startGlobalTimeout(() => {
-          if (Date.now() - lastUpdatedTemp > 10000) {
-            setHasTempTimeout(true);
-            addNotification({ message: 'No body temperature data received within 30 seconds', timestamp: Date.now(),gearId: selectedPersonnel?.gearId,saved: false, sensor: 'Body Temperature'});
-          }
-        }, 10000, true);
-      }
-    }
-  }, [lastUpdatedTemp, hasTempTimeout, addNotification, startGlobalTimeout]);
-  
-
-  useEffect(() => {
-    if (lastUpdatedEnvTemp) {
-      if (!hasEnvTempTimeout && !useStore.getState().isTimeoutActive(false)) {
-        startGlobalTimeout(() => {
-          if (Date.now() - lastUpdatedEnvTemp > 10000) {
-            setHasEnvTempTimeout(true);
-            addNotification({ message: 'No environmental temperature data received within 30 seconds', timestamp: Date.now(), gearId: selectedPersonnel?.gearId,saved: false, sensor: 'environmental Temperature'});
-          }
-        }, 10000, false);
-      }
-    }
-  }, [lastUpdatedEnvTemp, hasEnvTempTimeout, addNotification, startGlobalTimeout]);
-  
   const handleSelectChange = (e) => {
     const selectedId = e.target.value;
     const selected = personnel.find((p) => p.id === selectedId);
@@ -181,9 +133,12 @@ function MonitoringBody() {
     {
       icon: bodytem,
       title: 'Body Temperature',
-      value: selectedPersonnel?.gearId === 'pr001'  // Only show "Loading..." for pr001
-        ? (isLoadingBodyTemp || hasTempTimeout ? 'Loading...' : temperature !== null ? `${temperature}°C` : 'No data available')
-        : 'No data available',  // Show "No data available" for others like pr002, pr003
+      value:
+        selectedPersonnel?.gearId === 'pr001'
+          ? temperature !== null
+            ? `${temperature}°C`
+            : 'No data available'
+          : 'No data available',
       description: temperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: temperature >= 40 ? flamesIcon : likeIcon,
     },
@@ -207,9 +162,12 @@ function MonitoringBody() {
     {
       icon: enviTemp,
       title: 'Environmental Temp',
-      value: selectedPersonnel?.gearId === 'pr001'  // Only show "Loading..." for pr001
-        ? (isLoadingEnvTemp || hasEnvTempTimeout ? 'Loading...' : environmentalTemperature !== null ? `${environmentalTemperature}°C` : 'No data available')
-        : 'No data available',  // Show "No data available" for others like pr002, pr003
+      value:
+        selectedPersonnel?.gearId === 'pr001'
+          ? environmentalTemperature !== null
+            ? `${environmentalTemperature}°C`
+            : 'No data available'
+          : 'No data available',
       description: environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: environmentalTemperature >= 40 ? flamesIcon : likeIcon,
     },
@@ -240,7 +198,6 @@ function MonitoringBody() {
             <ProfileMonitoring personnel={selectedPersonnel} />
             <NotificationCard />
           </div>
-
           <div className="lg:col-span-3 flex flex-col gap-4">
             <MonitoringSection title="Health Monitoring Section" monitoringData={healthMonitoringData} />
             <MonitoringSection title="Environmental Monitoring Section" monitoringData={environmentalMonitoringData} gridCols={3} />

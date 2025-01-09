@@ -65,7 +65,7 @@ function DashboardBody() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full border-t-4 border-b-4 border-bfpOrange h-16 w-16"></div>
+        <div className="animate-spin rounded-full border-t-2 border-b-2 border-bfpNavy h-14 w-14"></div>
       </div>
     );
   }

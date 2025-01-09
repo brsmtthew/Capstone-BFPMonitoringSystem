@@ -9,9 +9,6 @@ export const useStore = create((set, get) => ({
   environmentalTemperature: null,
   lastUpdatedTemp: null,
   lastUpdatedEnvTemp: null,
-  isLoadingBodyTemp: true,
-  isLoadingEnvTemp: true,
-  hasTempTimeout: false,
   hasEnvTempTimeout: false,
   notifications: (() => {
     try {
@@ -22,10 +19,6 @@ export const useStore = create((set, get) => ({
       return [];
     }
   })(),
-  timeoutId: null,
-  timeoutStartedAt: null,
-  timeoutIdTemp: null, // Added for body temperature timeout
-  timeoutIdEnvTemp: null, // Added for environmental temperature timeout
 
   // Set personnel data
   setPersonnel: (personnelData) => set({ personnel: personnelData }),
@@ -38,18 +31,6 @@ export const useStore = create((set, get) => ({
 
   // Set environmental temperature data
   setEnvironmentalTemperature: (envTempData) => set({ environmentalTemperature: envTempData }),
-
-  // Set loading state for body temperature
-  setIsLoadingBodyTemp: (state) => set({ isLoadingBodyTemp: state }),
-
-  // Set loading state for environmental temperature
-  setIsLoadingEnvTemp: (state) => set({ isLoadingEnvTemp: state }),
-
-  // Handle timeout for body temperature
-  setHasTempTimeout: (state) => set({ hasTempTimeout: state }),
-
-  // Handle timeout for environmental temperature
-  setHasEnvTempTimeout: (state) => set({ hasEnvTempTimeout: state }),
 
   // Set last updated timestamp for body temperature
   setLastUpdatedTemp: (timestamp) => set({ lastUpdatedTemp: timestamp }),
@@ -87,31 +68,4 @@ export const useStore = create((set, get) => ({
     return { notifications: [] };
   }),
 
-  // Timeout management
-  setTimeoutId: (id) => set({ timeoutId: id }),
-
-  setTimeoutStartedAt: (timestamp) => set({ timeoutStartedAt: timestamp }),
-
-  resetTimeout: (isForTemp) => {
-    const timeoutId = isForTemp ? get().timeoutIdTemp : get().timeoutIdEnvTemp;
-    if (timeoutId) clearTimeout(timeoutId);
-    set(isForTemp ? { timeoutIdTemp: null } : { timeoutIdEnvTemp: null });
-  },
-
-  startGlobalTimeout: (callback, duration, isForTemp) => {
-    const resetTimeout = get().resetTimeout;
-    resetTimeout(isForTemp);
-
-    const newTimeoutId = setTimeout(() => {
-      callback();
-      resetTimeout(isForTemp);
-    }, duration);
-
-    set(isForTemp ? { timeoutIdTemp: newTimeoutId } : { timeoutIdEnvTemp: newTimeoutId });
-  },
-
-  isTimeoutActive: (isForTemp) => {
-    const timeoutId = isForTemp ? get().timeoutIdTemp : get().timeoutIdEnvTemp;
-    return timeoutId !== null;
-  },
 }));
