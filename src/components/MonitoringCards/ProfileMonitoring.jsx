@@ -4,12 +4,13 @@ import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/Firebase';
 
 function ProfileMonitoring({ personnel }) {
-  const { notifications, temperature, environmentalTemperature, updateNotificationState } = useStore();
+  const { notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor, HeartRate, updateNotificationState } = useStore();
   const [isSaving, setIsSaving] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const [lastSavedData, setLastSavedData] = useState({
     temperature: null,
     environmentalTemperature: null,
+    smokeSensor: null,
   });
 
   const saveRecordings = async () => {
@@ -47,31 +48,29 @@ function ProfileMonitoring({ personnel }) {
         updateNotificationState(notificationsToSave.map((notif) => notif.id));
       }
 
-      // Save real-time values only if changed
-      const realTimeData = {};
-      if (typeof temperature === 'number' && temperature !== lastSavedData.temperature) {
-        realTimeData.bodyTemperature = temperature;
-      }
-      if (
-        typeof environmentalTemperature === 'number' &&
-        environmentalTemperature !== lastSavedData.environmentalTemperature
-      ) {
-        realTimeData.environmentalTemperature = environmentalTemperature;
-      }
+      // Save all real-time values
+      const realTimeData = {
+        bodyTemperature: temperature,
+        environmentalTemperature: environmentalTemperature,
+        smokeSensor: smokeSensor,
+        ToxicGasSensor: ToxicGasSensor,
+        HeartRate: HeartRate,
+      };
 
-      if (Object.keys(realTimeData).length > 0) {
-        const realTimeDataRef = collection(docRef, 'realTimeData');
-        await addDoc(realTimeDataRef, {
-          ...realTimeData,
-          timestamp: Date.now(),
-        });
+      const realTimeDataRef = collection(docRef, 'realTimeData');
+      await addDoc(realTimeDataRef, {
+        ...realTimeData,
+        timestamp: Date.now(),
+      });
 
-        // Update last saved data
-        setLastSavedData({
-          temperature,
-          environmentalTemperature,
-        });
-      }
+      // Update last saved data
+      setLastSavedData({
+        temperature,
+        environmentalTemperature,
+        smokeSensor,
+        ToxicGasSensor,
+        HeartRate,
+      });
 
       console.log('Recordings saved successfully.');
     } catch (error) {

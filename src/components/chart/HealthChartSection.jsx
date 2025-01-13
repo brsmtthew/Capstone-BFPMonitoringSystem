@@ -1,5 +1,6 @@
 import React from 'react';
-import LineChart from './LineChart'; // Import the reusable LineChart
+import LineChart  from './LineChart'; // Import the reusable LineChart
+import { ResponsiveContainer } from 'recharts';
 
 // Sample Data for Charts
 const heartRateData = [
@@ -30,28 +31,34 @@ const HealthChartSection = () => {
       {/* Center the grid and ensure the charts are centered */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center mb-4">
         {/* Heart Rate Chart */}
-        <LineChart
-          data={heartRateData}
-          xKey="time"
-          yKey="heartRate"
-          color="#FF7300" // bfpOrange
-          title="Heart Rate"
-          yLabel="BPM"
-          description="This chart shows heart rate trends over time."
-          unit="BPM"
-        />
+
+        <ResponsiveContainer>
+          <LineChart
+            data={heartRateData}
+            xKey="time"
+            yKey="heartRate"
+            color="#FF7300" // bfpOrange
+            title="Heart Rate"
+            yLabel="BPM"
+            description="This chart shows heart rate trends over time."
+            unit="BPM"
+          />
+        </ResponsiveContainer>
+        
 
         {/* Body Temperature Chart */}
-        <LineChart
-          data={bodyTempData}
-          xKey="time"
-          yKey="bodyTemp"
-          color="#4CAF50" // Green for temperature
-          title="Body Temperature"
-          yLabel="°C"
-          description="This chart displays body temperature fluctuations."
-          unit="°C"
-        />
+        <ResponsiveContainer>
+          <LineChart
+            data={bodyTempData}
+            xKey="time"
+            yKey="bodyTemp"
+            color="#0088FE" // bfpBlue
+            title="Body Temperature"
+            yLabel="°C"
+            description="This chart shows body temperature trends over time."
+            unit="°C"
+          />
+        </ResponsiveContainer>
       </div>
     </div>
   );

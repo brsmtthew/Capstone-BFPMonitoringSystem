@@ -9,7 +9,9 @@ export const useStore = create((set, get) => ({
   environmentalTemperature: null,
   lastUpdatedTemp: null,
   lastUpdatedEnvTemp: null,
-  hasEnvTempTimeout: false,
+  smokeSensor: null,
+  ToxicGasSensor: null,
+  HeartRate: null,
   notifications: (() => {
     try {
       const storedNotifications = JSON.parse(localStorage.getItem('notifications'));
@@ -37,6 +39,15 @@ export const useStore = create((set, get) => ({
 
   // Set last updated timestamp for environmental temperature
   setLastUpdatedEnvTemp: (timestamp) => set({ lastUpdatedEnvTemp: timestamp }),
+
+  // Set smoke sensor data
+  setSmokeSensor: (smokeSensorData) => set({ smokeSensor: smokeSensorData }),
+
+  // Set toxic gas sensor data
+  setToxicGasSensor: (toxicGasData) => set({ ToxicGasSensor: toxicGasData }),
+
+  // Set heart rate data
+  setHeartRate: (heartRateData) => set({ HeartRate: heartRateData }),
 
   // Add a new notification
   addNotification: (notification) => set((state) => {
