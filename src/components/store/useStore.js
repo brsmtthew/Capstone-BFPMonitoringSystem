@@ -5,6 +5,7 @@ import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 export const useStore = create((set, get) => ({
   personnel: [],
   selectedPersonnel: null,
+  monitoredPersonnel: [],
   temperature: null,
   environmentalTemperature: null,
   lastUpdatedTemp: null,
@@ -21,6 +22,7 @@ export const useStore = create((set, get) => ({
       return [];
     }
   })(),
+
 
   // Set personnel data
   setPersonnel: (personnelData) => set({ personnel: personnelData }),
@@ -78,5 +80,18 @@ export const useStore = create((set, get) => ({
     localStorage.removeItem('notifications');
     return { notifications: [] };
   }),
+
+  addMonitoredPersonnel: (person) =>
+    set((state) => {
+      // Avoid duplicates
+      if (state.monitoredPersonnel.some((p) => p.gearId === person.gearId)) return state;
+      return { monitoredPersonnel: [...state.monitoredPersonnel, person] };
+    }),
+
+    removeMonitoredPersonnel: (gearId) => set((state) => ({
+      monitoredPersonnel: state.monitoredPersonnel.filter(
+        (person) => person.gearId !== gearId
+      ),
+    })),
 
 }));

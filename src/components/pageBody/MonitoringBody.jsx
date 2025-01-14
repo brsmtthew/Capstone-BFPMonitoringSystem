@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, realtimeDb } from '../../firebase/Firebase';
@@ -18,11 +19,15 @@ import MonitoringSection from '../MonitoringCards/MonitoringSection';
 import BodyCard from '../parentCard/BodyCard';
 import NotificationCard from '../MonitoringCards/NotificationCard';
 import EnviMonitoring from '../MonitoringCards/EnviMonitoring';
+import HealthMonitoring from '../MonitoringCards/HealthMonitoring';
 
 function MonitoringBody() {
   const {
     personnel,
     selectedPersonnel,
+    monitoredPersonnel,
+    addMonitoredPersonnel,
+    removeMonitoredPersonnel,
     setPersonnel,
     setSelectedPersonnel,
     temperature,
@@ -38,6 +43,8 @@ function MonitoringBody() {
     setHeartRate,
   } = useStore();
 
+  const { state } = useLocation(); // Access data passed via navigate
+
   const prevTemperature = useRef(temperature);
   const prevEnvTemperature = useRef(environmentalTemperature);
   const prevSmokeSensor = useRef(smokeSensor);
@@ -49,6 +56,18 @@ function MonitoringBody() {
   const [showSmokeNotification, setShowSmokeNotification] = useState(false);
   const [showToxicGasNotification, setShowToxicGasNotification] = useState(false);
   const [showHeartRateNotification, setShowHeartRateNotification] = useState(false);
+
+  useEffect(() => {
+    if (state?.selectedPersonnel) {
+      addMonitoredPersonnel(state.selectedPersonnel);
+      setSelectedPersonnel(state.selectedPersonnel);
+    }
+  }, [state, addMonitoredPersonnel, setSelectedPersonnel]);
+
+  // Remove personnel handler
+  const handleRemovePersonnel = (gearId) => {
+    removeMonitoredPersonnel(gearId); // Use this to remove personnel from monitoring.
+  };  
 
   // Utility to fetch data from Firebase Realtime Database
   const fetchData = (path, setter, property) => {
@@ -196,10 +215,13 @@ function MonitoringBody() {
     if (selectedId !== 'pr001') {
       setTemperature(null);
       setEnvironmentalTemperature(null);
+      setSmokeSensor(null);
+      setToxicGasSensor(null);
+      setHeartRate(null);
     }
   };
 
-  const healthMonitoringData = [
+  const monitoringHealthData = [
     {
       icon: heartIcon,
       title: 'Heart Rate',
@@ -225,7 +247,18 @@ function MonitoringBody() {
     },
   ];
 
-  const environmentalMonitoringData = [
+  const monitoringEnviData = [
+    {
+      icon: enviTemp,
+      title: 'Envi Temperature',
+      value: selectedPersonnel?.gearId === 'pr001'
+      ? environmentalTemperature !== null
+        ? `${environmentalTemperature}°C`
+        : 'No data available'
+      : 'No data available',
+      description: environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
+      warningIcon: environmentalTemperature >= 40 ? flamesIcon : likeIcon,
+    },
     {
       icon: danger,
       title: 'Toxic Gas',
@@ -258,57 +291,45 @@ function MonitoringBody() {
       description: smokeSensor > 500 ? 'Critical Smoke Level' : 'Safe Level',
       warningIcon: smokeSensor > 500 ? flamesIcon : likeIcon,
     },
-    {
-      icon: enviTemp,
-      title: (
-        <span style={{ fontSize: '14px' }}>Environmental Temp</span> // Adjust font size in pixels here
-      ),
-      value:
-        selectedPersonnel?.gearId === 'pr001'
-          ? environmentalTemperature !== null
-            ? `${environmentalTemperature}°C`
-            : 'No data available'
-          : 'No data available',
-      description: environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
-      warningIcon: environmentalTemperature >= 40 ? flamesIcon : likeIcon,
-    },
   ];
 
   return (
     <div className="p-4 h-full flex flex-col bg-white">
-      <HeaderSection
-        title="REAL-TIME MONITORING"
-        extraContent={
-          <select
-            className="text-xl text-white bg-bfpNavy font-semibold border border-gray-300 rounded-lg px-4 py-2"
-            onChange={handleSelectChange}
-          >
-            <option value="">Select Personnel</option>
-            {personnel.map((person) => (
-              <option key={person.id} value={person.id}>
-                {person.name}
-              </option>
-            ))}
-          </select>
-        }
-      />
+      <HeaderSection title="REAL-TIME MONITORING" />
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
-      <BodyCard>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 text-white h-full pb-2">
-          <div className="lg:col-span-1 flex flex-col justify-start gap-4">
-            <ProfileMonitoring personnel={selectedPersonnel} />
-            <NotificationCard />
-          </div>
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <MonitoringSection title="Health Monitoring Section" monitoringData={healthMonitoringData} />
-            <MonitoringSection title="Environmental Monitoring Section" monitoringData={environmentalMonitoringData} gridCols={3} />
-          </div>
-        </div>
-
-        {/* <div>
-          <EnviMonitoring />
-        </div> */}
-      </BodyCard>
+      {monitoredPersonnel.length === 0 ? (
+        <div className="flex justify-center items-center h-screen">
+          <p className="text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg">
+            Please go to the Personnel Page to monitor the personnel.
+          </p>
+      </div>
+      
+      ) : (
+        monitoredPersonnel.map((person) => (
+          <BodyCard key={person.gearId}>
+            <div>
+              <div className="flex">
+                <div className="flex-shrink-0 mb-6">
+                  <ProfileMonitoring personnel={person} />
+                </div>
+                <div className="flex-grow mb-6 ml-4">
+                  <HealthMonitoring monitoringHealthData={monitoringHealthData} />
+                </div>
+              </div>
+              <EnviMonitoring monitoringEnviData={monitoringEnviData} />
+              <div className="mt-4">
+                <NotificationCard />
+                <button
+                  className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600"
+                  onClick={() => handleRemovePersonnel(person.gearId)}
+                >
+                  Remove from Monitoring
+                </button>
+              </div>
+            </div>
+          </BodyCard>
+        ))
+      )}
     </div>
   );
 }
