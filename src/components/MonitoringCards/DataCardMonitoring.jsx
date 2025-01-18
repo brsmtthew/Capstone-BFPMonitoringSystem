@@ -4,7 +4,7 @@ const DataCardMonitoring = ({ value, description, warningIcon }) => {
   const hasValidValue = value && value !== "No data available";
 
   return (
-    <div className="h-56 w-96 bg-white rounded-md shadow-md flex flex-col justify-center items-center text-center p-4">
+    <div className="w-full bg-white rounded-md shadow-md flex flex-col justify-center items-center text-center p-4">
       <p className="text-[56px] font-bold">{value}</p>
       {/* Only display description and warningIcon if value is valid */}
       {hasValidValue && description && (

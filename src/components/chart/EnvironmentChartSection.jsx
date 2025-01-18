@@ -3,30 +3,11 @@ import LineChart from './LineChart';
 import BarChart from './BarChart';
 import GaugeChart from './GaugeChart';
 
-// Sample Data for Charts
-const smokeData = [
-  { time: '10:00', value: 50 },
-  { time: '10:05', value: 60 },
-  { time: '10:10', value: 55 },
-  { time: '10:15', value: 58 },
-  { time: '10:20', value: 62 },
-  { time: '10:25', value: 70 },
-];
-
 const toxicGasData = [
   { name: 'Toxic Gas Level', value: 60 },
 ];
 
-const environmentalTempData = [
-  { time: '10:00', temp: 25 },
-  { time: '10:05', temp: 25.5 },
-  { time: '10:10', temp: 26 },
-  { time: '10:15', temp: 26.5 },
-  { time: '10:20', temp: 27 },
-  { time: '10:25', temp: 27.5 },
-];
-
-const EnvironmentChartSection = () => {
+const EnvironmentChartSection = ({ smokeData, enviData }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col text-center h-auto max-w-full">
       {/* Section Header */}
@@ -39,10 +20,10 @@ const EnvironmentChartSection = () => {
         {/* Smoke Detection - Bar Chart (First Column, First Row) */}
         <div className="flex justify-center col-span-1">
           <BarChart
-            data={smokeData}
+            data={smokeData} // Pass smokeData to BarChart
             xKey="time"
             yKey="value"
-            color="#FF7300" // bfpOrange
+            color="#000435" // bfpNavy
             title="Smoke Detection"
             description="This chart shows the smoke levels detected over time."
             yLabel="Level"
@@ -68,7 +49,7 @@ const EnvironmentChartSection = () => {
       {/* Environmental Temperature - Line Chart (Second Row, Full Width) */}
       <div className="flex justify-center col-span-2 mb-4">
         <LineChart
-          data={environmentalTempData}
+          data={enviData}
           xKey="time"
           yKey="temp"
           color="#4CAF50" // Green for temperature

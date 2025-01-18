@@ -225,6 +225,7 @@ function HistoryBody() {
                     <th className="px-6 py-3">Date</th>
                     <th className="px-6 py-3">Time</th>
                     <th className="px-6 py-3">Total Notifications</th>
+                    <th className="px-6 py-3">Analytics</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -247,6 +248,9 @@ function HistoryBody() {
                         <td className="px-6 py-3">{data.date}</td>
                         <td className="px-6 py-3">{data.time}</td>
                         <td className="px-6 py-3">{data.totalNotifications}</td>
+                        <td className="px-6 py-3 flex justify-start">
+                          <button className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105">View</button>
+                        </td>
                       </tr>
 
                       {expandedPersonnel === data && (

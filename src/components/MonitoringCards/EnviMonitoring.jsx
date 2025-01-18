@@ -8,7 +8,7 @@ const EnviMonitoring = ({ monitoringEnviData = [] }) => {
       <div className="bg-bfpNavy rounded-lg text-center text-white p-4">
         <p className="font-bold text-[26px]">Environmental Monitoring</p>
       </div>
-      <div className="flex flex-wrap justify-around gap-4 mt-4">
+      <div className="flex flex-wrap justify-around lg:grid lg:grid-cols-3 gap-4 mt-4 p-4">
         {monitoringEnviData.map((data, index) => (
           <EnviCard key={index} icon={data.icon} title={data.title}>
             <DataCardMonitoring

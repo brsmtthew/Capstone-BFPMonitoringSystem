@@ -67,7 +67,7 @@ export const useStore = create((set, get) => ({
 
     // Optionally, save to Firebase (if needed)
     if (state.selectedPersonnel) {
-      const docRef = doc(db, 'personnelMonitoring', state.selectedPersonnel.gearId);
+      const docRef = doc(db, 'personnelRecords', state.selectedPersonnel.gearId);
       const notificationsCollection = collection(docRef, 'notifications');
       addDoc(notificationsCollection, updatedNotification);
     }

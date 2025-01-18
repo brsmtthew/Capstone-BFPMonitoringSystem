@@ -92,7 +92,7 @@ function PersonnelBody() {
               personnel.map((person) => (
                 <div
                   key={person.id}
-                  className="bg-primeColor shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center"
+                  className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center"
                 >
                   <img
                     src={person.image || 'https://via.placeholder.com/150'}
@@ -104,14 +104,14 @@ function PersonnelBody() {
                   <p className="text-sm text-white">{person.gearId}</p>
                   {!monitoredPersonnel.some((monitored) => monitored.gearId === person.gearId) ? (
                     <button
-                      className="mt-4 px-4 py-2 bg-bfpNavy text-white rounded-lg hover:bg-hoverBtn"
+                      className="mt-4 px-4 py-2 bg-bfpOrange text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
                       onClick={() => handleMonitor(person)}
                     >
                       Monitor
                     </button>
                   ) : (
                     <button
-                      className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-red-700"
+                      className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105"
                       onClick={() => handleRemove(person)}
                     >
                       Remove

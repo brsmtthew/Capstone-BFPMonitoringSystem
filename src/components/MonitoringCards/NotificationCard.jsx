@@ -24,7 +24,7 @@ function NotificationCard() {
     : [];
 
   return (
-    <div className="h-96 w-[600px] bg-white rounded-lg shadow-lg flex flex-col">
+    <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col">
       <div className="p-4 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
         <h3 className="text-[20px] font-bold">Notification</h3>
         <button
