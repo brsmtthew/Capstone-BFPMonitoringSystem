@@ -2,26 +2,8 @@ import React from 'react';
 import LineChart  from './LineChart'; // Import the reusable LineChart
 import { ResponsiveContainer } from 'recharts';
 
-// Sample Data for Charts
-const heartRateData = [
-  { time: '10:00', heartRate: 72 },
-  { time: '10:05', heartRate: 75 },
-  { time: '10:10', heartRate: 70 },
-  { time: '10:15', heartRate: 74 },
-  { time: '10:20', heartRate: 73 },
-  { time: '10:25', heartRate: 76 },
-];
 
-const bodyTempData = [
-  { time: '10:00', bodyTemp: 36.5 },
-  { time: '10:05', bodyTemp: 36.7 },
-  { time: '10:10', bodyTemp: 36.6 },
-  { time: '10:15', bodyTemp: 36.8 },
-  { time: '10:20', bodyTemp: 36.5 },
-  { time: '10:25', bodyTemp: 36.7 },
-];
-
-const HealthChartSection = () => {
+const HealthChartSection = ({HeartRate,temperatureData}) => {
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col text-center h-auto">
       <div className="p-3 w-full bg-bfpNavy rounded-lg mb-4 text-white">
@@ -34,9 +16,9 @@ const HealthChartSection = () => {
 
         <ResponsiveContainer>
           <LineChart
-            data={heartRateData}
+            data={HeartRate}
             xKey="time"
-            yKey="heartRate"
+            yKey="value"
             color="#FF7300" // bfpOrange
             title="Heart Rate"
             yLabel="BPM"
@@ -49,9 +31,9 @@ const HealthChartSection = () => {
         {/* Body Temperature Chart */}
         <ResponsiveContainer>
           <LineChart
-            data={bodyTempData}
+            data={temperatureData}
             xKey="time"
-            yKey="bodyTemp"
+            yKey="value"
             color="#0088FE" // bfpBlue
             title="Body Temperature"
             yLabel="°C"

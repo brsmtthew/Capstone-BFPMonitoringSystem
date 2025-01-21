@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../../firebase/Firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import HeaderSection from '../header/HeaderSection';
 import BodyCard from '../parentCard/BodyCard';
 import { useStore } from '../store/useStore';
 import AddPersonnelModal from '../modal/addPersonnelModal';
+import EditPersonnelModal from '../modal/editPersonnelModal';
+import { toast } from 'react-toastify';
 
 function PersonnelBody() {
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [selectedImagePath, setSelectedImagePath] = useState(null);
   const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
+  const [isEditOpen, setEditOpen] = useState(false);
+
 
   // Accessing the monitored personnel list from the store
   const { monitoredPersonnel, addMonitoredPersonnel, removeMonitoredPersonnel } = useStore();
@@ -44,6 +46,16 @@ function PersonnelBody() {
     removeMonitoredPersonnel(person.gearId); // Remove by gearId
   };
 
+  // Handle click to delete a personnel
+  const handleDelete = async (person) => {
+    try {
+      await deleteDoc(doc(db, 'personnelInfo', person.id));
+      setPersonnel(personnel.filter((p) => p.id !== person.id));
+    } catch (error) {
+      toast.error("Error deleting personnel:", error);
+    }
+  };
+
   const openAddModal = (personnel = null) => {
     setSelectedPersonnel(personnel); // Set selected personnel for editing (or null for adding)
     setAddModalOpen(true);
@@ -53,6 +65,16 @@ function PersonnelBody() {
     setAddModalOpen(false);
     setSelectedPersonnel(null); // Clear selected personnel on close
   };
+
+  const openEditModal = (personnel = null) => {
+    setSelectedPersonnel(personnel); // Set selected personnel for editing (or null for adding)
+    setEditOpen(true);
+  }
+
+  const closeEditModal = () => {
+    setEditOpen(false);
+    setSelectedPersonnel(null); // Clear selected personnel on close
+  }
 
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white">
@@ -102,21 +124,35 @@ function PersonnelBody() {
                   <h3 className="text-lg font-bold text-white">{person.name}</h3>
                   <p className="text-sm text-white">{person.position}</p>
                   <p className="text-sm text-white">{person.gearId}</p>
-                  {!monitoredPersonnel.some((monitored) => monitored.gearId === person.gearId) ? (
+                  <div className="mt-4 flex space-x-2">
                     <button
-                      className="mt-4 px-4 py-2 bg-bfpOrange text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
-                      onClick={() => handleMonitor(person)}
+                      className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                      onClick={() => openEditModal(person)}
                     >
-                      Monitor
+                      Edit
                     </button>
-                  ) : (
+                    {!monitoredPersonnel.some((monitored) => monitored.gearId === person.gearId) ? (
+                      <button
+                        className="px-4 py-2 bg-green text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                        onClick={() => handleMonitor(person)}
+                      >
+                        Active
+                      </button>
+                    ) : (
+                      <button
+                        className="px-4 py-2 bg-red text-white rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105"
+                        onClick={() => handleRemove(person)}
+                      >
+                        Remove
+                      </button>
+                    )}
                     <button
-                      className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105"
-                      onClick={() => handleRemove(person)}
+                      className="px-4 py-2 bg-red text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                      onClick={() => handleDelete(person)}
                     >
-                      Remove
+                      Delete
                     </button>
-                  )}
+                  </div>
                 </div>
               ))
             ) : (
@@ -128,6 +164,12 @@ function PersonnelBody() {
       <AddPersonnelModal 
       isOpen={isAddModalOpen} 
       closeModal={closeAddModal} 
+      selectedPersonnel={selectedPersonnel}
+      />
+
+      <EditPersonnelModal
+      isOpen={isEditOpen}
+      closeModal={closeEditModal}
       selectedPersonnel={selectedPersonnel}
       />
     </div>

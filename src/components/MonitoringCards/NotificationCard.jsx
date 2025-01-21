@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../store/useStore';
 
-function NotificationCard() {
+function NotificationCard({ personnel }) {
   const { notifications, clearNotifications, selectedPersonnel } = useStore();
 
   // Function to format timestamp to desired format
@@ -16,12 +16,10 @@ function NotificationCard() {
     return `${month}/${day}/${year} time ${hour}:${minute}`;
   };
 
-  // Filter notifications based on selectedPersonnel's gearId
-  const filteredNotifications = selectedPersonnel
-    ? notifications.filter(
-        (notification) => notification.gearId === selectedPersonnel.gearId
-      )
-    : [];
+  // Filter notifications based on the personnel's gearId
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.gearId === personnel.gearId
+  );
 
   return (
     <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col">

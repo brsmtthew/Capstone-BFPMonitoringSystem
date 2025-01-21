@@ -57,6 +57,9 @@ function MonitoringBody() {
   const [showToxicGasNotification, setShowToxicGasNotification] = useState(false);
   const [showHeartRateNotification, setShowHeartRateNotification] = useState(false);
 
+  const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+
   useEffect(() => {
     if (state?.selectedPersonnel) {
       addMonitoredPersonnel(state.selectedPersonnel);
@@ -123,14 +126,18 @@ function MonitoringBody() {
     if (temperature !== prevTemperature.current) {
       const isCritical = temperature >= 40;
       setShowTempNotification(isCritical);
-      if (isCritical && !tempNotificationSent.current) {
-        addNotification({
-          message: 'Critical Body Temperature Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Body Temperature',
-          value: temperature,
-        });
+      if (isCritical && !tempNotificationSent.current && selectedPersonnel?.gearId) {
+        //check if notification is for the currently selected personnel
+        if (selectedPersonnel.gearId === selectedPersonnel?.gearId) {
+          addNotification({
+            id: uniqueId,
+            message: 'Critical Body Temperature Detected!',
+            timestamp: Date.now(),
+            gearId: selectedPersonnel?.gearId,
+            sensor: 'Body Temperature',
+            value: temperature,
+          });
+        }
         tempNotificationSent.current = true; // Set the flag to true after sending the notification
       } else if (!isCritical) {
         tempNotificationSent.current = false; // Reset the flag if the value is no longer critical
@@ -145,14 +152,18 @@ function MonitoringBody() {
     if (environmentalTemperature !== prevEnvTemperature.current) {
       const isCritical = environmentalTemperature >= 40;
       setShowEnvTempNotification(isCritical);
-      if (isCritical && !envTempNotificationSent.current) {
-        addNotification({
-          message: 'Critical Environmental Temperature Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Environmental Temperature',
-          value: environmentalTemperature,
-        });
+      if (isCritical && !envTempNotificationSent.current && selectedPersonnel?.gearId) {
+        //check if notification is for the currently selected personnel
+        if (selectedPersonnel.gearId === selectedPersonnel?.gearId) {
+          addNotification({
+            id: uniqueId,
+            message: 'Critical Environmental Temperature Detected!',
+            timestamp: Date.now(),
+            gearId: selectedPersonnel?.gearId,
+            sensor: 'Environmental Temperature',
+            value: environmentalTemperature,
+          });
+        }
         envTempNotificationSent.current = true; // Set the flag to true after sending the notification
       } else if (!isCritical) {
         envTempNotificationSent.current = false; // Reset the flag if the value is no longer critical
@@ -167,14 +178,18 @@ function MonitoringBody() {
     if (smokeSensor !== prevSmokeSensor.current) {
       const isCritical = smokeSensor >= 100 && smokeSensor <= 1000;
       setShowSmokeNotification(isCritical);
-      if (isCritical && !smokeNotificationSent.current) {
-        addNotification({
-          message: 'High Smoke Levels Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Smoke Sensor',
-          value: smokeSensor,
-        });
+      if (isCritical && !smokeNotificationSent.current && selectedPersonnel?.gearId) {
+        //check if notification is for the currently selected personnel
+        if (selectedPersonnel.gearId === selectedPersonnel?.gearId) {
+          addNotification({
+            id: uniqueId,
+            message: 'High Smoke Level Detected!',
+            timestamp: Date.now(),
+            gearId: selectedPersonnel?.gearId,
+            sensor: 'Smoke Sensor',
+            value: smokeSensor,
+          });
+        }
         smokeNotificationSent.current = true; // Set the flag to true after sending the notification
       } else if (!isCritical) {
         smokeNotificationSent.current = false; // Reset the flag if the value is no longer critical
@@ -189,14 +204,18 @@ function MonitoringBody() {
     if (ToxicGasSensor !== prevToxicGasSensor.current) {
       const isCritical = ToxicGasSensor >= 10 && ToxicGasSensor <= 10000;
       setShowToxicGasNotification(isCritical);
-      if (isCritical && !toxicGasNotificationSent.current) {
-        addNotification({
-          message: 'High Carbon Monoxide Gas Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Toxic Gas Sensor',
-          value: ToxicGasSensor,
-        });
+      if (isCritical && !toxicGasNotificationSent.current && selectedPersonnel?.gearId) {
+        //check if notification is for the currently selected personnel
+        if (selectedPersonnel.gearId === selectedPersonnel?.gearId) {
+          addNotification({
+            id: uniqueId,
+            message: 'High Carbon Monoxide Gas Detected!',
+            timestamp: Date.now(),
+            gearId: selectedPersonnel?.gearId,
+            sensor: 'Toxic Gas Sensor',
+            value: ToxicGasSensor,
+          });
+        }
         toxicGasNotificationSent.current = true; // Set the flag to true after sending the notification
       } else if (!isCritical) {
         toxicGasNotificationSent.current = false; // Reset the flag if the value is no longer critical
@@ -211,14 +230,18 @@ function MonitoringBody() {
     if (HeartRate !== prevHeartRate.current) {
       const isCritical = HeartRate >= 110 && HeartRate <= 200;
       setShowHeartRateNotification(isCritical);
-      if (isCritical && !heartRateNotificationSent.current) {
-        addNotification({
-          message: 'Critical Heart Rate Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Heart Rate',
-          value: HeartRate,
-        });
+      if (isCritical && !heartRateNotificationSent.current && selectedPersonnel?.gearId) {
+        //check if notification is for the currently selected personnel
+        if (selectedPersonnel.gearId === selectedPersonnel?.gearId) {
+          addNotification({
+            id: uniqueId,
+            message: 'High Heart Rate Detected!',
+            timestamp: Date.now(),
+            gearId: selectedPersonnel?.gearId,
+            sensor: 'Heart Rate',
+            value: HeartRate,
+          });
+        }
         heartRateNotificationSent.current = true; // Set the flag to true after sending the notification
       } else if (!isCritical) {
         heartRateNotificationSent.current = false; // Reset the flag if the value is no longer critical

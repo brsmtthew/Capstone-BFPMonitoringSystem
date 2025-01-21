@@ -1,77 +1,81 @@
 import React, { useEffect, useState } from 'react';
 import HeaderSection from '../header/HeaderSection';
 import BodyCard from '../parentCard/BodyCard';
-import BodyChart from '../chart/HealthChartSection';
+import HealthChartSection from '../chart/HealthChartSection';
 import EnvironmentChartSection from '../chart/EnvironmentChartSection';
-import { db } from "../../firebase/Firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { useLocation } from "react-router-dom";
 
 const AnalyticsBody = () => {
+  const location = useLocation();
   const [realTimeData, setRealTimeData] = useState([]);
-  
-  // Function to fetch data
-  const fetchRealTimeData = async () => {
-    try {
-      // Step 1: Get all documents from the personnelRecords collection
-      const personnelRecordsRef = collection(db, 'personnelRecords');
-      const querySnapshot = await getDocs(personnelRecordsRef);
-      
-      // Step 2: Loop through the documents and fetch their real-time data (which is a collection)
-      const data = [];
-      for (const docSnapshot of querySnapshot.docs) {
-        const realTimeDataRef = collection(doc(db, 'personnelRecords', docSnapshot.id), 'realTimeData');
-        const realTimeDocSnapshot = await getDocs(realTimeDataRef);
-        
-        realTimeDocSnapshot.forEach((realTimeDoc) => {
-          data.push({
-            ...realTimeDoc.data(),
-            id: realTimeDoc.id,
-            personnelId: docSnapshot.id,
-          });
-        });
-      }
-      
-      setRealTimeData(data);
-    } catch (error) {
-      console.error("Error fetching real-time data: ", error);
+
+  useEffect(() => {
+    console.log("Received Data from HistoryBody:", location.state?.realTimeData);
+    if (location.state?.realTimeData) {
+      setRealTimeData(location.state.realTimeData);
     }
+  }, [location.state]);
+
+  // Function to reset analytics data
+  const handleReset = () => {
+    setRealTimeData([]); // Clear the data
+    console.log("Analytics data has been reset.");
   };
 
-  // Fetch real-time data on component mount
-  useEffect(() => {
-    fetchRealTimeData();
-  }, []);
-
-  // Extract smoke sensor data from realTimeData
+  // Extracting smoke sensor data
   const smokeData = realTimeData
-    .filter((data) => data.smokeSensor) // Filter data that has smokeSensor
+    .filter((data) => data.smokeSensor !== undefined)
     .map((data) => ({
-      time: data.time, // Assuming there's a timestamp field
-      value: data.smokeSensor, // Extract smoke sensor value
+      time: data.time || "N/A",
+      value: data.smokeSensor,
     }));
 
-    const EnviData = realTimeData
-    .filter((data) => data.environmentalTemperature) // Filter data that has environmentalTemperature
+  // Extracting environmental temperature data
+  const EnviData = realTimeData
+    .filter((data) => data.environmentalTemperature !== undefined)
     .map((data) => ({
-      time: data.time, // Assuming there's a timestamp field
-      value: data.environmentalTemperature, // Extract environmental temperature value
+      time: data.time || "N/A",
+      value: data.environmentalTemperature,
     }));
+
+  const ToxicGas = realTimeData
+    .filter((data) => data.ToxicGasSensor !== undefined)
+    .map((data) => ({
+      time: data.time || "N/A",
+      value: data.ToxicGasSensor,
+    }));
+
+    const HeartRate = realTimeData
+    .filter((data) => data.HeartRate !== undefined)
+    .map((data) => ({
+      time: data.time || "N/A",
+      value: data.HeartRate,
+    }));
+  
+  const temperatureData = realTimeData
+    .filter((data) => data.bodyTemperature !== undefined)
+    .map((data) => ({
+      time: data.time || "N/A",
+      value: data.bodyTemperature,
+    }));
+
+  console.log("Processed Smoke Data:", smokeData);
+  console.log("Processed Environmental Data:", EnviData);
 
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white">
-      {/* Header Section */}
-      <HeaderSection title="ANALYTICS OVERVIEW" />
-
-      {/* Separator */}
+      <HeaderSection title="ANALYTICS OVERVIEW"
+      extraContent={
+        <button onClick={handleReset} className="bg-red text-white px-4 py-2 rounded-lg shadow-md hover:bg-opacity-80 transition">
+          Reset
+        </button>
+      } />
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
-
-      {/* Grid for Analytics Data */}
       <BodyCard>
-        {/* Add a bottom margin to HealthChartSection */}
         <div className="mb-6">
-          <BodyChart data={realTimeData} />
+          <HealthChartSection HeartRate={HeartRate} temperatureData={temperatureData} />
         </div>
-        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} />
+        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} ToxicGas={ToxicGas} />
       </BodyCard>
     </div>
   );

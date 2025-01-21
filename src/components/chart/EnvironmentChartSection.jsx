@@ -3,11 +3,7 @@ import LineChart from './LineChart';
 import BarChart from './BarChart';
 import GaugeChart from './GaugeChart';
 
-const toxicGasData = [
-  { name: 'Toxic Gas Level', value: 60 },
-];
-
-const EnvironmentChartSection = ({ smokeData, enviData }) => {
+const EnvironmentChartSection = ({ smokeData, enviData, ToxicGas }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col text-center h-auto max-w-full">
       {/* Section Header */}
@@ -34,7 +30,7 @@ const EnvironmentChartSection = ({ smokeData, enviData }) => {
         {/* Toxic Gas - Gauge Chart (Second Column, First Row) */}
         <div className="flex justify-center col-span-1">
           <GaugeChart
-            data={toxicGasData}
+            data={ToxicGas}
             cx="50%"
             cy="50%"
             innerRadius="30%"
@@ -51,7 +47,7 @@ const EnvironmentChartSection = ({ smokeData, enviData }) => {
         <LineChart
           data={enviData}
           xKey="time"
-          yKey="temp"
+          yKey="value"
           color="#4CAF50" // Green for temperature
           title="Environmental Temperature"
           description="This chart displays the environmental temperature over time."

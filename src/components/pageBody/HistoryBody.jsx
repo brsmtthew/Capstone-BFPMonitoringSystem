@@ -6,6 +6,8 @@ import searchIcon from "./dashboardAssets/glass.png";
 import HeaderSection from "../header/HeaderSection";
 import BodyCard from "../parentCard/BodyCard";
 import HistoryTable from "../historyTable/HistoryTable";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function HistoryBody() {
   const [historyData, setHistoryData] = useState([]);
@@ -16,28 +18,33 @@ function HistoryBody() {
   const [selectedRows, setSelectedRows] = useState([]); // Track selected rows for deletion
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Track dropdown visibility
   const [sortOption, setSortOption] = useState(""); // Track sorting option
+  const [selectedRealTimeData, setSelectedRealTimeData] = useState(null); // Store selected real-time data
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const personnelSnapshot = await getDocs(collection(db, "personnelMonitoring"));
+        const personnelSnapshot = await getDocs(collection(db, "personnelRecords"));
         const data = [];
-
+    
         for (const docSnapshot of personnelSnapshot.docs) {
           const personnel = docSnapshot.data();
-          const gearId = docSnapshot.id;
-
+          const documentId = docSnapshot.id; // Firestore auto-generated ID
+    
           const notificationsRef = collection(docSnapshot.ref, "notifications");
           const notifSnapshot = await getDocs(notificationsRef);
           const notifications = [];
-
+    
           notifSnapshot.forEach((notifDoc) => {
             const notifData = notifDoc.data();
             const date = new Date(notifData.timestamp);
             const formattedDate = date.toLocaleDateString();
             const formattedTime = date.toLocaleTimeString();
-
+    
+            const gearId = notifData.gearId || "Unknown"; // Default if no gearId
+    
             notifications.push({
+              gearId: gearId,
               event: notifData.event || "Critical",
               date: formattedDate,
               time: formattedTime,
@@ -46,9 +53,10 @@ function HistoryBody() {
               status: notifData.status || "Unknown",
             });
           });
-
+    
           data.push({
-            gearId: gearId,
+            documentId: documentId, // Use documentId here
+            gearId: notifications.length > 0 ? notifications[0].gearId : "No gearId",
             name: personnel.personnelName,
             date: notifications.length > 0 ? notifications[0].date : "No date",
             time: notifications.length > 0 ? notifications[0].time : "No time",
@@ -56,7 +64,7 @@ function HistoryBody() {
             notifications: notifications,
           });
         }
-
+    
         setHistoryData(data);
         setFilteredData(data);
         setLoading(false);
@@ -64,18 +72,25 @@ function HistoryBody() {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
-    };
-
+    };    
+    
     fetchData();
   }, []);
+  
+  
 
   useEffect(() => {
-    const filtered = historyData.filter((data) =>
-      data.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      data.gearId.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = historyData.filter((data) => {
+    const name = data.name || ""; // Fallback to an empty string if undefined
+    const gearId = data.gearId || ""; // Fallback to an empty string if undefined
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gearId.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredData(filtered);
-  }, [searchTerm, historyData]);
+  });
+  setFilteredData(filtered);
+}, [searchTerm, historyData]);
+
 
   const handleRowClick = (personnel) => {
     setExpandedPersonnel(expandedPersonnel === personnel ? null : personnel);
@@ -127,6 +142,26 @@ function HistoryBody() {
       console.error("Error deleting data:", error);
     }
   };
+
+  // Handle "View" button click and send data to analytics page
+  const handleViewClick = async (documentId) => {  // Using documentId instead of personnelId
+    try {
+      // Adjust the path to match your Firestore structure
+      const realTimeDataRef = collection(db, 'personnelRecords', documentId, 'realTimeData'); // Use documentId here
+      const realTimeDataSnapshot = await getDocs(realTimeDataRef);
+      const realTimeData = [];
+  
+      realTimeDataSnapshot.forEach((doc) => {
+        realTimeData.push({ id: doc.id, ...doc.data() });
+      });
+  
+      // Navigate to analytics and pass data
+      navigate('/analytics', { state: { realTimeData } });
+    } catch (error) {
+      toast.error("Error fetching real-time data:", error);
+    }
+  };
+  
 
   return (
     <div className="p-4 min-h-screen flex flex-col">
@@ -232,7 +267,7 @@ function HistoryBody() {
                   {filteredData.map((data, index) => (
                     <React.Fragment key={index}>
                       <tr
-                        onClick={() => handleRowClick(data)}
+                        onDoubleClick={() => handleRowClick(data)}
                         className="border-b bg-bfpNavy hover:bg-searchTable cursor-pointer"
                       >
                         <td className="p-4">
@@ -249,7 +284,8 @@ function HistoryBody() {
                         <td className="px-6 py-3">{data.time}</td>
                         <td className="px-6 py-3">{data.totalNotifications}</td>
                         <td className="px-6 py-3 flex justify-start">
-                          <button className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105">View</button>
+                          <button onClick={() => handleViewClick(data.documentId)}
+                          className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105">View</button>
                         </td>
                       </tr>
 

@@ -18,7 +18,7 @@ export default {
       cardHolderColor: "#252736",
       white: "#FFFFFF",
       black: "#000000",
-      green: "#90EE90",
+      green: "#008000",
       blue: "#0000FF",
       separator: "#02F690",
       separatorLine: "#ABABAB",

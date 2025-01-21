@@ -1,38 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
+import { toast } from "react-toastify";
 
 function HistoryTable({ selectedPersonnel }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Debugging: log selectedPersonnel to verify it's passed correctly
-    console.log("Selected Personnel:", selectedPersonnel);
-
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        // Ensure that selectedPersonnel.gearId exists before querying
-        if (selectedPersonnel && selectedPersonnel.gearId) {
-          const notificationsRef = collection(
-            db,
-            `personnelMonitoring/${selectedPersonnel.gearId}/notifications`
-          );
-          const snapshot = await getDocs(notificationsRef);
-          // Debugging: log fetched notifications
-          console.log("Fetched Notifications:", snapshot.docs);
+        if (selectedPersonnel && selectedPersonnel.documentId) {
+          const notificationsRef = collection(db, `personnelRecords/${selectedPersonnel.documentId}/notifications`);
+          const notifSnapshot = await getDocs(notificationsRef);
+          const notifications = notifSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-          const fetchedNotifications = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setNotifications(fetchedNotifications);
+          setNotifications(notifications);
         } else {
-          console.error("Selected personnel or gearId is undefined.");
+          toast.error("Invalid selected personnel or documentId.");
         }
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        toast.error(`Error fetching notifications: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -41,7 +30,7 @@ function HistoryTable({ selectedPersonnel }) {
     if (selectedPersonnel) {
       fetchNotifications();
     }
-  }, [selectedPersonnel]);
+  }, [selectedPersonnel]); // This useEffect only runs when `selectedPersonnel` changes.
 
   if (!selectedPersonnel) {
     return <p className="text-white text-center mt-4">Select a personnel to view details.</p>;
