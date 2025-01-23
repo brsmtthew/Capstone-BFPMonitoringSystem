@@ -22,42 +22,66 @@ const AnalyticsBody = () => {
     console.log("Analytics data has been reset.");
   };
 
+  // Function to sort data by datetime
+  const sortByDateTime = (data) => {
+    return data.sort((a, b) => {
+      const dateTimeA = new Date(`${a.date} ${a.time}`);
+      const dateTimeB = new Date(`${b.date} ${b.time}`);
+      return dateTimeA - dateTimeB;
+    });
+  };
+
   // Extracting smoke sensor data
-  const smokeData = realTimeData
-    .filter((data) => data.smokeSensor !== undefined)
-    .map((data) => ({
-      time: data.time || "N/A",
-      value: data.smokeSensor,
-    }));
+  const smokeData = sortByDateTime(
+    realTimeData
+      .filter((data) => data.smokeSensor !== undefined)
+      .map((data) => ({
+        time: data.time || "N/A",
+        value: data.smokeSensor,
+        date: data.date || "N/A",
+      }))
+  );
 
   // Extracting environmental temperature data
-  const EnviData = realTimeData
-    .filter((data) => data.environmentalTemperature !== undefined)
-    .map((data) => ({
-      time: data.time || "N/A",
-      value: data.environmentalTemperature,
-    }));
+  const EnviData = sortByDateTime(
+    realTimeData
+      .filter((data) => data.environmentalTemperature !== undefined)
+      .map((data) => ({
+        time: data.time || "N/A",
+        value: data.environmentalTemperature,
+        date: data.date || "N/A",
+      }))
+  );
 
-  const ToxicGas = realTimeData
-    .filter((data) => data.ToxicGasSensor !== undefined)
-    .map((data) => ({
-      time: data.time || "N/A",
-      value: data.ToxicGasSensor,
-    }));
+  const ToxicGas = sortByDateTime(
+    realTimeData
+      .filter((data) => data.ToxicGasSensor !== undefined)
+      .map((data) => ({
+        time: data.time || "N/A",
+        value: data.ToxicGasSensor,
+        date: data.date || "N/A",
+      }))
+  );
 
-    const HeartRate = realTimeData
-    .filter((data) => data.HeartRate !== undefined)
-    .map((data) => ({
-      time: data.time || "N/A",
-      value: data.HeartRate,
-    }));
-  
-  const temperatureData = realTimeData
-    .filter((data) => data.bodyTemperature !== undefined)
-    .map((data) => ({
-      time: data.time || "N/A",
-      value: data.bodyTemperature,
-    }));
+  const HeartRate = sortByDateTime(
+    realTimeData
+      .filter((data) => data.HeartRate !== undefined)
+      .map((data) => ({
+        time: data.time || "N/A",
+        value: data.HeartRate,
+        date: data.date || "N/A",
+      }))
+  );
+
+  const temperatureData = sortByDateTime(
+    realTimeData
+      .filter((data) => data.bodyTemperature !== undefined)
+      .map((data) => ({
+        time: data.time || "N/A",
+        value: data.bodyTemperature,
+        date: data.date || "N/A",
+      }))
+  );
 
   console.log("Processed Smoke Data:", smokeData);
   console.log("Processed Environmental Data:", EnviData);

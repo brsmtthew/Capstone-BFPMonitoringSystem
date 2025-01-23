@@ -2,16 +2,23 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
 import hardhat from "./landingAssets/labour.png";
+import { useAuth } from "../auth/AuthContext";
+import {toast} from 'react-toastify';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const logout = useAuth().logout;
   const location = useLocation();
   const [activeLink, setActiveLink] = useState(location.pathname);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/", { replace: true });
+    try {
+      logout();
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast.error(`Error logging out: ${error.message}`);
+    }
   };
 
   const handleLinkClick = (path) => {

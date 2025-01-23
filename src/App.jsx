@@ -7,22 +7,67 @@ import History from './components/pages/History';
 import Analytics from './components/pages/Analytics';
 import Personnel from './components/pages/Personnel';
 import Monitoring from './components/pages/Monitoring';
+import Navbar from './components/landingPage/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import {AuthProvider} from './components/auth/AuthContext';
+
+const Layout = ({ children }) => (
+  <div>
+    <Navbar />
+    <main>{children}</main>
+  </div>
+);
 
 function App() {
   return (
-    <div>
+    <AuthProvider>
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/monitoring" element={<Monitoring />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/personnel" element={<Personnel />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/monitoring"
+          element={
+            <ProtectedRoute>
+              <Monitoring />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <History />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/personnel"
+          element={
+            <ProtectedRoute>
+              <Personnel />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-    </div>
+    </AuthProvider>
   );
 }
 

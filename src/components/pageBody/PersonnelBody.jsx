@@ -106,7 +106,7 @@ function PersonnelBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {loading ? (
-        <p className="text-center mt-10 text-lg text-gray-700">Loading...</p>
+        <p className="text-center mt-10 text-lg text-gray">Loading...</p>
       ) : (
         <BodyCard>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
