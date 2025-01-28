@@ -164,7 +164,7 @@ function HistoryBody() {
   
 
   return (
-    <div className="p-4 min-h-screen flex flex-col">
+    <div className="p-4 min-h-screen flex flex-col font-montserrat">
       <HeaderSection title="HISTORY" />
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />

@@ -9,6 +9,7 @@ export default {
       fontFamily: {
         kanit: ['"Kanit"', "sans-serif"],
         montserrat: ["Montserrat", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
       },
     },
 
@@ -44,6 +45,7 @@ export default {
       'end-gradient': '#FFCC80',  // Soft, light orange-yellow
       lightGray: "#EAEAEA",
       hoverBtn: "#4A90E2",
+      textBtn: "#b59d38",
     }
   },
   plugins: [],

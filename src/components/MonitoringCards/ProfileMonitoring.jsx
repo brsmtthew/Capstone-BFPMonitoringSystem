@@ -38,7 +38,9 @@ function ProfileMonitoring({ personnel }) {
   };
 
   return (
-    <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col">
+    <div className="bg-white rounded-lg shadow-lg flex flex-col 
+                    h-72 w-72 sm:h-80 sm:w-80 md:h-80 md:w-80 
+                    lg:h-96 lg:w-96 xl:h-96 xl:w-96 2xl:h-96 2xl:w-96 font-montserrat">
       <div className="p-2 bg-bfpNavy rounded-lg text-white flex flex-col items-start">
         {personnel ? (
           <>
@@ -53,7 +55,7 @@ function ProfileMonitoring({ personnel }) {
         )}
       </div>
       <div className="flex-grow p-4 flex flex-col items-center justify-center">
-        <div className="h-52 w-52 rounded-full overflow-hidden mb-2">
+        <div className="rounded-full overflow-hidden mb-2 h-32 w-32 sm:h-32 sm:w-32 md:h-32 md:w-32 lg:h-52 lg:w-52 xl:h-52 xl:w-52">
           <img
             src={personnel?.image || 'https://via.placeholder.com/300x300'}
             alt="Profile"

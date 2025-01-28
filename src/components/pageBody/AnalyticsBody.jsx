@@ -87,8 +87,12 @@ const AnalyticsBody = () => {
   console.log("Processed Environmental Data:", EnviData);
 
   return (
-    <div className="p-4 min-h-screen flex flex-col lg:bg-white">
-      <HeaderSection title="ANALYTICS OVERVIEW"
+    <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
+      <HeaderSection title={
+        <span className="text-lg sm:text-base md:text-sm">
+          ANALYTICS OVERVIEW
+        </span>
+      }
       extraContent={
         <button onClick={handleReset} className="bg-red text-white px-4 py-2 rounded-lg shadow-md hover:bg-opacity-80 transition">
           Reset

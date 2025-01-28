@@ -49,8 +49,6 @@ function MonitoringBody() {
   const [showToxicGasNotification, setShowToxicGasNotification] = useState(false);
   const [showHeartRateNotification, setShowHeartRateNotification] = useState(false);
 
-  const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
   useEffect(() => {
     if (state?.selectedPersonnel) {
       addMonitoredPersonnel(state.selectedPersonnel);
@@ -119,6 +117,7 @@ function MonitoringBody() {
       const isCritical = temperature >= 40;
       setShowTempNotification(isCritical);
       if (isCritical && !tempNotificationSent.current && selectedPersonnel?.gearId) {
+        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         addNotification({
           id: uniqueId,
           message: 'Critical Body Temperature Detected!',
@@ -143,6 +142,7 @@ function MonitoringBody() {
       const isCritical = environmentalTemperature >= 40;
       setShowEnvTempNotification(isCritical);
       if (isCritical && !envTempNotificationSent.current && selectedPersonnel?.gearId) {
+        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         addNotification({
           id: uniqueId,
           message: 'Critical Environmental Temperature Detected!',
@@ -167,6 +167,7 @@ function MonitoringBody() {
       const isCritical = smokeSensor >= 100 && smokeSensor <= 1000;
       setShowSmokeNotification(isCritical);
       if (isCritical && !smokeNotificationSent.current && selectedPersonnel?.gearId) {
+        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         addNotification({
           id: uniqueId,
           message: 'High Smoke Level Detected!',
@@ -191,6 +192,7 @@ function MonitoringBody() {
       const isCritical = ToxicGasSensor >= 10 && ToxicGasSensor <= 10000;
       setShowToxicGasNotification(isCritical);
       if (isCritical && !toxicGasNotificationSent.current && selectedPersonnel?.gearId) {
+        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         addNotification({
           id: uniqueId,
           message: 'High Carbon Monoxide Gas Detected!',
@@ -215,6 +217,7 @@ function MonitoringBody() {
       const isCritical = HeartRate >= 110 && HeartRate <= 200;
       setShowHeartRateNotification(isCritical);
       if (isCritical && !heartRateNotificationSent.current && selectedPersonnel?.gearId) {
+        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         addNotification({
           id: uniqueId,
           message: 'High Heart Rate Detected!',
@@ -305,23 +308,34 @@ function MonitoringBody() {
         <BodyCard className={`${monitoredPersonnel.length > 1 ? 'overflow-y-auto max-h-[80vh]' : ''}`}>
           {monitoredPersonnel.map((person) => (
             <div key={person.gearId} className="mb-6">
-              <div className="flex">
+              {/* First Row: Profile Monitoring and Health Monitoring */}
+              <div
+                className="flex flex-col sm:items-center sm:justify-center md:items-center md:justify-center 
+                          lg:flex-row lg:items-start lg:justify-start"
+              >
                 <div className="flex-shrink-0 mb-6">
                   <ProfileMonitoring personnel={person} />
                 </div>
-                <div className="flex-grow mb-6 ml-4">
+                <div className="flex-grow mb-6 lg:ml-4">
                   <HealthMonitoring monitoringHealthData={monitoringHealthData(person)} />
                 </div>
               </div>
-              <div className="flex">
+
+              {/* Second Row: Notification Card and Environmental Monitoring */}
+              <div
+                className="flex flex-col sm:items-center sm:justify-center md:items-center md:justify-center 
+                          lg:flex-row lg:items-start lg:justify-start"
+              >
                 <div className="flex-shrink-0 mb-6">
                   <NotificationCard personnel={person} />
                 </div>
-                <div className="flex-grow mb-6 ml-4">
+                <div className="flex-grow mb-6 lg:ml-4">
                   <EnviMonitoring monitoringEnviData={monitoringEnviData(person)} />
                 </div>
               </div>
-              <div className="mt-4">
+
+              {/* Remove Button */}
+              <div className="mt-4 flex justify-center">
                 <button
                   className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600"
                   onClick={() => handleRemovePersonnel(person.gearId)}

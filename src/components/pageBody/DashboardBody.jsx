@@ -75,7 +75,7 @@ function DashboardBody() {
   }
 
   return (
-    <div className="p-4 h-full flex flex-col bg-white">
+    <div className="p-4 h-full flex flex-col bg-white font-montserrat">
       <HeaderSection title="DASHBOARD" />
 
       <div className="my-4 h-[3px] bg-separatorLine w-[80%] mx-auto" />

@@ -4,8 +4,8 @@ const Button = ({ value }) => {
   const isActive =
     value !== null &&
     value !== undefined &&
-    value.trim() !== 'Loading...' &&
-    value.trim() !== 'No data available';
+    value !== '' && // Handle empty string
+    !(typeof value === 'string' && ['Loading...', 'No data available'].includes(value.trim()));
 
   return (
     <button

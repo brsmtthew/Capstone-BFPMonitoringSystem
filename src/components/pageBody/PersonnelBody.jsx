@@ -16,7 +16,7 @@ function PersonnelBody() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
   const [isEditOpen, setEditOpen] = useState(false);
-
+  const [expandedPersonnel, setExpandedPersonnel] = useState(null); // State to manage expanded card
 
   // Accessing the monitored personnel list from the store
   const { monitoredPersonnel, addMonitoredPersonnel, removeMonitoredPersonnel } = useStore();
@@ -76,8 +76,12 @@ function PersonnelBody() {
     setSelectedPersonnel(null); // Clear selected personnel on close
   }
 
+  const toggleExpand = (personId) => {
+    setExpandedPersonnel(expandedPersonnel === personId ? null : personId);
+  };
+
   return (
-    <div className="p-4 min-h-screen flex flex-col lg:bg-white">
+    <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection
         title="PERSONNEL LIST"
         extraContent={
@@ -114,7 +118,8 @@ function PersonnelBody() {
               personnel.map((person) => (
                 <div
                   key={person.id}
-                  className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center"
+                  className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center cursor-pointer"
+                  onDoubleClick={() => toggleExpand(person.id)}
                 >
                   <img
                     src={person.image || 'https://via.placeholder.com/150'}
@@ -124,6 +129,13 @@ function PersonnelBody() {
                   <h3 className="text-lg font-bold text-white">{person.name}</h3>
                   <p className="text-sm text-white">{person.position}</p>
                   <p className="text-sm text-white">{person.gearId}</p>
+                  {expandedPersonnel === person.id && (
+                    <div className="mt-4 text-white">
+                      <p><strong>Age:</strong> {person.age}</p>
+                      <p><strong>Birthdate:</strong> {person.birthdate}</p>
+                      <p><strong>Phone:</strong> {person.phone}</p>
+                    </div>
+                  )}
                   <div className="mt-4 flex space-x-2">
                     <button
                       className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"

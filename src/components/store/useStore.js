@@ -81,7 +81,7 @@ export const useStore = create((set, get) => ({
   addNotification: async (notification) => {
     const updatedNotification = {
       ...notification,
-      gearId: get().selectedPersonnel?.gearId || null, // Add gearId to the notification
+      gearId: notification.gearId, // Add gearId to the notification
     };
   
     set((state) => {
@@ -148,7 +148,7 @@ export const useStore = create((set, get) => ({
   }),
 
   saveRecordings: async () => {
-    const { selectedPersonnel, notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor, HeartRate, updateNotificationState } = get();
+    const { selectedPersonnel, sensorData, updateNotificationState } = get();
 
     if (!selectedPersonnel) {
       alert('Please select a personnel first.');
@@ -179,7 +179,7 @@ export const useStore = create((set, get) => ({
       }
 
       // Filter notifications to save only unsaved ones
-      const notificationsToSave = notifications.filter(
+      const notificationsToSave = get().notifications.filter(
         (notif) => notif.gearId === selectedPersonnel.gearId && !notif.saved
       );
 
@@ -205,11 +205,11 @@ export const useStore = create((set, get) => ({
 
       // Save all real-time values
       const realTimeData = {
-        bodyTemperature: temperature,
-        environmentalTemperature: environmentalTemperature,
-        smokeSensor: smokeSensor,
-        ToxicGasSensor: ToxicGasSensor,
-        HeartRate: HeartRate,
+        bodyTemperature: sensorData[selectedPersonnel.gearId]?.bodyTemperature !== undefined ? sensorData[selectedPersonnel.gearId]?.bodyTemperature : null,
+        environmentalTemperature: sensorData[selectedPersonnel.gearId]?.environmentalTemperature !== undefined ? sensorData[selectedPersonnel.gearId]?.environmentalTemperature : null,
+        smokeSensor: sensorData[selectedPersonnel.gearId]?.smokeSensor !== undefined ? sensorData[selectedPersonnel.gearId]?.smokeSensor : null,
+        ToxicGasSensor: sensorData[selectedPersonnel.gearId]?.ToxicGasSensor !== undefined ? sensorData[selectedPersonnel.gearId]?.ToxicGasSensor : null,
+        HeartRate: sensorData[selectedPersonnel.gearId]?.HeartRate !== undefined ? sensorData[selectedPersonnel.gearId]?.HeartRate : null,
       };
 
       const realTimeDataRef = collection(docRef, 'realTimeData');

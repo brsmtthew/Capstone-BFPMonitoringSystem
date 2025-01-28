@@ -26,20 +26,23 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-black">
+    <div className="min-h-screen flex items-center justify-center bg-bfpNavy text-black">
       <ToastContainer /> {/* Required for toast notifications */}
       <div className="bg-white border border-separatorLine shadow-lg rounded-lg overflow-hidden flex max-w-4xl h-[90vh]">
-        <div className="w-full md:w-1/2 p-2 flex flex-col justify-start">
-          <div className="flex items-center mb-8 ml-4">
+        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center relative">
+          <div className="absolute top-4 left-4 flex items-center mb-8">
             <img src={logo} alt="logo Icon" className="h-12 w-12 mr-2" />
-            <p className="text-lg font-semibold">Smart Hard Hat .Co</p>
+            <p className="font-semibold text-[26px]">
+              <span className="text-bfpOrange">Sentinel</span>
+              <span className="text-bfpNavy">Gear</span>
+            </p>
           </div>
 
-          <p className="text-[32px] text-center font-bold mt-12">WELCOME BACK</p>
-          <p className='text-[12px] text-center'>Log in to securely access your account and manage your settings</p>
+          <p className="text-[32px] text-center font-bold mt-20">WELCOME BACK</p>
+          <p className='text-[18px] text-center'>Log in to securely access your account and manage your settings</p>
 
-          <div className="flex flex-col justify-center">
-            <form className="space-y-4 mt-8" onSubmit={handleLogin}>
+          <div className="flex flex-col justify-center mt-8">
+            <form className="space-y-6" onSubmit={handleLogin}>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                 <input
@@ -47,7 +50,7 @@ function Login() {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)} // Update state
-                  className="w-full mt-1 px-2 py-1 border border-r-separatorLine rounded-md focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your email"
                 />
               </div>
@@ -59,14 +62,14 @@ function Login() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)} // Update state
-                  className="w-full mt-1 px-4 py-2 border border-r-separatorLine rounded-md focus:outline-none focus:ring-2 focus:ring-blue"
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter your password"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2 bg-primeColor text-white font-semibold rounded-full hover:bg-blue-600"
+                className="w-full mt-4 py-2 bg-blue text-white font-semibold rounded-md hover:bg-hoverBtn transition duration-300"
               >
                 Login
               </button>
