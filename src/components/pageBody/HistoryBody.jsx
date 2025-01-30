@@ -56,10 +56,10 @@ function HistoryBody() {
     
           data.push({
             documentId: documentId, // Use documentId here
-            gearId: notifications.length > 0 ? notifications[0].gearId : "No gearId",
+            gearId: personnel.gearId || "No gearId",
             name: personnel.personnelName,
-            date: notifications.length > 0 ? notifications[0].date : "No date",
-            time: notifications.length > 0 ? notifications[0].time : "No time",
+            date: personnel.date || "No date",
+            time: personnel.time || "No time",
             totalNotifications: notifications.length,
             notifications: notifications,
           });

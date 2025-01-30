@@ -4,14 +4,15 @@ import BodyCard from '../parentCard/BodyCard';
 import HealthChartSection from '../chart/HealthChartSection';
 import EnvironmentChartSection from '../chart/EnvironmentChartSection';
 import { useLocation } from "react-router-dom";
+import {toast} from 'react-toastify';
 
 const AnalyticsBody = () => {
   const location = useLocation();
   const [realTimeData, setRealTimeData] = useState([]);
 
   useEffect(() => {
-    console.log("Received Data from HistoryBody:", location.state?.realTimeData);
     if (location.state?.realTimeData) {
+      toast.success("Analytics data has been loaded.");
       setRealTimeData(location.state.realTimeData);
     }
   }, [location.state]);
@@ -19,7 +20,7 @@ const AnalyticsBody = () => {
   // Function to reset analytics data
   const handleReset = () => {
     setRealTimeData([]); // Clear the data
-    console.log("Analytics data has been reset.");
+    toast.info("Analytics data has been reset.");
   };
 
   // Function to sort data by datetime
@@ -89,7 +90,7 @@ const AnalyticsBody = () => {
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection title={
-        <span className="text-lg sm:text-base md:text-sm">
+        <span className="text-lg">
           ANALYTICS OVERVIEW
         </span>
       }
@@ -103,7 +104,7 @@ const AnalyticsBody = () => {
         <div className="mb-6">
           <HealthChartSection HeartRate={HeartRate} temperatureData={temperatureData} />
         </div>
-        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} ToxicGas={ToxicGas} />
+        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} ToxicGas={ToxicGas} HeartRate={HeartRate} temperatureData={temperatureData}/>
       </BodyCard>
     </div>
   );

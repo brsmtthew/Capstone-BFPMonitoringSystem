@@ -11,35 +11,39 @@ const HealthChartSection = ({HeartRate,temperatureData}) => {
       </div>
 
       {/* Center the grid and ensure the charts are centered */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-x-auto mb-4">
         {/* Heart Rate Chart */}
 
         <ResponsiveContainer>
-          <LineChart
-            data={HeartRate}
-            xKey="time"
-            yKey="value"
-            color="#FF7300" // bfpOrange
-            title="Heart Rate"
-            yLabel="BPM"
-            description="This chart shows heart rate trends over time."
-            unit="BPM"
-          />
+          <div className='flex justify-center col-span-1'>
+            <LineChart
+              data={HeartRate}
+              xKey="time"
+              yKey="value"
+              color="#FF7300" // bfpOrange
+              title="Heart Rate"
+              yLabel="BPM"
+              description="This chart shows heart rate trends over time."
+              unit="BPM"
+            />
+          </div>
         </ResponsiveContainer>
         
 
         {/* Body Temperature Chart */}
         <ResponsiveContainer>
-          <LineChart
-            data={temperatureData}
-            xKey="time"
-            yKey="value"
-            color="#0088FE" // bfpBlue
-            title="Body Temperature"
-            yLabel="°C"
-            description="This chart shows body temperature trends over time."
-            unit="°C"
-          />
+          <div className='flex justify-center col-span-1'>
+            <LineChart
+              data={temperatureData}
+              xKey="time"
+              yKey="value"
+              color="#0088FE" // bfpBlue
+              title="Body Temperature"
+              yLabel="°C"
+              description="This chart shows body temperature trends over time."
+              unit="°C"
+            />
+          </div>
         </ResponsiveContainer>
       </div>
     </div>

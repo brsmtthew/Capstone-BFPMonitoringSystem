@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload, label, unit }) => {
 };
 
 const BarChart = ({ data, xKey, yKey, color, title, description, yLabel, unit }) => (
-  <div className="h-96 w-[500px] bg-white rounded-lg shadow-lg flex flex-col">
+  <div className="h-96 w-full lg:w-[600px] bg-white rounded-lg shadow-lg flex flex-col">
     {/* Header */}
     <div className="p-3 bg-bfpOrange rounded-t-lg text-white">
       <h3 className="text-lg font-bold">{title}</h3>

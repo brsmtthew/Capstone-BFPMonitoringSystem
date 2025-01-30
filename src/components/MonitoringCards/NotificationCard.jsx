@@ -39,7 +39,9 @@ function NotificationCard({ personnel }) {
           filteredNotifications.map((notification, index) => (
             <div
               key={index}
-              className="flex justify-between items-center mb-2 p-2 bg-red text-white rounded-lg"
+              className={`flex justify-between items-center mb-2 p-2 rounded-lg ${
+                notification.isCritical ? 'bg-red text-white' : 'bg-green text-white'
+              }`}
             >
               <span>{notification.message}</span>
               <span className="text-xs text-white">
