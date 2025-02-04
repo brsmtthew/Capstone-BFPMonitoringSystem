@@ -59,7 +59,7 @@ function HistoryTable({ selectedPersonnel }) {
                 notifications.map((notif) => (
                   <tr key={notif.id} className="border-b bg-bfpNavy hover:bg-searchTable">
                     <td className="px-6 py-3">{notif.sensor || "N/A"}</td>
-                    <td className="px-6 py-3">{notif.value || "N/A"}</td>
+                    <td className="px-6 py-3">{notif.value === undefined ? "N/A" : notif.value}</td>
                     <td className="px-6 py-3">{notif.message || "N/A"}</td>
                     <td className="px-6 py-3">{new Date(notif.timestamp).toLocaleString()}</td>
                   </tr>

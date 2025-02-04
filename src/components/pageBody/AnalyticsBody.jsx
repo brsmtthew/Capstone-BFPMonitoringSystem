@@ -4,23 +4,43 @@ import BodyCard from '../parentCard/BodyCard';
 import HealthChartSection from '../chart/HealthChartSection';
 import EnvironmentChartSection from '../chart/EnvironmentChartSection';
 import { useLocation } from "react-router-dom";
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const AnalyticsBody = () => {
   const location = useLocation();
   const [realTimeData, setRealTimeData] = useState([]);
-
+  const [personnelInfo, setPersonnelInfo] = useState({ name: "", date: "", time: "" });
+  
   useEffect(() => {
-    if (location.state?.realTimeData) {
+    // Load the saved data from localStorage
+    const savedData = JSON.parse(localStorage.getItem('overviewData'));
+    if (savedData) {
+      console.log('Loading saved data');
+      toast.success("Loaded the saved analytics data.");
+      setRealTimeData(savedData);
+    } else if (location.state?.realTimeData) {
+      console.log('Loading data from location state');
       toast.success("Analytics data has been loaded.");
       setRealTimeData(location.state.realTimeData);
+      //Set personnel info from location state
+      const { name, date, time } = location.state;  // Extracting name, date, and time
+      setPersonnelInfo({ name, date, time });
     }
-  }, [location.state]);
+  }, [location.state]);  // Ensure location changes are tracked correctly
+  
 
   // Function to reset analytics data
   const handleReset = () => {
     setRealTimeData([]); // Clear the data
+    setPersonnelInfo({ name: "", date: "", time: "" });
+    localStorage.removeItem('overviewData');
     toast.info("Analytics data has been reset.");
+  };
+
+  const handleSave = () => {
+    // Save the current data to localStorage
+    localStorage.setItem('overviewData', JSON.stringify(realTimeData));
+    toast.success("Analytics data has been saved.");
   };
 
   // Function to sort data by datetime
@@ -84,9 +104,6 @@ const AnalyticsBody = () => {
       }))
   );
 
-  console.log("Processed Smoke Data:", smokeData);
-  console.log("Processed Environmental Data:", EnviData);
-
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection title={
@@ -95,16 +112,38 @@ const AnalyticsBody = () => {
         </span>
       }
       extraContent={
-        <button onClick={handleReset} className="bg-red text-white px-4 py-2 rounded-lg shadow-md hover:bg-opacity-80 transition">
-          Reset
-        </button>
+        <>
+          <button
+            onClick={handleSave}
+            className="bg-blue text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition mr-2"
+          >
+            Save
+          </button>
+          <button
+            onClick={handleReset}
+            className="bg-red text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition"
+          >
+            Reset
+          </button>
+        </>
       } />
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
       <BodyCard>
         <div className="mb-6">
+        <div className="flex justify-center space-x-6 lg:text-[22px] mb-4">
+          <div>
+            <p className="font-semibold">Name: {personnelInfo.name}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Date: {personnelInfo.date}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Time: {personnelInfo.time}</p>
+          </div>
+        </div>
           <HealthChartSection HeartRate={HeartRate} temperatureData={temperatureData} />
         </div>
-        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} ToxicGas={ToxicGas} HeartRate={HeartRate} temperatureData={temperatureData}/>
+        <EnvironmentChartSection smokeData={smokeData} enviData={EnviData} ToxicGas={ToxicGas} HeartRate={HeartRate} temperatureData={temperatureData} />
       </BodyCard>
     </div>
   );

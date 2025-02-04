@@ -26,6 +26,13 @@ export const useStore = create((set, get) => ({
       return [];
     }
   })(),
+  notificationFlags: (() => {
+    try {
+      return JSON.parse(localStorage.getItem('notificationFlags')) || {};
+    } catch (error) {
+      return {};
+    }
+  })(),
 
   // Set personnel data
   setPersonnel: (personnelData) => set({ personnel: personnelData }),
@@ -101,22 +108,6 @@ export const useStore = create((set, get) => ({
   
       return { notifications: updatedNotifications };
     });
-  
-    // Save to Firebase
-    // if (updatedNotification.gearId) {
-    //   const docRef = doc(db, 'personnelRecords', updatedNotification.gearId);
-    //   const notificationsCollection = collection(docRef, 'notifications');
-  
-    //   try {
-    //     await addDoc(notificationsCollection, updatedNotification); // Save the enhanced notification
-    //     toast.success('Notification saved to Firebase');
-    //   } catch (err) {
-    //     console.error('Error saving notification to Firebase:', err);
-    //     toast.error('Failed to save notification to Firebase');
-    //   }
-    // } else {
-    //   toast.error('Gear ID is missing; notification not saved to Firebase.');
-    // }
   },
 
   // Clear all notifications
@@ -163,12 +154,16 @@ export const useStore = create((set, get) => ({
   saveRecordings: async () => {
     const { selectedPersonnel, sensorData, updateNotificationState } = get();
 
-    if (!selectedPersonnel) {
-      alert('Please select a personnel first.');
+    // Validate selectedPersonnel
+    if (!selectedPersonnel || !selectedPersonnel.gearId) {
+      toast.error('No personnel selected.');
       return;
     }
 
     try {
+      console.log('Selected personnel:', selectedPersonnel);
+      console.log('Sensor data:', sensorData[selectedPersonnel.gearId]);
+
       // Create or reference the main document with an auto-generated ID
       const personnelRecordsCollection = collection(db, 'personnelRecords');
       let docRef;
@@ -210,9 +205,16 @@ export const useStore = create((set, get) => ({
 
             if (querySnapshot.empty) {
               await addDoc(notificationsCollection, {
-                ...notif,
+                id: notif.id || '',
+                message: notif.message || '',
+                timestamp: notif.timestamp || Date.now(),
+                gearId: notif.gearId || '',
+                sensor: notif.sensor || '',
+                value: notif.value ?? null, // Ensure value is not undefined
+                isCritical: notif.isCritical ?? false, // Default to false
                 saved: true,
               });
+              
             }
           })
         );
@@ -243,7 +245,26 @@ export const useStore = create((set, get) => ({
 
       toast.success('Recordings saved successfully.');
     } catch (error) {
-      toast.error('Error saving recordings:', error);
+      console.error('Error saving recordings:', error);
+       // Ensure error is converted to a readable string
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      toast.error(`Error saving recordings: ${errorMessage}`);
     }
   },
+
+  setNotificationFlag: (gearId, sensor, flag) =>
+    set((state) => {
+      const updatedFlags = {
+        ...state.notificationFlags,
+        [`${gearId}-${sensor}`]: flag,
+      };
+      localStorage.setItem('notificationFlags', JSON.stringify(updatedFlags));
+      return { notificationFlags: updatedFlags };
+    }),
+  
+  
+    getNotificationFlag: (gearId, sensor) => {
+      return get().notificationFlags[`${gearId}-${sensor}`] || false;
+    },
 }));

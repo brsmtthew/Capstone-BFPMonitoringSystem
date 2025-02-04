@@ -20,6 +20,7 @@ import BodyCard from '../parentCard/BodyCard';
 import NotificationCard from '../MonitoringCards/NotificationCard';
 import EnviMonitoring from '../MonitoringCards/EnviMonitoring';
 import HealthMonitoring from '../MonitoringCards/HealthMonitoring';
+import { toast } from "react-toastify";
 
 function MonitoringBody() {
   const {
@@ -33,6 +34,8 @@ function MonitoringBody() {
     sensorData,
     setSensorData,
     addNotification,
+    setNotificationFlag,
+    getNotificationFlag,
   } = useStore();
 
   const { state } = useLocation(); // Access data passed via navigate
@@ -69,6 +72,9 @@ function MonitoringBody() {
       const data = snapshot.val();
       if (data && data.Reading !== undefined) {
         setSensorData(gearId, sensorType, data.Reading); // Use the specific property (e.g., Reading)
+      } else {
+        // Initialize with 0 if no data is available
+        setSensorData(gearId, sensorType, 0);
       }
     });
     return unsubscribe;
@@ -92,6 +98,13 @@ function MonitoringBody() {
     if (selectedPersonnel?.gearId) {
       const gearId = selectedPersonnel.gearId;
 
+      // Initialize sensor data with default values
+      setSensorData(gearId, 'bodyTemperature', 0);
+      setSensorData(gearId, 'environmentalTemperature', 0);
+      setSensorData(gearId, 'smokeSensor', 0);
+      setSensorData(gearId, 'ToxicGasSensor', 0);
+      setSensorData(gearId, 'HeartRate', 0);
+
       // Fetch data for the selected personnel
       const unsubscribeTemp = fetchData(`Monitoring/${gearId}/BodyTemperature`, gearId, 'bodyTemperature');
       const unsubscribeEnvTemp = fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature');
@@ -114,207 +127,89 @@ function MonitoringBody() {
     };
   }, [selectedPersonnel, setSensorData]);
 
-  // Monitor temperature changes and add notifications
-  const tempNotificationSent = useRef(false);
-  useEffect(() => {
-    if (!selectedPersonnel?.gearId) return; // Stop if no selected personnel
-    const temperature = sensorData[selectedPersonnel?.gearId]?.bodyTemperature;
-    if (temperature !== prevTemperature.current) {
-      const isCritical = temperature >= 40;
-      setShowTempNotification(isCritical);
-      if (isCritical && !tempNotificationSent.current && selectedPersonnel?.gearId) {
+   // Notification utility to prevent repetitive code
+   const handleSensorNotification = (sensor, sensorValue, criticalThreshold, normalThreshold, sensorName, sensorType, setNotificationState) => {
+    const isCritical = sensorValue >= criticalThreshold;
+    const isNormal = sensorValue <= normalThreshold;
+    const hasSentNotification = getNotificationFlag(selectedPersonnel?.gearId, sensorType);
+  
+    // Check if the sensor value is a valid number
+    const isValidValue = sensorValue !== undefined && sensorValue !== null;
+  
+    if (isValidValue) {
+      if (isCritical && !hasSentNotification) {
+        // Send the notification
         const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
         addNotification({
           id: uniqueId,
-          message: 'Critical Body Temperature Detected!',
+          message: `Critical ${sensorName} Detected!`,
           timestamp: Date.now(),
           gearId: selectedPersonnel?.gearId,
-          sensor: 'Body Temperature',
-          value: temperature,
+          sensor: sensorName,
+          value: sensorValue,
           isCritical: true,
         });
-        tempNotificationSent.current = true; // Set the flag to true after sending the notification
-      } else if (!isCritical && tempNotificationSent.current && selectedPersonnel?.gearId) {
+        toast.info(`🔥 Critical ${sensorName} Detected: ${sensorValue}`);
+        setNotificationFlag(selectedPersonnel?.gearId, sensorType, true); // Mark as notified
+      } else if (isNormal && hasSentNotification) {
+        // Send a "back to normal" notification once it's back to safe levels
         const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
         addNotification({
           id: uniqueId,
-          message: 'Body Temperature is back to normal.',
+          message: `${sensorName} is back to normal.`,
           timestamp: Date.now(),
           gearId: selectedPersonnel?.gearId,
-          sensor: 'Body Temperature',
-          value: temperature,
+          sensor: sensorName,
+          value: sensorValue,
           isCritical: false,
         });
-        tempNotificationSent.current = false; // Reset the flag if the value is no longer critical
+        toast.info(`Normal ${sensorName} Detected: ${sensorValue}`);
+        setNotificationFlag(selectedPersonnel?.gearId, sensorType, false); // Mark as normal
       }
-      prevTemperature.current = temperature;
     }
-  }, [sensorData, addNotification, selectedPersonnel]);
+  };
 
-  // Monitor environmental temperature changes and add notifications
-  const envTempNotificationSent = useRef(false);
+  // Monitor different sensor changes
   useEffect(() => {
-    if (!selectedPersonnel?.gearId) return; // Stop if no selected personnel
-    const environmentalTemperature = sensorData[selectedPersonnel?.gearId]?.environmentalTemperature;
-    if (environmentalTemperature !== prevEnvTemperature.current) {
-      const isCritical = environmentalTemperature >= 40;
-      setShowEnvTempNotification(isCritical);
-      if (isCritical && !envTempNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'Critical Environmental Temperature Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Environmental Temperature',
-          value: environmentalTemperature,
-          isCritical: true,
-        });
-        envTempNotificationSent.current = true; // Set the flag to true after sending the notification
-      } else if (!isCritical && envTempNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'Environmental Temperature is back to normal.',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Environmental Temperature',
-          value: environmentalTemperature,
-          isCritical: false,
-        });
-        envTempNotificationSent.current = false; // Reset the flag if the value is no longer critical
-      }
-      prevEnvTemperature.current = environmentalTemperature;
-    }
-  }, [sensorData, addNotification, selectedPersonnel]);
+    if (selectedPersonnel?.gearId) {
+      // Log each sensor value to verify it's being received
+      console.log('Monitoring Sensors:', sensorData[selectedPersonnel?.gearId]);
+      
+      handleSensorNotification('Body Temperature', sensorData[selectedPersonnel?.gearId]?.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature', setShowTempNotification);
+      handleSensorNotification('Environmental Temperature', sensorData[selectedPersonnel?.gearId]?.environmentalTemperature, 27, 22, 'Environmental Temperature', 'environmentalTemperature', setShowEnvTempNotification);
+      handleSensorNotification('Smoke Level', sensorData[selectedPersonnel?.gearId]?.smokeSensor, 300, 200, 'Smoke Level', 'smokeSensor', setShowSmokeNotification);
+      handleSensorNotification('Toxic Gas Level', sensorData[selectedPersonnel?.gearId]?.ToxicGasSensor, 250, 200, 'Toxic Gas Level', 'ToxicGasSensor', setShowToxicGasNotification);
+      handleSensorNotification('Heart Rate', sensorData[selectedPersonnel?.gearId]?.HeartRate, 120, 80, 'Heart Rate', 'Heart Rate', setShowHeartRateNotification);
 
-  // Monitor smoke sensor changes and add notifications
-  const smokeNotificationSent = useRef(false);
-  useEffect(() => {
-    if (!selectedPersonnel?.gearId) return; // Stop if no selected personnel
-    const smokeSensor = sensorData[selectedPersonnel?.gearId]?.smokeSensor;
-    if (smokeSensor !== prevSmokeSensor.current) {
-      const isCritical = smokeSensor >= 100 && smokeSensor <= 1000;
-      setShowSmokeNotification(isCritical);
-      if (isCritical && !smokeNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'High Smoke Level Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Smoke Sensor',
-          value: smokeSensor,
-          isCritical: true,
-        });
-        smokeNotificationSent.current = true; // Set the flag to true after sending the notification
-      } else if (!isCritical && smokeNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'Smoke Level is back to normal.',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Smoke Sensor',
-          value: smokeSensor,
-          isCritical: false,
-        });
-        smokeNotificationSent.current = false; // Reset the flag if the value is no longer critical
-      }
-      prevSmokeSensor.current = smokeSensor;
     }
-  }, [sensorData, addNotification, selectedPersonnel]);
-
-  // Monitor toxic gas sensor changes and add notifications
-  const toxicGasNotificationSent = useRef(false);
-  useEffect(() => {
-    if (!selectedPersonnel?.gearId) return; // Stop if no selected personnel
-    const ToxicGasSensor = sensorData[selectedPersonnel?.gearId]?.ToxicGasSensor;
-    if (ToxicGasSensor !== prevToxicGasSensor.current) {
-      const isCritical = ToxicGasSensor >= 310 && ToxicGasSensor <= 10000;
-      setShowToxicGasNotification(isCritical);
-      if (isCritical && !toxicGasNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'High Carbon Monoxide Gas Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Toxic Gas Sensor',
-          value: ToxicGasSensor,
-          isCritical: true,
-        });
-        toxicGasNotificationSent.current = true; // Set the flag to true after sending the notification
-      } else if (!isCritical && toxicGasNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'Carbon Monoxide Gas Level is back to normal.',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Toxic Gas Sensor',
-          value: ToxicGasSensor,
-          isCritical: false,
-        });
-        toxicGasNotificationSent.current = false; // Reset the flag if the value is no longer critical
-      }
-      prevToxicGasSensor.current = ToxicGasSensor;
-    }
-  }, [sensorData, addNotification, selectedPersonnel]);
-
-  // Monitor heart rate changes and add notifications
-  const heartRateNotificationSent = useRef(false);
-  useEffect(() => {
-    if (!selectedPersonnel?.gearId) return; // Stop if no selected personnel
-    const HeartRate = sensorData[selectedPersonnel?.gearId]?.HeartRate;
-    if (HeartRate !== prevHeartRate.current) {
-      const isCritical = HeartRate >= 110 && HeartRate <= 200;
-      setShowHeartRateNotification(isCritical);
-      if (isCritical && !heartRateNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'High Heart Rate Detected!',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Heart Rate',
-          value: HeartRate,
-          isCritical: true,
-        });
-        heartRateNotificationSent.current = true; // Set the flag to true after sending the notification
-      } else if (!isCritical && heartRateNotificationSent.current && selectedPersonnel?.gearId) {
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        addNotification({
-          id: uniqueId,
-          message: 'Heart Rate is back to normal.',
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: 'Heart Rate',
-          value: HeartRate,
-          isCritical: false,
-        });
-        heartRateNotificationSent.current = false; // Reset the flag if the value is no longer critical
-      }
-      prevHeartRate.current = HeartRate;
-    }
-  }, [sensorData, addNotification, selectedPersonnel]);
+  }, [sensorData, addNotification, selectedPersonnel, getNotificationFlag, addNotification]);
 
   const monitoringHealthData = (person) => [
     {
       icon: heartIcon,
       title: 'Heart Rate',
-      value: sensorData[person.gearId]?.HeartRate !== undefined
+      value: sensorData[person.gearId]?.HeartRate !== undefined && sensorData[person.gearId].HeartRate !== 0
         ? `${sensorData[person.gearId].HeartRate.toFixed(2)} BPM`
-        : 'No data available',
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            Waiting for data
+          </span>
+        ),
       description: sensorData[person.gearId]?.HeartRate >= 120 ? 'Elevated Heart Rate' : 'Normal Heart Rate',
       warningIcon: sensorData[person.gearId]?.HeartRate >= 120 ? flamesIcon : likeIcon,
     },
     {
       icon: bodytem,
       title: 'Body Temperature',
-      value: sensorData[person.gearId]?.bodyTemperature !== undefined
+      value: sensorData[person.gearId]?.bodyTemperature !== undefined && sensorData[person.gearId].bodyTemperature !== 0
         ? `${sensorData[person.gearId].bodyTemperature.toFixed(2)}°C`
-        : 'No data available',
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            Waiting for data
+          </span>
+        ),
       description: sensorData[person.gearId]?.bodyTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? flamesIcon : likeIcon,
     },
@@ -328,18 +223,26 @@ function MonitoringBody() {
           Envi Temperature
         </span>
       ),
-      value: sensorData[person.gearId]?.environmentalTemperature !== undefined
+      value: sensorData[person.gearId]?.environmentalTemperature !== undefined && sensorData[person.gearId].environmentalTemperature !== 0
         ? `${sensorData[person.gearId].environmentalTemperature}°C`
-        : 'No data available',
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            Waiting for data
+          </span>
+        ),
       description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
       warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 40 ? flamesIcon : likeIcon,
     },
     {
       icon: danger,
       title: 'Toxic Gas',
-      value: sensorData[person.gearId]?.ToxicGasSensor !== undefined
+      value: sensorData[person.gearId]?.ToxicGasSensor !== undefined && sensorData[person.gearId].ToxicGasSensor !== 0
         ? `${sensorData[person.gearId].ToxicGasSensor} PPM`
-        : 'No data available',
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            Waiting for data
+          </span>
+        ),
       description:
         sensorData[person.gearId]?.ToxicGasSensor >= 5
           ? 'Toxic Gas Detected'
@@ -349,9 +252,13 @@ function MonitoringBody() {
     {
       icon: maskIcon,
       title: 'Smoke',
-      value: sensorData[person.gearId]?.smokeSensor !== undefined
+      value: sensorData[person.gearId]?.smokeSensor !== undefined && sensorData[person.gearId].smokeSensor !== 0
         ? `${sensorData[person.gearId].smokeSensor} PPM`
-        : 'No data available',
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            Waiting for data
+          </span>
+        ),
       description: sensorData[person.gearId]?.smokeSensor > 310 ? 'Critical Smoke Level' : 'Safe Level',
       warningIcon: sensorData[person.gearId]?.smokeSensor > 310 ? flamesIcon : likeIcon,
     },

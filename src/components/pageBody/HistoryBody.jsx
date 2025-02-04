@@ -100,11 +100,11 @@ function HistoryBody() {
     setSearchTerm(e.target.value);
   };
 
-  const handleSelectRow = (gearId) => {
+  const handleSelectRow = (documentId) => {
     setSelectedRows((prevSelectedRows) =>
-      prevSelectedRows.includes(gearId)
-        ? prevSelectedRows.filter((id) => id !== gearId)
-        : [...prevSelectedRows, gearId]
+      prevSelectedRows.includes(documentId)
+        ? prevSelectedRows.filter((id) => id !== documentId)
+        : [...prevSelectedRows, documentId]
     );
   };
 
@@ -130,21 +130,22 @@ function HistoryBody() {
 
   const handleDeleteSelected = async () => {
     try {
-      for (const gearId of selectedRows) {
-        const docRef = doc(db, "personnelMonitoring", gearId);
+      for (const documentId of selectedRows) {
+        const docRef = doc(db, "personnelMonitoring", documentId);
         await deleteDoc(docRef); // Delete the document
       }
       // After deletion, refresh the data
-      setFilteredData(filteredData.filter((data) => !selectedRows.includes(data.gearId)));
+      setFilteredData(filteredData.filter((data) => !selectedRows.includes(data.documentId)));
       setSelectedRows([]); // Clear selected rows
       setIsDropdownOpen(false); // Close dropdown after action
+      toast.success("Selected Personnel deleted successfully")
     } catch (error) {
-      console.error("Error deleting data:", error);
+      toast.error("Error deleting personnel");
     }
   };
 
   // Handle "View" button click and send data to analytics page
-  const handleViewClick = async (documentId) => {  // Using documentId instead of personnelId
+  const handleViewClick = async (documentId, name, date, time) => {  // Using documentId instead of personnelId
     try {
       // Adjust the path to match your Firestore structure
       const realTimeDataRef = collection(db, 'personnelRecords', documentId, 'realTimeData'); // Use documentId here
@@ -156,7 +157,7 @@ function HistoryBody() {
       });
   
       // Navigate to analytics and pass data
-      navigate('/analytics', { state: { realTimeData } });
+      navigate('/analytics', { state: { realTimeData, name: name, date: date, time: time } });
     } catch (error) {
       toast.error("Error fetching real-time data:", error);
     }
@@ -274,8 +275,8 @@ function HistoryBody() {
                           <input
                             type="checkbox"
                             className="w-4 h-4 rounded text-green"
-                            checked={selectedRows.includes(data.gearId)}
-                            onChange={() => handleSelectRow(data.gearId)}
+                            checked={selectedRows.includes(data.documentId)}
+                            onChange={() => handleSelectRow(data.documentId)}
                           />
                         </td>
                         <td className="px-6 py-3">{data.gearId}</td>
@@ -284,7 +285,7 @@ function HistoryBody() {
                         <td className="px-6 py-3">{data.time}</td>
                         <td className="px-6 py-3">{data.totalNotifications}</td>
                         <td className="px-6 py-3 flex justify-start">
-                          <button onClick={() => handleViewClick(data.documentId)}
+                          <button onClick={() => handleViewClick(data.documentId, data.name, data.date, data.time)}
                           className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105">View</button>
                         </td>
                       </tr>
