@@ -1,6 +1,5 @@
 import React from 'react';
 import HealthCard from './HealthCard';
-import DataCardMonitoring from './DataCardMonitoring';
 
 const HealthMonitoring = ({ monitoringHealthData = [] }) => {
   return (
@@ -10,13 +9,14 @@ const HealthMonitoring = ({ monitoringHealthData = [] }) => {
       </div>
       <div className="font-montserrat flex flex-wrap justify-around gap-4 mt-4">
         {monitoringHealthData.map((data, index) => (
-          <HealthCard key={index} icon={data.icon} title={data.title}>
-            <DataCardMonitoring
-              value={data.value}
-              description={data.description}
-              warningIcon={data.warningIcon}
-            />
-          </HealthCard>
+          <HealthCard 
+          key={index} 
+          icon={data.icon} 
+          title={data.title}
+          value={data.value}
+          description={data.description}
+          warningIcon={data.warningIcon}
+          />
         ))}
       </div>
     </div>

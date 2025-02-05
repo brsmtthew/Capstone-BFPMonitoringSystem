@@ -19,10 +19,9 @@ export const useStore = create((set, get) => ({
   sensorData: {},
   notifications: (() => {
     try {
-      const storedNotifications = JSON.parse(localStorage.getItem('notifications'));
-      return Array.isArray(storedNotifications) ? storedNotifications : [];
+      const storedNotifications = localStorage.getItem('notifications');
+      return storedNotifications ? JSON.parse(storedNotifications) : [];
     } catch (error) {
-      toast.error('Failed to parse notifications from localStorage', error);
       return [];
     }
   })(),
@@ -253,18 +252,54 @@ export const useStore = create((set, get) => ({
     }
   },
 
-  setNotificationFlag: (gearId, sensor, flag) =>
+  // Get notification flag
+  getNotificationFlag: (gearId, sensorType) => {
+    return get().notificationFlags[`${gearId}-${sensorType}`] || false;
+  },
+
+  // Set notification flag
+  setNotificationFlag: (gearId, sensorType, value) => {
     set((state) => {
-      const updatedFlags = {
-        ...state.notificationFlags,
-        [`${gearId}-${sensor}`]: flag,
-      };
+      const updatedFlags = { ...state.notificationFlags, [`${gearId}-${sensorType}`]: value };
       localStorage.setItem('notificationFlags', JSON.stringify(updatedFlags));
       return { notificationFlags: updatedFlags };
-    }),
+    });
+  },
+
+  // Global notification handler
+  handleSensorNotification: (gearId, sensorValue, criticalThreshold, normalThreshold, sensorName, sensorType) => {
+    const condition = sensorValue >= criticalThreshold ? 'critical' : 'normal';
+    const uniqueId = `${gearId}-${sensorType}-${condition}`;
+    const existingNotification = get().notifications.find(notif => notif.id === uniqueId);
+    const wasCritical = get().getNotificationFlag(gearId, sensorType); // Check if previously critical
   
-  
-    getNotificationFlag: (gearId, sensor) => {
-      return get().notificationFlags[`${gearId}-${sensor}`] || false;
-    },
+    // Trigger critical notification
+    if (sensorValue >= criticalThreshold && !existingNotification) {
+      get().addNotification({
+        id: uniqueId,
+        message: `Critical ${sensorName} Detected!`,
+        timestamp: Date.now(),
+        gearId,
+        sensor: sensorName,
+        value: sensorValue,
+        isCritical: true,
+      });
+      toast.warn(`🔥 Critical ${sensorName} Detected: ${sensorValue}`);
+      get().setNotificationFlag(gearId, sensorType, true); // Set flag to true
+    }
+    // Trigger normal notification only if was previously critical and now <= normalThreshold
+    else if (sensorValue <= normalThreshold && wasCritical && !existingNotification) {
+      get().addNotification({
+        id: uniqueId,
+        message: `${sensorName} is back to normal.`,
+        timestamp: Date.now(),
+        gearId,
+        sensor: sensorName,
+        value: sensorValue,
+        isCritical: false,
+      });
+      toast.info(`✅ ${sensorName} is back to normal: ${sensorValue}`);
+      get().setNotificationFlag(gearId, sensorType, false); // Reset flag to false
+    }
+  },
 }));

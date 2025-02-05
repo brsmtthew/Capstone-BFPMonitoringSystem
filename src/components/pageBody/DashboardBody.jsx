@@ -7,12 +7,14 @@ import HeaderSection from '../header/HeaderSection';
 import OverviewCard from '../DashboardCard/OverviewCard';
 import ProfileCard from '../DashboardCard/ProfileCard';
 import BodyCard from '../parentCard/BodyCard';
+import DashboardChart from '../chart/DashboardChart';
 
 function DashboardBody() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [analyticsData, setAnalyticsData] = useState({ realTimeData: [], personnelInfo: {} });
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -83,18 +85,20 @@ function DashboardBody() {
 
       {/* Parent Card */}
       <BodyCard>
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:grid-rows-2">
-          {/* Personnel Profile */}
-          <ProfileCard
-            name={personnel[currentImageIndex].name}
-            position={personnel[currentImageIndex].position}
-            image={personnel[currentImageIndex].image}
-            onPrevious={prevImage}
-            onNext={nextImage}
-            fetchImageUrl={fetchImageUrl}
-          />
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:grid-rows-2 grid-flow-row-dense">
+          {/* Profile Card - Takes up 1st column across both rows */}
+          <div className="lg:row-span-2">
+            <ProfileCard
+              name={personnel[currentImageIndex].name}
+              position={personnel[currentImageIndex].position}
+              image={personnel[currentImageIndex].image}
+              onPrevious={prevImage}
+              onNext={nextImage}
+              fetchImageUrl={fetchImageUrl}
+            />
+          </div>
 
-          {/* Other Cards */}
+          {/* Overview Cards - Row 1, Columns 2 and 3 */}
           <OverviewCard title="Total Personnel" description="The total number of personnel currently registered.">
             <p className="text-[64px] font-bold text-black">{personnel.length}</p>
             <p className='text-[28px] font-bold text-black'>Total Personnel</p>
@@ -105,21 +109,12 @@ function DashboardBody() {
             <p className="text-sm text-black">Battery Remaining</p>
           </OverviewCard>
 
-          <OverviewCard title="Environmental Conditions" description="Real-time environmental data: temperature, smoke, etc.">
-            <p className="text-lg text-black">Temperature: 30°C</p>
-            <p className="text-lg text-black">Smoke: Normal</p>
-            <p className="text-lg text-black">Gas Levels: Safe</p>
-          </OverviewCard>
-
-          <OverviewCard title="System Overview" description="Summary of active alerts and system status.">
-            <p className="text-lg text-black">Active Alerts: 3</p>
-            <p className="text-lg text-black">Resolved Alerts: 12</p>
-            <p className="text-lg text-black">System Uptime: 24 hrs</p>
-          </OverviewCard>
+          {/* DashboardChart - Spanning columns 2 and 3 in Row 2 */}
+          <div className="lg:col-span-2 max-w-[1150px]">
+            <DashboardChart />
+          </div>
         </div>
       </BodyCard>
-      
-
       <AddPersonnelModal isOpen={isModalOpen} closeModal={closeModal} />
     </div>
   );

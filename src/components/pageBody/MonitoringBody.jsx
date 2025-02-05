@@ -21,6 +21,7 @@ import NotificationCard from '../MonitoringCards/NotificationCard';
 import EnviMonitoring from '../MonitoringCards/EnviMonitoring';
 import HealthMonitoring from '../MonitoringCards/HealthMonitoring';
 import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 function MonitoringBody() {
   const {
@@ -33,24 +34,12 @@ function MonitoringBody() {
     setSelectedPersonnel,
     sensorData,
     setSensorData,
-    addNotification,
-    setNotificationFlag,
-    getNotificationFlag,
+    handleSensorNotification
   } = useStore();
 
   const { state } = useLocation(); // Access data passed via navigate
-
-  const prevTemperature = useRef(null);
-  const prevEnvTemperature = useRef(null);
-  const prevSmokeSensor = useRef(null);
-  const prevToxicGasSensor = useRef(null);
-  const prevHeartRate = useRef(null);
-
-  const [showTempNotification, setShowTempNotification] = useState(false);
-  const [showEnvTempNotification, setShowEnvTempNotification] = useState(false);
-  const [showSmokeNotification, setShowSmokeNotification] = useState(false);
-  const [showToxicGasNotification, setShowToxicGasNotification] = useState(false);
-  const [showHeartRateNotification, setShowHeartRateNotification] = useState(false);
+  const unsubscribeMap = useRef({});
+  const navigate = useNavigate(); // Initialize navigation
 
   useEffect(() => {
     if (state?.selectedPersonnel) {
@@ -61,21 +50,37 @@ function MonitoringBody() {
 
   // Remove personnel handler
   const handleRemovePersonnel = (gearId) => {
-    removeMonitoredPersonnel(gearId); // Use this to remove personnel from monitoring.
-    setSelectedPersonnel(null); 
+    removeMonitoredPersonnel(gearId); 
+    setSelectedPersonnel(null);
+  
+    // Stop listening to Firebase database updates
+    if (unsubscribeMap.current[gearId]) {
+      unsubscribeMap.current[gearId].forEach((unsubscribe) => unsubscribe());
+      delete unsubscribeMap.current[gearId];
+    }
+  
+    // Remove personnel's sensor data from state
+    setSensorData((prev) => {
+      const newData = { ...prev };
+      delete newData[gearId];
+      return newData;
+    });
   };
+  
 
   // Utility to fetch data from Firebase Realtime Database
   const fetchData = (path, gearId, sensorType) => {
+    let timeoutId;
     const dataRef = ref(realtimeDb, path);
     const unsubscribe = onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
-      if (data && data.Reading !== undefined) {
-        setSensorData(gearId, sensorType, data.Reading); // Use the specific property (e.g., Reading)
-      } else {
-        // Initialize with 0 if no data is available
-        setSensorData(gearId, sensorType, 0);
-      }
+      // Debounce to prevent rapid updates
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (data?.Reading !== undefined) {
+          setSensorData(gearId, sensorType, data.Reading);
+        }
+      }, 500); // Adjust debounce time as needed
     });
     return unsubscribe;
   };
@@ -97,95 +102,55 @@ function MonitoringBody() {
   useEffect(() => {
     if (selectedPersonnel?.gearId) {
       const gearId = selectedPersonnel.gearId;
-
-      // Initialize sensor data with default values
-      setSensorData(gearId, 'bodyTemperature', 0);
-      setSensorData(gearId, 'environmentalTemperature', 0);
-      setSensorData(gearId, 'smokeSensor', 0);
-      setSensorData(gearId, 'ToxicGasSensor', 0);
-      setSensorData(gearId, 'HeartRate', 0);
-
-      // Fetch data for the selected personnel
+  
+      // setSensorData(gearId, 'bodyTemperature', 0);
+      // setSensorData(gearId, 'environmentalTemperature', 0);
+      // setSensorData(gearId, 'smokeSensor', 0);
+      // setSensorData(gearId, 'ToxicGasSensor', 0);
+      // setSensorData(gearId, 'HeartRate', 0);
+  
+      // Fetch sensor data
       const unsubscribeTemp = fetchData(`Monitoring/${gearId}/BodyTemperature`, gearId, 'bodyTemperature');
       const unsubscribeEnvTemp = fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature');
-      const unsubscribeSmoke = fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor'); // Fetch SmokeSensor data
-      const unsubscribeToxic = fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor'); // Fetch ToxicGas data
-      const unsubscribeHeartRate = fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate'); // Fetch HeartRate data
-
-      // Cleanup subscriptions when component unmounts or personnel changes
+      const unsubscribeSmoke = fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor');
+      const unsubscribeToxic = fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor');
+      const unsubscribeHeartRate = fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate');
+  
+      // Store unsubscribe functions
+      unsubscribeMap.current[gearId] = [
+        unsubscribeTemp, 
+        unsubscribeEnvTemp, 
+        unsubscribeSmoke, 
+        unsubscribeToxic, 
+        unsubscribeHeartRate
+      ];
+  
       return () => {
-        unsubscribeTemp();
-        unsubscribeEnvTemp();
-        unsubscribeSmoke();
-        unsubscribeToxic();
-        unsubscribeHeartRate();
+        if (unsubscribeMap.current[gearId]) {
+          unsubscribeMap.current[gearId].forEach((unsubscribe) => unsubscribe());
+          delete unsubscribeMap.current[gearId];
+        }
       };
     }
-    // Cleanup all if no personnel is selected
-    return () => {
-      setSensorData({}); // Reset all sensor data
-    };
   }, [selectedPersonnel, setSensorData]);
-
-   // Notification utility to prevent repetitive code
-   const handleSensorNotification = (sensor, sensorValue, criticalThreshold, normalThreshold, sensorName, sensorType, setNotificationState) => {
-    const isCritical = sensorValue >= criticalThreshold;
-    const isNormal = sensorValue <= normalThreshold;
-    const hasSentNotification = getNotificationFlag(selectedPersonnel?.gearId, sensorType);
   
-    // Check if the sensor value is a valid number
-    const isValidValue = sensorValue !== undefined && sensorValue !== null;
-  
-    if (isValidValue) {
-      if (isCritical && !hasSentNotification) {
-        // Send the notification
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        addNotification({
-          id: uniqueId,
-          message: `Critical ${sensorName} Detected!`,
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: sensorName,
-          value: sensorValue,
-          isCritical: true,
-        });
-        toast.info(`🔥 Critical ${sensorName} Detected: ${sensorValue}`);
-        setNotificationFlag(selectedPersonnel?.gearId, sensorType, true); // Mark as notified
-      } else if (isNormal && hasSentNotification) {
-        // Send a "back to normal" notification once it's back to safe levels
-        const uniqueId = `${selectedPersonnel?.gearId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        
-        addNotification({
-          id: uniqueId,
-          message: `${sensorName} is back to normal.`,
-          timestamp: Date.now(),
-          gearId: selectedPersonnel?.gearId,
-          sensor: sensorName,
-          value: sensorValue,
-          isCritical: false,
-        });
-        toast.info(`Normal ${sensorName} Detected: ${sensorValue}`);
-        setNotificationFlag(selectedPersonnel?.gearId, sensorType, false); // Mark as normal
-      }
-    }
-  };
-
   // Monitor different sensor changes
   useEffect(() => {
     if (selectedPersonnel?.gearId) {
-      // Log each sensor value to verify it's being received
-      console.log('Monitoring Sensors:', sensorData[selectedPersonnel?.gearId]);
-      
-      handleSensorNotification('Body Temperature', sensorData[selectedPersonnel?.gearId]?.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature', setShowTempNotification);
-      handleSensorNotification('Environmental Temperature', sensorData[selectedPersonnel?.gearId]?.environmentalTemperature, 27, 22, 'Environmental Temperature', 'environmentalTemperature', setShowEnvTempNotification);
-      handleSensorNotification('Smoke Level', sensorData[selectedPersonnel?.gearId]?.smokeSensor, 300, 200, 'Smoke Level', 'smokeSensor', setShowSmokeNotification);
-      handleSensorNotification('Toxic Gas Level', sensorData[selectedPersonnel?.gearId]?.ToxicGasSensor, 250, 200, 'Toxic Gas Level', 'ToxicGasSensor', setShowToxicGasNotification);
-      handleSensorNotification('Heart Rate', sensorData[selectedPersonnel?.gearId]?.HeartRate, 120, 80, 'Heart Rate', 'Heart Rate', setShowHeartRateNotification);
-
+      const gearId = selectedPersonnel.gearId;
+      const sensors = sensorData[gearId];
+  
+      if (!sensors) return;
+  
+      handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
+      handleSensorNotification(gearId, sensors.environmentalTemperature, 30, 28, 'Environmental Temperature', 'environmentalTemperature');
+      handleSensorNotification(gearId, sensors.smokeSensor, 350, 340, 'Smoke Level', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 380, 370, 'Toxic Gas Level', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
+  
     }
-  }, [sensorData, addNotification, selectedPersonnel, getNotificationFlag, addNotification]);
-
+  }, [sensorData[selectedPersonnel?.gearId], selectedPersonnel, handleSensorNotification]);
+  
   const monitoringHealthData = (person) => [
     {
       icon: heartIcon,
@@ -271,10 +236,11 @@ function MonitoringBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
       {monitoredPersonnel.length === 0 ? (
         <div className="flex justify-center items-center h-screen">
-          <p className="text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg">
-            Please go to the Personnel Page to monitor the personnel.
+          <p className="text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"
+          onClick={() => navigate('/personnel')}>
+            Click here to go to the Personnel Page for monitoring.
           </p>
-      </div>
+        </div>
       
       ) : (
         <BodyCard className={`${monitoredPersonnel.length > 1 ? 'overflow-y-auto max-h-[80vh]' : ''}`}>

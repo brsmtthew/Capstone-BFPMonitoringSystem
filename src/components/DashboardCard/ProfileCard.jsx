@@ -40,7 +40,7 @@ const ProfileCard = ({
   const resolvedImageUrl = image.startsWith('https') ? image : fetchImageUrl?.(image);
 
   return (
-    <div className="relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow bg-white h-80">
+    <div className="relative lg:row-span-2 flex flex-col bg-gray-100 rounded-lg shadow bg-white h-96">
       {/* Header */}
       <div className="absolute top-0 left-0 bg-bfpNavy w-full p-4 text-white rounded-t-lg rounded-xl">
         <h4
@@ -68,7 +68,7 @@ const ProfileCard = ({
       {/* Image */}
       <div className="relative grow flex items-center justify-center">
         <img
-          className={`h-72 w-72 rounded-full object-cover transition-all duration-300 ${
+          className={`h-96 w-96 rounded-full object-cover transition-all duration-300 ${
             animationState === 'fade-out' ? 'opacity-0 scale-90' : 'opacity-100 scale-100'
           } ${!isImageLoaded ? 'opacity-0' : 'opacity-100'}`}
           src={resolvedImageUrl}
@@ -80,13 +80,13 @@ const ProfileCard = ({
       {/* Navigation Buttons */}
       <div className="flex justify-between p-4">
         <button
-          className="text-sm text-white bg-gray px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
+          className="text-sm text-white bg-gray px-5 py-3 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
           onClick={handlePrevious}
         >
           Previous
         </button>
         <button
-          className="text-sm text-white bg-bfpNavy px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
+          className="text-sm text-white bg-bfpNavy px-5 py-3 rounded-lg transform transition duration-300 hover:scale-105 hover:shadow-lg hover:bg-hoverBtn"
           onClick={handleNext}
         >
           Next

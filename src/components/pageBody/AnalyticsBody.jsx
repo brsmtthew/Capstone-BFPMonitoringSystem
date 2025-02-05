@@ -14,19 +14,23 @@ const AnalyticsBody = () => {
   useEffect(() => {
     // Load the saved data from localStorage
     const savedData = JSON.parse(localStorage.getItem('overviewData'));
+  
     if (savedData) {
       console.log('Loading saved data');
       toast.success("Loaded the saved analytics data.");
-      setRealTimeData(savedData);
+      setRealTimeData(Array.isArray(savedData.realTimeData) ? savedData.realTimeData : []);
+      setPersonnelInfo(savedData.personnelInfo || { name: "", date: "", time: "" });
     } else if (location.state?.realTimeData) {
       console.log('Loading data from location state');
       toast.success("Analytics data has been loaded.");
-      setRealTimeData(location.state.realTimeData);
-      //Set personnel info from location state
-      const { name, date, time } = location.state;  // Extracting name, date, and time
-      setPersonnelInfo({ name, date, time });
+      setRealTimeData(Array.isArray(location.state.realTimeData) ? location.state.realTimeData : []);
+      setPersonnelInfo({
+        name: location.state.name || "",
+        date: location.state.date || "",
+        time: location.state.time || "",
+      });
     }
-  }, [location.state]);  // Ensure location changes are tracked correctly
+  }, [location.state]);
   
 
   // Function to reset analytics data
@@ -38,10 +42,16 @@ const AnalyticsBody = () => {
   };
 
   const handleSave = () => {
-    // Save the current data to localStorage
-    localStorage.setItem('overviewData', JSON.stringify(realTimeData));
+    const dataToSave = {
+      realTimeData: Array.isArray(realTimeData) ? realTimeData : [],
+      personnelInfo,
+    };
+    localStorage.setItem('overviewData', JSON.stringify(dataToSave));
+    window.dispatchEvent(new Event("storage")); // Trigger update
     toast.success("Analytics data has been saved.");
   };
+  
+  
 
   // Function to sort data by datetime
   const sortByDateTime = (data) => {
@@ -54,7 +64,7 @@ const AnalyticsBody = () => {
 
   // Extracting smoke sensor data
   const smokeData = sortByDateTime(
-    realTimeData
+    (Array.isArray(realTimeData) ? realTimeData : [])
       .filter((data) => data.smokeSensor !== undefined)
       .map((data) => ({
         time: data.time || "N/A",
@@ -62,10 +72,11 @@ const AnalyticsBody = () => {
         date: data.date || "N/A",
       }))
   );
+  
 
   // Extracting environmental temperature data
   const EnviData = sortByDateTime(
-    realTimeData
+    (Array.isArray(realTimeData)? realTimeData : [])
       .filter((data) => data.environmentalTemperature !== undefined)
       .map((data) => ({
         time: data.time || "N/A",
@@ -75,7 +86,7 @@ const AnalyticsBody = () => {
   );
 
   const ToxicGas = sortByDateTime(
-    realTimeData
+    (Array.isArray(realTimeData)? realTimeData : [])
       .filter((data) => data.ToxicGasSensor !== undefined)
       .map((data) => ({
         time: data.time || "N/A",
@@ -85,7 +96,7 @@ const AnalyticsBody = () => {
   );
 
   const HeartRate = sortByDateTime(
-    realTimeData
+    (Array.isArray(realTimeData)? realTimeData : [])
       .filter((data) => data.HeartRate !== undefined)
       .map((data) => ({
         time: data.time || "N/A",
@@ -95,7 +106,7 @@ const AnalyticsBody = () => {
   );
 
   const temperatureData = sortByDateTime(
-    realTimeData
+    (Array.isArray(realTimeData)? realTimeData : [])
       .filter((data) => data.bodyTemperature !== undefined)
       .map((data) => ({
         time: data.time || "N/A",
