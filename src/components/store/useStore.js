@@ -87,17 +87,21 @@ export const useStore = create((set, get) => ({
   addNotification: async (notification) => {
     const updatedNotification = {
       ...notification,
+      id: notification.id || Date.now(), // Ensure each notification has a unique ID
       gearId: notification.gearId, // Add gearId to the notification
     };
   
     set((state) => {
       // Check if the notification already exists in the state
-      const isDuplicate = state.notifications.some((notif) => notif.id === updatedNotification.id);
+      // const isDuplicate = state.notifications.some(
+      //   (notif) => notif.id === updatedNotification.id
+      // );
+
   
-      if (isDuplicate) {
-        toast.warn('Duplicate notification detected, skipping save.');
-        return state; // Return current state without adding the duplicate
-      }
+      // if (isDuplicate) {
+      //   toast.warn('Duplicate notification detected, skipping save.');
+      //   return state; // Return current state without adding the duplicate
+      // }
   
       // Update the state with the new notification
       const updatedNotifications = [updatedNotification, ...state.notifications];
@@ -254,13 +258,15 @@ export const useStore = create((set, get) => ({
 
   // Get notification flag
   getNotificationFlag: (gearId, sensorType) => {
-    return get().notificationFlags[`${gearId}-${sensorType}`] || false;
+    return get().notificationFlags[`${gearId}-${sensorType}`] || 'none';
   },
-
-  // Set notification flag
+  
   setNotificationFlag: (gearId, sensorType, value) => {
     set((state) => {
-      const updatedFlags = { ...state.notificationFlags, [`${gearId}-${sensorType}`]: value };
+      const updatedFlags = { 
+        ...state.notificationFlags, 
+        [`${gearId}-${sensorType}`]: value 
+      };
       localStorage.setItem('notificationFlags', JSON.stringify(updatedFlags));
       return { notificationFlags: updatedFlags };
     });
@@ -268,13 +274,23 @@ export const useStore = create((set, get) => ({
 
   // Global notification handler
   handleSensorNotification: (gearId, sensorValue, criticalThreshold, normalThreshold, sensorName, sensorType) => {
-    const condition = sensorValue >= criticalThreshold ? 'critical' : 'normal';
+    // Determine current condition based on thresholds
+    const condition = 
+      sensorValue >= criticalThreshold ? 'critical' :
+      sensorValue <= normalThreshold ? 'normal' :
+      null;
+  
+    if (condition === null) return; // No action for intermediate values
+  
     const uniqueId = `${gearId}-${sensorType}-${condition}`;
     const existingNotification = get().notifications.find(notif => notif.id === uniqueId);
-    const wasCritical = get().getNotificationFlag(gearId, sensorType); // Check if previously critical
+    const previousCondition = get().getNotificationFlag(gearId, sensorType);
   
-    // Trigger critical notification
-    if (sensorValue >= criticalThreshold && !existingNotification) {
+    // Skip if the current condition is the same as the previous state
+    if (previousCondition === condition) return;
+  
+    // Trigger notifications only on state changes
+    if (condition === 'critical') {
       get().addNotification({
         id: uniqueId,
         message: `Critical ${sensorName} Detected!`,
@@ -285,10 +301,8 @@ export const useStore = create((set, get) => ({
         isCritical: true,
       });
       toast.warn(`🔥 Critical ${sensorName} Detected: ${sensorValue}`);
-      get().setNotificationFlag(gearId, sensorType, true); // Set flag to true
-    }
-    // Trigger normal notification only if was previously critical and now <= normalThreshold
-    else if (sensorValue <= normalThreshold && wasCritical && !existingNotification) {
+      get().setNotificationFlag(gearId, sensorType, 'critical');
+    } else if (condition === 'normal') {
       get().addNotification({
         id: uniqueId,
         message: `${sensorName} is back to normal.`,
@@ -299,7 +313,7 @@ export const useStore = create((set, get) => ({
         isCritical: false,
       });
       toast.info(`✅ ${sensorName} is back to normal: ${sensorValue}`);
-      get().setNotificationFlag(gearId, sensorType, false); // Reset flag to false
+      get().setNotificationFlag(gearId, sensorType, 'normal');
     }
-  },
+  },  
 }));

@@ -2,7 +2,8 @@ import React from 'react';
 import Button from '../button/Button';
 
 const HealthCard = ({ icon, title, value, description, warningIcon, children }) => {
-  const hasValidValue = value && value !== "Waiting for data";
+  const hasValidValue = value && typeof value === 'string';
+
 
   return (
     <div className="h-auto w-full md:w-1/2 lg:w-1/3 bg-white rounded-lg shadow-md">

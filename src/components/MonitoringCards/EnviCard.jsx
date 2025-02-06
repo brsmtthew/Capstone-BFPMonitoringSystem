@@ -1,7 +1,7 @@
 import React from 'react';
 
 const EnviCard = ({ icon, title, value, description, warningIcon, children }) => {
-  const hasValidValue = value && value !== "Waiting for data";
+  const hasValidValue = value && typeof value === 'string';
 
   return (
     <div className="h-auto w-full bg-white rounded-lg shadow-md">

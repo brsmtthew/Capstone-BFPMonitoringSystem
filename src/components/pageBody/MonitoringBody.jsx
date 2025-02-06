@@ -70,17 +70,14 @@ function MonitoringBody() {
 
   // Utility to fetch data from Firebase Realtime Database
   const fetchData = (path, gearId, sensorType) => {
-    let timeoutId;
     const dataRef = ref(realtimeDb, path);
     const unsubscribe = onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
-      // Debounce to prevent rapid updates
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        if (data?.Reading !== undefined) {
-          setSensorData(gearId, sensorType, data.Reading);
-        }
-      }, 500); // Adjust debounce time as needed
+      if (data?.Reading !== undefined) {
+        // Convert Reading to a number
+        const value = Number(data.Reading);
+        setSensorData(gearId, sensorType, value);
+      }
     });
     return unsubscribe;
   };
@@ -144,8 +141,8 @@ function MonitoringBody() {
   
       handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
       handleSensorNotification(gearId, sensors.environmentalTemperature, 30, 28, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 350, 340, 'Smoke Level', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 380, 370, 'Toxic Gas Level', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.smokeSensor, 470, 460, 'Smoke Level', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 290, 280, 'Toxic Gas Level', 'ToxicGasSensor');
       handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
   
     }
@@ -159,7 +156,7 @@ function MonitoringBody() {
         ? `${sensorData[person.gearId].HeartRate.toFixed(2)} BPM`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            Waiting for data
+            No Data Available
           </span>
         ),
       description: sensorData[person.gearId]?.HeartRate >= 120 ? 'Elevated Heart Rate' : 'Normal Heart Rate',
@@ -172,7 +169,7 @@ function MonitoringBody() {
         ? `${sensorData[person.gearId].bodyTemperature.toFixed(2)}°C`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            Waiting for data
+            No Data Available
           </span>
         ),
       description: sensorData[person.gearId]?.bodyTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
@@ -192,7 +189,7 @@ function MonitoringBody() {
         ? `${sensorData[person.gearId].environmentalTemperature}°C`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            Waiting for data
+            No Data Available
           </span>
         ),
       description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
@@ -205,7 +202,7 @@ function MonitoringBody() {
         ? `${sensorData[person.gearId].ToxicGasSensor} PPM`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            Waiting for data
+            No Data Available
           </span>
         ),
       description:
@@ -221,7 +218,7 @@ function MonitoringBody() {
         ? `${sensorData[person.gearId].smokeSensor} PPM`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            Waiting for data
+            No Data Available
           </span>
         ),
       description: sensorData[person.gearId]?.smokeSensor > 310 ? 'Critical Smoke Level' : 'Safe Level',
