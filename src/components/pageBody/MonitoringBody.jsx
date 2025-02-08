@@ -20,6 +20,10 @@ import BodyCard from '../parentCard/BodyCard';
 import NotificationCard from '../MonitoringCards/NotificationCard';
 import EnviMonitoring from '../MonitoringCards/EnviMonitoring';
 import HealthMonitoring from '../MonitoringCards/HealthMonitoring';
+import BatterIcon from './dashboardAssets/energy.png';
+import BatteryHalf from './dashboardAssets/half-battery.png';
+import LowBattery from './dashboardAssets/low-battery.png';
+import lightingBattery from './dashboardAssets/lighting.png';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
@@ -73,10 +77,10 @@ function MonitoringBody() {
     const dataRef = ref(realtimeDb, path);
     const unsubscribe = onValue(dataRef, (snapshot) => {
       const data = snapshot.val();
-      if (data?.Reading !== undefined) {
-        // Convert Reading to a number
-        const value = Number(data.Reading);
-        setSensorData(gearId, sensorType, value);
+      if (sensorType === "Battery" && data?.Percentage !== undefined) {
+        setSensorData(gearId, sensorType, Number(data.Percentage));
+      } else if (data?.Reading !== undefined) {
+        setSensorData(gearId, sensorType, Number(data.Reading));
       }
     });
     return unsubscribe;
@@ -100,18 +104,13 @@ function MonitoringBody() {
     if (selectedPersonnel?.gearId) {
       const gearId = selectedPersonnel.gearId;
   
-      // setSensorData(gearId, 'bodyTemperature', 0);
-      // setSensorData(gearId, 'environmentalTemperature', 0);
-      // setSensorData(gearId, 'smokeSensor', 0);
-      // setSensorData(gearId, 'ToxicGasSensor', 0);
-      // setSensorData(gearId, 'HeartRate', 0);
-  
       // Fetch sensor data
       const unsubscribeTemp = fetchData(`Monitoring/${gearId}/BodyTemperature`, gearId, 'bodyTemperature');
       const unsubscribeEnvTemp = fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature');
       const unsubscribeSmoke = fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor');
       const unsubscribeToxic = fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor');
       const unsubscribeHeartRate = fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate');
+      const unsubscribeBattery = fetchData(`Monitoring/${gearId}/Battery`, gearId, 'Battery');
   
       // Store unsubscribe functions
       unsubscribeMap.current[gearId] = [
@@ -119,7 +118,8 @@ function MonitoringBody() {
         unsubscribeEnvTemp, 
         unsubscribeSmoke, 
         unsubscribeToxic, 
-        unsubscribeHeartRate
+        unsubscribeHeartRate,
+        unsubscribeBattery
       ];
   
       return () => {
@@ -142,13 +142,38 @@ function MonitoringBody() {
       handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
       handleSensorNotification(gearId, sensors.environmentalTemperature, 30, 28, 'Environmental Temperature', 'environmentalTemperature');
       handleSensorNotification(gearId, sensors.smokeSensor, 470, 460, 'Smoke Level', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 290, 280, 'Toxic Gas Level', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 390, 380, 'Toxic Gas Level', 'ToxicGasSensor');
       handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
   
     }
   }, [sensorData[selectedPersonnel?.gearId], selectedPersonnel, handleSensorNotification]);
   
   const monitoringHealthData = (person) => [
+    {
+      icon: BatterIcon,
+      title: 'Battery Percentage',
+      value: sensorData[person.gearId]?.Battery !== undefined && sensorData[person.gearId]?.Battery !== 0
+        ? `${sensorData[person.gearId]?.Battery.toFixed(2)}%`
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            No Data Available
+          </span>
+        ),
+      description: sensorData[person.gearId]?.Battery >= 75 
+        ? 'Battery is Full' 
+        : sensorData[person.gearId]?.Battery >= 50 
+          ? 'Battery is Medium' 
+          : sensorData[person.gearId]?.Battery >= 25 
+            ? 'Battery is Low' 
+            : 'Critical Battery Level',
+      warningIcon: sensorData[person.gearId]?.Battery >= 75 
+        ? BatterIcon 
+        : sensorData[person.gearId]?.Battery >= 50 
+          ? BatteryHalf 
+          : sensorData[person.gearId]?.Battery >= 25 
+            ? LowBattery 
+            : lightingBattery, // Critical battery icon
+    },    
     {
       icon: heartIcon,
       title: 'Heart Rate',

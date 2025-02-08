@@ -282,7 +282,7 @@ export const useStore = create((set, get) => ({
   
     if (condition === null) return; // No action for intermediate values
   
-    const uniqueId = `${gearId}-${sensorType}-${condition}`;
+    const uniqueId = `${gearId}-${sensorType}-${condition}-${Date.now()}`;
     const existingNotification = get().notifications.find(notif => notif.id === uniqueId);
     const previousCondition = get().getNotificationFlag(gearId, sensorType);
   

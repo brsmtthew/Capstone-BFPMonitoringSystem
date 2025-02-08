@@ -128,18 +128,36 @@ function HistoryBody() {
     setIsDropdownOpen(false); // Close dropdown after selection
   };
 
+  // Utility function to delete all documents in a subcollection
+  const deleteSubcollection = async (parentDocRef, subcollectionName) => {
+    const subcollectionRef = collection(parentDocRef, subcollectionName);
+    const subSnapshot = await getDocs(subcollectionRef);
+    const deletePromises = subSnapshot.docs.map((subDoc) =>
+      deleteDoc(subDoc.ref)
+    );
+    return Promise.all(deletePromises);
+  };
+
   const handleDeleteSelected = async () => {
     try {
       for (const documentId of selectedRows) {
-        const docRef = doc(db, "personnelMonitoring", documentId);
-        await deleteDoc(docRef); // Delete the document
+        const docRef = doc(db, "personnelRecords", documentId);
+        // Delete subcollections first
+        await deleteSubcollection(docRef, "notifications");
+        await deleteSubcollection(docRef, "realTimeData");
+
+        // Then delete the parent document
+        await deleteDoc(docRef);
       }
-      // After deletion, refresh the data
-      setFilteredData(filteredData.filter((data) => !selectedRows.includes(data.documentId)));
+      // After deletion, refresh the UI data
+      setFilteredData(
+        filteredData.filter((data) => !selectedRows.includes(data.documentId))
+      );
       setSelectedRows([]); // Clear selected rows
       setIsDropdownOpen(false); // Close dropdown after action
-      toast.success("Selected Personnel deleted successfully")
+      toast.success("Selected Personnel deleted successfully");
     } catch (error) {
+      console.error("Error deleting personnel: ", error);
       toast.error("Error deleting personnel");
     }
   };
@@ -199,7 +217,7 @@ function HistoryBody() {
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
+                  <div className="absolute right-50 mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
                     <button
                       onClick={() => handleSort("latest")}
                       className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"

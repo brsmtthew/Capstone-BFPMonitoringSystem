@@ -1,12 +1,10 @@
 import React from 'react';
-import Button from '../button/Button';
 
 const HealthCard = ({ icon, title, value, description, warningIcon, children }) => {
   const hasValidValue = value && typeof value === 'string';
 
-
   return (
-    <div className="h-auto w-full md:w-1/2 lg:w-1/3 bg-white rounded-lg shadow-md">
+    <div className="h-auto w-full bg-white rounded-lg shadow-md">
       <div className="bg-bfpNavy p-4 rounded-md flex items-center justify-between text-white">
         <div className="flex items-center">
           <img src={icon} alt={title} className="w-8 h-8 mr-2" />
