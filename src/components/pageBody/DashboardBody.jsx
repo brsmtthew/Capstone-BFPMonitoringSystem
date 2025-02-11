@@ -4,7 +4,7 @@ import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 import { db } from '../../firebase/Firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import HeaderSection from '../header/HeaderSection';
-import OverviewCard from '../DashboardCard/OverviewCard';
+import OverviewCard from '../DashboardCard/OverViewCard';
 import ProfileCard from '../DashboardCard/ProfileCard';
 import BodyCard from '../parentCard/BodyCard';
 import DashboardChart from '../chart/DashboardChart';
@@ -168,20 +168,47 @@ function DashboardBody() {
             <p className='text-[28px] font-bold text-black'>Total Personnel</p>
           </OverviewCard>
 
-          <OverviewCard title="Notification Status" description="Previous Notification for this Personnel">
-          {analyticsData.personnelInfo ? (
-            <>
-              <p className="text-[26px] font-bold text-black">Name: {analyticsData.personnelInfo.personnelName}</p>
-              <p className="text-[26px] font-semibold text-black">GearId: {analyticsData.personnelInfo.gearId}</p>
-            </>
-          ) : (
-            <p className="text-[26px] font-semibold text-black">Loading...</p>
-          )}
+          <OverviewCard
+            title="Notification Status"
+            description="Previous Notifications for this Personnel"
+          >
+            <div className="max-h-64 overflow-y-auto">
+              {analyticsData.notifications && analyticsData.notifications.length > 0 ? (
+                analyticsData.notifications.map((notification) => (
+                  <div
+                    key={notification.id}
+                    className={`p-2 mb-2 rounded-lg w-96 ${
+                      notification.isCritical
+                        ? 'bg-red border border-red text-white'
+                        : 'bg-green border border-green text-white'
+                    }`}
+                  >
+                    <p className="text-lg font-semibold">{notification.message}</p>
+                    <p className="text-lg font-bold">Value: {notification.value}</p>
+                    <p className="text-sm">
+                      {notification.timestamp ? (
+                        notification.timestamp.seconds
+                          ? new Date(notification.timestamp.seconds * 1000).toLocaleString()
+                          : new Date(notification.timestamp).toLocaleString()
+                      ) : (
+                        "N/A"
+                      )}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[26px] font-semibold text-black">
+                  No notifications available.
+                </p>
+              )}
+            </div>
           </OverviewCard>
 
+
           {/* DashboardChart - Spanning columns 2 and 3 in Row 2 */}
-          <div className="lg:col-span-2 max-w-[1150px]">
-            <DashboardChart data={analyticsData.realTimeData}/>
+          <div className="lg:col-span-2 max-w-full">
+            <DashboardChart data={analyticsData.realTimeData}
+            personnelInfo={analyticsData.personnelInfo}/>
           </div>
         </div>
       </BodyCard>

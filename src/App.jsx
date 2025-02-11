@@ -12,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {AuthProvider} from './components/auth/AuthContext';
+import ForgotPassword from './components/login/ForgotPassword';
 
 const Layout = ({ children }) => (
   <div>
@@ -26,6 +27,7 @@ function App() {
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
           path="/dashboard"
           element={

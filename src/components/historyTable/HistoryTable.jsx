@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
 import { toast } from "react-toastify";
 
@@ -12,11 +12,18 @@ function HistoryTable({ selectedPersonnel }) {
       setLoading(true);
       try {
         if (selectedPersonnel && selectedPersonnel.documentId) {
-          const notificationsRef = collection(db, `personnelRecords/${selectedPersonnel.documentId}/notifications`);
-          const notifSnapshot = await getDocs(notificationsRef);
-          const notifications = notifSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
-          setNotifications(notifications);
+          const notificationsRef = collection(
+            db,
+            `personnelRecords/${selectedPersonnel.documentId}/notifications`
+          );
+          // Create a query that orders by timestamp descending.
+          const q = query(notificationsRef, orderBy("timestamp", "desc"));
+          const notifSnapshot = await getDocs(q);
+          const notificationsData = notifSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setNotifications(notificationsData);
         } else {
           toast.error("Invalid selected personnel or documentId.");
         }
@@ -30,10 +37,14 @@ function HistoryTable({ selectedPersonnel }) {
     if (selectedPersonnel) {
       fetchNotifications();
     }
-  }, [selectedPersonnel]); // This useEffect only runs when `selectedPersonnel` changes.
+  }, [selectedPersonnel]);
 
   if (!selectedPersonnel) {
-    return <p className="text-white text-center mt-4">Select a personnel to view details.</p>;
+    return (
+      <p className="text-white text-center mt-4">
+        Select a personnel to view details.
+      </p>
+    );
   }
 
   return (
@@ -57,11 +68,18 @@ function HistoryTable({ selectedPersonnel }) {
             <tbody>
               {notifications.length > 0 ? (
                 notifications.map((notif) => (
-                  <tr key={notif.id} className="border-b bg-bfpNavy hover:bg-searchTable">
+                  <tr
+                    key={notif.id}
+                    className="border-b bg-bfpNavy hover:bg-searchTable"
+                  >
                     <td className="px-6 py-3">{notif.sensor || "N/A"}</td>
-                    <td className="px-6 py-3">{notif.value === undefined ? "N/A" : notif.value}</td>
+                    <td className="px-6 py-3">
+                      {notif.value === undefined ? "N/A" : notif.value}
+                    </td>
                     <td className="px-6 py-3">{notif.message || "N/A"}</td>
-                    <td className="px-6 py-3">{new Date(notif.timestamp).toLocaleString()}</td>
+                    <td className="px-6 py-3">
+                      {new Date(notif.timestamp).toLocaleString()}
+                    </td>
                   </tr>
                 ))
               ) : (

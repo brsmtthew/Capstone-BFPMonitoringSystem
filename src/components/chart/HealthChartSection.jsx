@@ -20,7 +20,7 @@ const HealthChartSection = ({HeartRate,temperatureData}) => {
               data={HeartRate}
               xKey="time"
               yKey="value"
-              color="#FF7300" // bfpOrange
+              color="#ff0000" // bfpOrange
               title="Heart Rate"
               yLabel="BPM"
               description="This chart shows heart rate trends over time."
@@ -37,7 +37,7 @@ const HealthChartSection = ({HeartRate,temperatureData}) => {
               data={temperatureData}
               xKey="time"
               yKey="value"
-              color="#0088FE" // bfpBlue
+              color="#00C49F" // bfpBlue
               title="Body Temperature"
               yLabel="°C"
               description="This chart shows body temperature trends over time."

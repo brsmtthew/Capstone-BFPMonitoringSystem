@@ -13,7 +13,7 @@ const Overview = ({ HeartRate, temperatureData, smokeData, enviData, ToxicGas })
   }));
 
   return (
-    <div className="h-96 w-full lg:w-[600px] bg-white rounded-lg shadow-lg flex flex-col">
+    <div className="h-96 w-full lg:w-[600px] bg-bfpNavy rounded-lg shadow-lg flex flex-col">
       {/* Header */}
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white">
         <h3 className="text-lg font-bold">Sensor Data Overview</h3>
@@ -25,8 +25,8 @@ const Overview = ({ HeartRate, temperatureData, smokeData, enviData, ToxicGas })
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={combinedData}>
             <CartesianGrid stroke="#e0e0e0" strokeDasharray="5 5" />
-            <XAxis dataKey="time" tick={{ fill: "#000" }} />
-            <YAxis tick={{ fill: "#000" }} />
+            <XAxis dataKey="time" tick={{ fill: "#fff" }} />
+            <YAxis tick={{ fill: "#fff" }} />
             <Tooltip />
             <Legend />
             <Line type="monotone" dataKey="heartRate" stroke="#ff0000" name="Heart Rate" />

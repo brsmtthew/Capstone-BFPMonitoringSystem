@@ -27,13 +27,13 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="flex items-center justify-between p-4 bg-white relative">
+    <nav className="flex items-center justify-between p-4 bg-white sticky top-0 z-50">
       {/* Left: Logo and Text */}
       <div className="flex items-center space-x-2">
         <img src={hardhat} alt="Bureau of Fire Protection" className="w-10 h-10 sm:w-14 sm:h-14" />
         <p className="font-semibold font-serif sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[26px]">
-          <span className="text-bfpOrange">Sentinel</span>
-          <span className="text-bfpNavy">Gear</span>
+          <span className="text-bfpOrange font-bold">BFP</span>
+          <span className="text-bfpNavy">SmartTrack</span>
         </p>
 
       </div>
@@ -42,10 +42,10 @@ const Navbar = () => {
       <div className="absolute left-1/2 transform -translate-x-1/2 hidden xl:flex space-x-4 bg-bfpNavy rounded-full text-white px-6 py-3">
         {[
           { path: "/dashboard", label: "Dashboard" },
+          { path: "/personnel", label: "Personnel" },
           { path: "/monitoring", label: "Monitoring" },
           { path: "/history", label: "History" },
           { path: "/analytics", label: "Analytics" },
-          { path: "/personnel", label: "Personnel" },
         ].map((link) => (
           <Link
             key={link.path}
@@ -76,10 +76,10 @@ const Navbar = () => {
             <ul className="flex flex-col space-y-4 p-6">
               {[
                 { path: "/dashboard", label: "Dashboard" },
+                { path: "/personnel", label: "Personnel" },
                 { path: "/monitoring", label: "Monitoring" },
                 { path: "/history", label: "History" },
                 { path: "/analytics", label: "Analytics" },
-                { path: "/personnel", label: "Personnel" },
               ].map((link) => (
                 <li key={link.path}>
                   <Link

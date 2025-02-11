@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from './LoginAssets/firefighter2.jpg';
 import logo from './LoginAssets/labour.png';
+import ForgotPassword from './ForgotPassword';
 
 function Login() {
   const navigate = useNavigate();
@@ -14,7 +15,13 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
-
+  
+    // Client-side validation
+    if (!email.trim() || !password.trim()) {
+      toast.error("Please provide both email and password.", { position: "top-right" });
+      return;
+    }
+  
     try {
       // Firebase login
       await signInWithEmailAndPassword(auth, email, password);
@@ -25,6 +32,14 @@ function Login() {
     }
   };
 
+  // Redirect the user to the Forgot Password UI
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    console.log('Forgot Password Clicked');
+    navigate('/forgot-password'); // Ensure this route is defined in your routing configuration
+  };
+  
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-bfpNavy text-black">
       <ToastContainer /> {/* Required for toast notifications */}
@@ -33,8 +48,8 @@ function Login() {
           <div className="absolute top-4 left-4 flex items-center mb-8">
             <img src={logo} alt="logo Icon" className="h-12 w-12 mr-2" />
             <p className="font-semibold text-[26px]">
-              <span className="text-bfpOrange">Sentinel</span>
-              <span className="text-bfpNavy">Gear</span>
+              <span className="text-bfpOrange font-bold">BFP</span>
+              <span className="text-bfpNavy">SmartTrack</span>
             </p>
           </div>
 
@@ -72,6 +87,14 @@ function Login() {
                 className="w-full mt-4 py-2 bg-blue text-white font-semibold rounded-md hover:bg-hoverBtn transition duration-300"
               >
                 Login
+              </button>
+              {/* Forgot Password Button */}
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="w-full mt-2 py-2 bg-transparent text-blue font-semibold rounded-md hover:underline transition duration-300"
+              >
+                Forgot Password?
               </button>
             </form>
           </div>

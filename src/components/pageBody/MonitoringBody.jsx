@@ -270,8 +270,7 @@ function MonitoringBody() {
             <div key={person.gearId} className="mb-6">
               {/* First Row: Profile Monitoring and Health Monitoring */}
               <div
-                className="flex flex-col sm:items-center sm:justify-center md:items-center md:justify-center 
-                          lg:flex-row lg:items-start lg:justify-start"
+                className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
               >
                 <div className="flex-shrink-0 mb-6">
                   <ProfileMonitoring personnel={person} />
@@ -283,8 +282,7 @@ function MonitoringBody() {
 
               {/* Second Row: Notification Card and Environmental Monitoring */}
               <div
-                className="flex flex-col sm:items-center sm:justify-center md:items-center md:justify-center 
-                          lg:flex-row lg:items-start lg:justify-start"
+                className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
               >
                 <div className="flex-shrink-0 mb-6">
                   <NotificationCard personnel={person} />

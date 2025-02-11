@@ -117,11 +117,7 @@ const AnalyticsBody = () => {
 
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
-      <HeaderSection title={
-        <span className="text-lg">
-          ANALYTICS OVERVIEW
-        </span>
-      }
+      <HeaderSection title= "ANALYTICS OVERVIEW"
       extraContent={
         <>
           <button

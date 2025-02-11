@@ -23,7 +23,7 @@ function NotificationCard({ personnel }) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-72 w-72 sm:h-80 sm:w-80 md:h-80 md:w-80 
+                    h-72 w-72 sm:h-96 sm:w-96 md:h-96 md:w-96 
                     lg:h-96 lg:w-96 xl:h-96 xl:w-96 2xl:h-96 2xl:w-96 font-montserrat">
       <div className="p-4 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
         <h3 className="text-[20px] font-bold">Notification</h3>

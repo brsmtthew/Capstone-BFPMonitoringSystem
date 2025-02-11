@@ -108,6 +108,18 @@ function HistoryBody() {
     );
   };
 
+  // New handler to select/deselect all rows
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      // When checked, select all documentIds from the filteredData
+      const allDocumentIds = filteredData.map((data) => data.documentId);
+      setSelectedRows(allDocumentIds);
+    } else {
+      // When unchecked, clear selection
+      setSelectedRows([]);
+    }
+  };
+
   const handleSort = (option) => {
     let sortedData = [...filteredData];
     switch (option) {
@@ -272,6 +284,11 @@ function HistoryBody() {
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded text-green"
+                        onChange={handleSelectAll}
+                        checked={
+                          filteredData.length > 0 &&
+                          selectedRows.length === filteredData.length
+                        }
                       />
                     </th>
                     <th className="px-6 py-3">Gear ID</th>
