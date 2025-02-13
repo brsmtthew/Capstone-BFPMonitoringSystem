@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/Firebase'; // Firestore configuration
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'; // Firestore methods
+import { doc, updateDoc } from 'firebase/firestore'; // Firestore methods
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage methods
 import { toast } from 'react-toastify'; // Toast notification
 
 // Initialize Firebase Storage
 const storage = getStorage();
 
-function AddPersonnelModal({ isOpen, closeModal }) {
+function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
   const [personnelInfo, setPersonnelInfo] = useState({
     gearId: '',
     name: '',
@@ -19,19 +19,19 @@ function AddPersonnelModal({ isOpen, closeModal }) {
 
   const [imageFile, setImageFile] = useState(null); // State for uploaded image
   const [imagePreview, setImagePreview] = useState(null); // State for image preview
-  const [saving, setSaving] = useState(false); // To prevent multiple submissions
 
   useEffect(() => {
-    if (isOpen) {
-      // Generate gearId when modal is opened
-      const generateGearId = async () => {
-        const gearId = await checkAndGenerateGearId();
-        setPersonnelInfo((prev) => ({ ...prev, gearId }));
-      };
-
-      generateGearId();
+    if (isOpen && selectedPersonnel) {
+      setPersonnelInfo({
+        gearId: selectedPersonnel.gearId || '',
+        name: selectedPersonnel.name || '',
+        position: selectedPersonnel.position || '',
+        age: selectedPersonnel.age || '',
+        birthdate: selectedPersonnel.birthdate || '',
+        phone: selectedPersonnel.phone || '',
+      });
+      setImagePreview(selectedPersonnel.image || null);
     } else {
-      // Reset personnelInfo, imageFile, and imagePreview when modal is closed
       setPersonnelInfo({
         gearId: '',
         name: '',
@@ -42,9 +42,8 @@ function AddPersonnelModal({ isOpen, closeModal }) {
       });
       setImageFile(null);
       setImagePreview(null);
-      setSaving(false);
     }
-  }, [isOpen]);
+  }, [isOpen, selectedPersonnel]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -60,47 +59,22 @@ function AddPersonnelModal({ isOpen, closeModal }) {
     setImagePreview(file ? URL.createObjectURL(file) : null); // Generate preview URL or null
   };
 
-  // Function to check if the gearId exists in Firestore and increment it
-  const checkAndGenerateGearId = async () => {
-    let newGearId = 'pr001';
-    let isAvailable = false;
-
-    while (!isAvailable) {
-      const q = query(collection(db, 'personnelInfo'), where('gearId', '==', newGearId));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        isAvailable = true; // gearId is available
-      } else {
-        // Increment gearId, e.g., from pr001 to pr002, pr003, etc.
-        const num = parseInt(newGearId.slice(2), 10);
-        newGearId = `pr${(num + 1).toString().padStart(3, '0')}`;
-      }
-    }
-
-    return newGearId;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (saving) return; // Prevent double submission
-    setSaving(true);
-
     try {
-      let imageUrl = '';
+      let imageUrl = imagePreview;
 
-      // Upload image to Firebase Storage if there's an image file
+      // Upload image to Firebase Storage if there's a new image file
       if (imageFile) {
         const storageRef = ref(storage, `personnelImages/${personnelInfo.gearId}/${personnelInfo.gearId}`);
-
         await uploadBytes(storageRef, imageFile); // Upload file
         imageUrl = await getDownloadURL(storageRef); // Get public URL
       }
 
-      // Save personnel info to Firestore with gearId and image URL
-      await addDoc(collection(db, 'personnelInfo'), {
-        gearId: personnelInfo.gearId,
+      // Update existing personnel info in Firestore
+      const docRef = doc(db, 'personnelInfo', selectedPersonnel.id);
+      await updateDoc(docRef, {
         name: personnelInfo.name,
         position: personnelInfo.position,
         age: personnelInfo.age,
@@ -111,12 +85,10 @@ function AddPersonnelModal({ isOpen, closeModal }) {
 
       // Close modal and show success message
       closeModal();
-      toast.success('Personnel info saved successfully!');
+      toast.success('Personnel info updated successfully!');
     } catch (error) {
-      toast.error('Error saving personnel info:', error);
-      alert('Failed to save personnel info');
-    } finally {
-      setSaving(false);
+      toast.error('Error updating personnel info:', error);
+      console.error('Error updating personnel info:', error);
     }
   };
 
@@ -128,7 +100,7 @@ function AddPersonnelModal({ isOpen, closeModal }) {
         <button onClick={closeModal} className="absolute top-2 right-2 text-black">
           X
         </button>
-        <h2 className="text-xl font-bold mb-4 text-black">Add Personnel Information</h2>
+        <h2 className="text-xl font-bold mb-4 text-black">Edit Personnel Information</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Image Upload */}
@@ -174,7 +146,6 @@ function AddPersonnelModal({ isOpen, closeModal }) {
                 value={personnelInfo.gearId}
                 onChange={handleInputChange}
                 className="w-full mt-1 px-2 py-1 border border-gray rounded-md"
-                placeholder="Generating Gear ID..."
                 disabled
               />
             </div>
@@ -273,7 +244,7 @@ function AddPersonnelModal({ isOpen, closeModal }) {
               type="submit"
               className="w-1/2 py-2 bg-bfpNavy text-white font-semibold rounded-full hover:bg-hoverBtn"
             >
-              {saving ? 'Saving...' : 'Save Personnel'}
+              Save Changes
             </button>
           </div>
         </form>
@@ -282,4 +253,4 @@ function AddPersonnelModal({ isOpen, closeModal }) {
   );
 }
 
-export default AddPersonnelModal;
+export default EditPersonnelModal;

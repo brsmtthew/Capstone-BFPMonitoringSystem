@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { db, storage } from '../../firebase/Firebase';
-import { collection, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
-import DeletePersonnelModal from '../modal/deletePersonnelModal';
-import AddPersonnelModal from '../modal/addPersonnelModal';
+import { db } from '../../firebase/Firebase';
+import { collection, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import HeaderSection from '../header/HeaderSection';
 import BodyCard from '../parentCard/BodyCard';
+import { useStore } from '../store/useStore';
+import AddPersonnelModal from '../modal/addPersonnelModal';
+import EditPersonnelModal from '../modal/editPersonnelModal';
+import { toast } from 'react-toastify';
 
 function PersonnelBody() {
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [isAddModalOpen, setAddModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [selectedImagePath, setSelectedImagePath] = useState(null);
-  const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
-  
   const navigate = useNavigate();
+  const [isAddModalOpen, setAddModalOpen] = useState(false);
+  const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
+  const [isEditOpen, setEditOpen] = useState(false);
+  const [expandedPersonnel, setExpandedPersonnel] = useState(null); // State to manage expanded card
 
-  // Fetch personnel data 
+  // Accessing the monitored personnel list from the store
+  const { monitoredPersonnel, addMonitoredPersonnel, removeMonitoredPersonnel } = useStore();
+
+  // Fetch personnel data from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'personnelInfo'), (querySnapshot) => {
       const personnelData = querySnapshot.docs.map((doc) => ({
@@ -30,25 +32,32 @@ function PersonnelBody() {
       setLoading(false);
     });
 
-    // Cleanup listener on unmount
     return () => unsubscribe();
   }, []);
 
-  // Open and Close Modals
-  const openDeleteModal = (id, imagePath) => {
-    setSelectedId(id);
-    setSelectedImagePath(imagePath); // Pass the image path
-    setDeleteModalOpen(true);
+  // Handle click to monitor a personnel
+  const handleMonitor = (person) => {
+    addMonitoredPersonnel(person);
+    navigate('/monitoring', { state: { selectedPersonnel: person } });
   };
 
-  const closeDeleteModal = () => {
-    setDeleteModalOpen(false);
-    setSelectedId(null);
-    setSelectedImagePath(null); // Clear the image path
+  // Handle click to remove a personnel from monitoring
+  const handleRemove = (person) => {
+    removeMonitoredPersonnel(person.gearId); // Remove by gearId
+  };
+
+  // Handle click to delete a personnel
+  const handleDelete = async (person) => {
+    try {
+      await deleteDoc(doc(db, 'personnelInfo', person.id));
+      setPersonnel(personnel.filter((p) => p.id !== person.id));
+    } catch (error) {
+      toast.error("Error deleting personnel:", error);
+    }
   };
 
   const openAddModal = (personnel = null) => {
-    setSelectedPersonnel(null); // Set selected personnel for editing (or null for adding)
+    setSelectedPersonnel(personnel); // Set selected personnel for editing (or null for adding)
     setAddModalOpen(true);
   };
 
@@ -57,43 +66,22 @@ function PersonnelBody() {
     setSelectedPersonnel(null); // Clear selected personnel on close
   };
 
-  // const openAddModal = () => setAddModalOpen(true);
-  // const closeAddModal = () => setAddModalOpen(false);
-
-  // Handle display personnel
-  const handleDisplay = (member) => {
-    openAddModal(member);
-  };
-
-  // Delete personnel and image
-  const handleDeletePersonnel = async () => {
-    try {
-      // Delete the document from Firestore
-      await deleteDoc(doc(db, 'personnelInfo', selectedId));
-
-      // If there's an image path, delete the image from Firebase Storage
-      if (selectedImagePath) {
-        const imageRef = ref(storage, selectedImagePath);
-        await deleteObject(imageRef);
-        console.log('Image deleted successfully');
-      }
-
-      // Update the personnel state
-      setPersonnel((prev) => prev.filter((member) => member.id !== selectedId));
-    } catch (error) {
-      console.error('Error deleting personnel or image:', error);
-    } finally {
-      closeDeleteModal();
-    }
-  };
-
-  if (loading) {
-    return <p className="text-center mt-10 text-lg text-gray-700">Loading...</p>;
+  const openEditModal = (personnel = null) => {
+    setSelectedPersonnel(personnel); // Set selected personnel for editing (or null for adding)
+    setEditOpen(true);
   }
 
+  const closeEditModal = () => {
+    setEditOpen(false);
+    setSelectedPersonnel(null); // Clear selected personnel on close
+  }
+
+  const toggleExpand = (personId) => {
+    setExpandedPersonnel(expandedPersonnel === personId ? null : personId);
+  };
+
   return (
-    <div className="p-4 min-h-screen flex flex-col lg:bg-white">
-      {/* Header */}
+    <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection
         title="PERSONNEL LIST"
         extraContent={
@@ -121,92 +109,81 @@ function PersonnelBody() {
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
-      {/* Card for Personnel Data */}
-      <BodyCard>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {personnel.length > 0 ? (
-            personnel.map((member) => (
-              <div
-                key={member.id}
-                className="bg-primeColor shadow-lg rounded-xl overflow-hidden"
-              >
-                {/* Image Section */}
-                <div className="p-4 flex flex-col items-center">
+      {loading ? (
+        <p className="text-center mt-10 text-lg text-gray">Loading...</p>
+      ) : (
+        <BodyCard>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {personnel.length > 0 ? (
+              personnel.map((person) => (
+                <div
+                  key={person.id}
+                  className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center cursor-pointer"
+                  onDoubleClick={() => toggleExpand(person.id)}
+                >
                   <img
-                    src={member.image || 'https://via.placeholder.com/150'}
-                    alt={`${member.name}'s avatar`}
-                    className="h-48 w-48 object-cover rounded-full shadow-md"
+                    src={person.image || 'https://via.placeholder.com/150'}
+                    alt={person.name}
+                    className="w-24 h-24 rounded-full mb-4"
                   />
-                  <h3 className="text-2xl font-bold text-center mt-4 text-white">
-                    {member.name}
-                  </h3>
-                  <p className="text-lg font-medium text-center text-white">
-                    {member.position}
-                  </p>
-                </div>
-
-                {/* Details Section */}
-                <div className="text-white px-8 py-2">
-                  <div className="space-y-2">
-                    <p>
-                      <span className="font-semibold">ID:</span> {member.gearId}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Age:</span> {member.age}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Birthdate:</span> {member.birthdate}
-                    </p>
-                    <p>
-                      <span className="font-semibold">Phone:</span> {member.phone}
-                    </p>
+                  <h3 className="text-lg font-bold text-white">{person.name}</h3>
+                  <p className="text-sm text-white">{person.position}</p>
+                  <p className="text-sm text-white">{person.gearId}</p>
+                  {expandedPersonnel === person.id && (
+                    <div className="mt-4 text-white">
+                      <p><strong>Age:</strong> {person.age}</p>
+                      <p><strong>Birthdate:</strong> {person.birthdate}</p>
+                      <p><strong>Phone:</strong> {person.phone}</p>
+                    </div>
+                  )}
+                  <div className="mt-4 flex space-x-2">
+                    <button
+                      className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                      onClick={() => openEditModal(person)}
+                    >
+                      Edit
+                    </button>
+                    {!monitoredPersonnel.some((monitored) => monitored.gearId === person.gearId) ? (
+                      <button
+                        className="px-4 py-2 bg-green text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                        onClick={() => handleMonitor(person)}
+                      >
+                        Active
+                      </button>
+                    ) : (
+                      <button
+                        className="px-4 py-2 bg-red text-white rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105"
+                        onClick={() => handleRemove(person)}
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <button
+                      className="px-4 py-2 bg-red text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                      onClick={() => handleDelete(person)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-
-                {/* Separator */}
-                <div className="my-4 w-3/4 h-px bg-separator mx-auto"></div>
-
-                {/* Button Section */}
-                <div className="flex justify-around p-4">
-                  <button
-                    className="bg-bfpNavy text-white px-4 py-2 rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => handleDisplay(member)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red text-white px-4 py-2 rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105 hover:shadow-lg"
-                    onClick={() => openDeleteModal(member.id, member.imagePath)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-center text-lg text-gray-300 col-span-full">
-              No personnel data found.
-            </p>
-          )}
-        </div>
-      </BodyCard>
-
-      {/* Add Personnel Modal */}
+              ))
+            ) : (
+              <p className="text-gray">No personnel available.</p>
+            )}
+          </div>
+        </BodyCard>
+      )}
       <AddPersonnelModal 
       isOpen={isAddModalOpen} 
       closeModal={closeAddModal} 
       selectedPersonnel={selectedPersonnel}
       />
 
-      {/* Delete Personnel Modal */}
-      {isDeleteModalOpen && (
-        <DeletePersonnelModal
-          isOpen={isDeleteModalOpen}
-          onClose={closeDeleteModal}
-          selectedId={selectedId}
-          updatePersonnel={setPersonnel}  // Pass the update function
-        />
-      )}
+      <EditPersonnelModal
+      isOpen={isEditOpen}
+      closeModal={closeEditModal}
+      selectedPersonnel={selectedPersonnel}
+      />
     </div>
   );
 }

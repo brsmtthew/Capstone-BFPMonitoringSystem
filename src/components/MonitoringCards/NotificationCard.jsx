@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStore } from '../store/useStore';
 
-function NotificationCard() {
+function NotificationCard({ personnel }) {
   const { notifications, clearNotifications, selectedPersonnel } = useStore();
 
   // Function to format timestamp to desired format
@@ -16,19 +16,19 @@ function NotificationCard() {
     return `${month}/${day}/${year} time ${hour}:${minute}`;
   };
 
-  // Filter notifications based on selectedPersonnel's gearId
-  const filteredNotifications = selectedPersonnel
-    ? notifications.filter(
-        (notification) => notification.gearId === selectedPersonnel.gearId
-      )
-    : [];
+  // Filter notifications based on the personnel's gearId
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.gearId === personnel.gearId
+  );
 
   return (
-    <div className="h-96 w-80 bg-white rounded-lg shadow-lg flex flex-col">
-      <div className="p-2 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
-        <h3 className="text-lg font-bold">Notification</h3>
+    <div className="bg-white rounded-lg shadow-lg flex flex-col 
+                    h-72 w-72 sm:h-96 sm:w-96 md:h-96 md:w-96 
+                    lg:h-96 lg:w-96 xl:h-96 xl:w-96 2xl:h-96 2xl:w-96 font-montserrat">
+      <div className="p-4 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
+        <h3 className="text-[20px] font-bold">Notification</h3>
         <button
-          className="text-xs text-white bg-red px-3 py-2 rounded-md hover:bg-bfpOrange"
+          className="text-xs text-white bg-red px-6 py-3 rounded-lg hover:bg-bfpOrange"
           onClick={clearNotifications}
         >
           Clear
@@ -39,7 +39,9 @@ function NotificationCard() {
           filteredNotifications.map((notification, index) => (
             <div
               key={index}
-              className="flex justify-between items-center mb-2 p-2 bg-red text-white rounded-lg"
+              className={`flex justify-between items-center mb-2 p-2 rounded-lg ${
+                notification.isCritical ? 'bg-red text-white' : 'bg-green text-white'
+              }`}
             >
               <span>{notification.message}</span>
               <span className="text-xs text-white">

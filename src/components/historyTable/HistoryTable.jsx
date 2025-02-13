@@ -1,38 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
+import { toast } from "react-toastify";
 
 function HistoryTable({ selectedPersonnel }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Debugging: log selectedPersonnel to verify it's passed correctly
-    console.log("Selected Personnel:", selectedPersonnel);
-
     const fetchNotifications = async () => {
       setLoading(true);
       try {
-        // Ensure that selectedPersonnel.gearId exists before querying
-        if (selectedPersonnel && selectedPersonnel.gearId) {
+        if (selectedPersonnel && selectedPersonnel.documentId) {
           const notificationsRef = collection(
             db,
-            `personnelMonitoring/${selectedPersonnel.gearId}/notifications`
+            `personnelRecords/${selectedPersonnel.documentId}/notifications`
           );
-          const snapshot = await getDocs(notificationsRef);
-          // Debugging: log fetched notifications
-          console.log("Fetched Notifications:", snapshot.docs);
-
-          const fetchedNotifications = snapshot.docs.map((doc) => ({
+          // Create a query that orders by timestamp descending.
+          const q = query(notificationsRef, orderBy("timestamp", "desc"));
+          const notifSnapshot = await getDocs(q);
+          const notificationsData = notifSnapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
-          setNotifications(fetchedNotifications);
+          setNotifications(notificationsData);
         } else {
-          console.error("Selected personnel or gearId is undefined.");
+          toast.error("Invalid selected personnel or documentId.");
         }
       } catch (error) {
-        console.error("Error fetching notifications:", error);
+        toast.error(`Error fetching notifications: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -44,7 +40,11 @@ function HistoryTable({ selectedPersonnel }) {
   }, [selectedPersonnel]);
 
   if (!selectedPersonnel) {
-    return <p className="text-white text-center mt-4">Select a personnel to view details.</p>;
+    return (
+      <p className="text-white text-center mt-4">
+        Select a personnel to view details.
+      </p>
+    );
   }
 
   return (
@@ -68,11 +68,18 @@ function HistoryTable({ selectedPersonnel }) {
             <tbody>
               {notifications.length > 0 ? (
                 notifications.map((notif) => (
-                  <tr key={notif.id} className="border-b bg-bfpNavy hover:bg-searchTable">
+                  <tr
+                    key={notif.id}
+                    className="border-b bg-bfpNavy hover:bg-searchTable"
+                  >
                     <td className="px-6 py-3">{notif.sensor || "N/A"}</td>
-                    <td className="px-6 py-3">{notif.value || "N/A"}</td>
+                    <td className="px-6 py-3">
+                      {notif.value === undefined ? "N/A" : notif.value}
+                    </td>
                     <td className="px-6 py-3">{notif.message || "N/A"}</td>
-                    <td className="px-6 py-3">{new Date(notif.timestamp).toLocaleString()}</td>
+                    <td className="px-6 py-3">
+                      {new Date(notif.timestamp).toLocaleString()}
+                    </td>
                   </tr>
                 ))
               ) : (

@@ -6,6 +6,8 @@ import searchIcon from "./dashboardAssets/glass.png";
 import HeaderSection from "../header/HeaderSection";
 import BodyCard from "../parentCard/BodyCard";
 import HistoryTable from "../historyTable/HistoryTable";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function HistoryBody() {
   const [historyData, setHistoryData] = useState([]);
@@ -16,28 +18,33 @@ function HistoryBody() {
   const [selectedRows, setSelectedRows] = useState([]); // Track selected rows for deletion
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Track dropdown visibility
   const [sortOption, setSortOption] = useState(""); // Track sorting option
+  const [selectedRealTimeData, setSelectedRealTimeData] = useState(null); // Store selected real-time data
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const personnelSnapshot = await getDocs(collection(db, "personnelMonitoring"));
+        const personnelSnapshot = await getDocs(collection(db, "personnelRecords"));
         const data = [];
-
+    
         for (const docSnapshot of personnelSnapshot.docs) {
           const personnel = docSnapshot.data();
-          const gearId = docSnapshot.id;
-
+          const documentId = docSnapshot.id; // Firestore auto-generated ID
+    
           const notificationsRef = collection(docSnapshot.ref, "notifications");
           const notifSnapshot = await getDocs(notificationsRef);
           const notifications = [];
-
+    
           notifSnapshot.forEach((notifDoc) => {
             const notifData = notifDoc.data();
             const date = new Date(notifData.timestamp);
             const formattedDate = date.toLocaleDateString();
             const formattedTime = date.toLocaleTimeString();
-
+    
+            const gearId = notifData.gearId || "Unknown"; // Default if no gearId
+    
             notifications.push({
+              gearId: gearId,
               event: notifData.event || "Critical",
               date: formattedDate,
               time: formattedTime,
@@ -46,17 +53,18 @@ function HistoryBody() {
               status: notifData.status || "Unknown",
             });
           });
-
+    
           data.push({
-            gearId: gearId,
+            documentId: documentId, // Use documentId here
+            gearId: personnel.gearId || "No gearId",
             name: personnel.personnelName,
-            date: notifications.length > 0 ? notifications[0].date : "No date",
-            time: notifications.length > 0 ? notifications[0].time : "No time",
+            date: personnel.date || "No date",
+            time: personnel.time || "No time",
             totalNotifications: notifications.length,
             notifications: notifications,
           });
         }
-
+    
         setHistoryData(data);
         setFilteredData(data);
         setLoading(false);
@@ -64,18 +72,25 @@ function HistoryBody() {
         console.error("Error fetching data:", error);
         setLoading(false);
       }
-    };
-
+    };    
+    
     fetchData();
   }, []);
+  
+  
 
   useEffect(() => {
-    const filtered = historyData.filter((data) =>
-      data.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      data.gearId.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = historyData.filter((data) => {
+    const name = data.name || ""; // Fallback to an empty string if undefined
+    const gearId = data.gearId || ""; // Fallback to an empty string if undefined
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      gearId.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredData(filtered);
-  }, [searchTerm, historyData]);
+  });
+  setFilteredData(filtered);
+}, [searchTerm, historyData]);
+
 
   const handleRowClick = (personnel) => {
     setExpandedPersonnel(expandedPersonnel === personnel ? null : personnel);
@@ -85,12 +100,24 @@ function HistoryBody() {
     setSearchTerm(e.target.value);
   };
 
-  const handleSelectRow = (gearId) => {
+  const handleSelectRow = (documentId) => {
     setSelectedRows((prevSelectedRows) =>
-      prevSelectedRows.includes(gearId)
-        ? prevSelectedRows.filter((id) => id !== gearId)
-        : [...prevSelectedRows, gearId]
+      prevSelectedRows.includes(documentId)
+        ? prevSelectedRows.filter((id) => id !== documentId)
+        : [...prevSelectedRows, documentId]
     );
+  };
+
+  // New handler to select/deselect all rows
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      // When checked, select all documentIds from the filteredData
+      const allDocumentIds = filteredData.map((data) => data.documentId);
+      setSelectedRows(allDocumentIds);
+    } else {
+      // When unchecked, clear selection
+      setSelectedRows([]);
+    }
   };
 
   const handleSort = (option) => {
@@ -113,23 +140,62 @@ function HistoryBody() {
     setIsDropdownOpen(false); // Close dropdown after selection
   };
 
+  // Utility function to delete all documents in a subcollection
+  const deleteSubcollection = async (parentDocRef, subcollectionName) => {
+    const subcollectionRef = collection(parentDocRef, subcollectionName);
+    const subSnapshot = await getDocs(subcollectionRef);
+    const deletePromises = subSnapshot.docs.map((subDoc) =>
+      deleteDoc(subDoc.ref)
+    );
+    return Promise.all(deletePromises);
+  };
+
   const handleDeleteSelected = async () => {
     try {
-      for (const gearId of selectedRows) {
-        const docRef = doc(db, "personnelMonitoring", gearId);
-        await deleteDoc(docRef); // Delete the document
+      for (const documentId of selectedRows) {
+        const docRef = doc(db, "personnelRecords", documentId);
+        // Delete subcollections first
+        await deleteSubcollection(docRef, "notifications");
+        await deleteSubcollection(docRef, "realTimeData");
+
+        // Then delete the parent document
+        await deleteDoc(docRef);
       }
-      // After deletion, refresh the data
-      setFilteredData(filteredData.filter((data) => !selectedRows.includes(data.gearId)));
+      // After deletion, refresh the UI data
+      setFilteredData(
+        filteredData.filter((data) => !selectedRows.includes(data.documentId))
+      );
       setSelectedRows([]); // Clear selected rows
       setIsDropdownOpen(false); // Close dropdown after action
+      toast.success("Selected Personnel deleted successfully");
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error deleting personnel: ", error);
+      toast.error("Error deleting personnel");
     }
   };
 
+  // Handle "View" button click and send data to analytics page
+  const handleViewClick = async (documentId, name, date, time) => {  // Using documentId instead of personnelId
+    try {
+      // Adjust the path to match your Firestore structure
+      const realTimeDataRef = collection(db, 'personnelRecords', documentId, 'realTimeData'); // Use documentId here
+      const realTimeDataSnapshot = await getDocs(realTimeDataRef);
+      const realTimeData = [];
+  
+      realTimeDataSnapshot.forEach((doc) => {
+        realTimeData.push({ id: doc.id, ...doc.data() });
+      });
+  
+      // Navigate to analytics and pass data
+      navigate('/analytics', { state: { realTimeData, name: name, date: date, time: time } });
+    } catch (error) {
+      toast.error("Error fetching real-time data:", error);
+    }
+  };
+  
+
   return (
-    <div className="p-4 min-h-screen flex flex-col">
+    <div className="p-4 min-h-screen flex flex-col font-montserrat">
       <HeaderSection title="HISTORY" />
 
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
@@ -163,7 +229,7 @@ function HistoryBody() {
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
+                  <div className="absolute right-50 mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
                     <button
                       onClick={() => handleSort("latest")}
                       className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"
@@ -218,6 +284,11 @@ function HistoryBody() {
                       <input
                         type="checkbox"
                         className="w-4 h-4 rounded text-green"
+                        onChange={handleSelectAll}
+                        checked={
+                          filteredData.length > 0 &&
+                          selectedRows.length === filteredData.length
+                        }
                       />
                     </th>
                     <th className="px-6 py-3">Gear ID</th>
@@ -225,21 +296,22 @@ function HistoryBody() {
                     <th className="px-6 py-3">Date</th>
                     <th className="px-6 py-3">Time</th>
                     <th className="px-6 py-3">Total Notifications</th>
+                    <th className="px-6 py-3">Analytics</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredData.map((data, index) => (
                     <React.Fragment key={index}>
                       <tr
-                        onClick={() => handleRowClick(data)}
+                        onDoubleClick={() => handleRowClick(data)}
                         className="border-b bg-bfpNavy hover:bg-searchTable cursor-pointer"
                       >
                         <td className="p-4">
                           <input
                             type="checkbox"
                             className="w-4 h-4 rounded text-green"
-                            checked={selectedRows.includes(data.gearId)}
-                            onChange={() => handleSelectRow(data.gearId)}
+                            checked={selectedRows.includes(data.documentId)}
+                            onChange={() => handleSelectRow(data.documentId)}
                           />
                         </td>
                         <td className="px-6 py-3">{data.gearId}</td>
@@ -247,6 +319,10 @@ function HistoryBody() {
                         <td className="px-6 py-3">{data.date}</td>
                         <td className="px-6 py-3">{data.time}</td>
                         <td className="px-6 py-3">{data.totalNotifications}</td>
+                        <td className="px-6 py-3 flex justify-start">
+                          <button onClick={() => handleViewClick(data.documentId, data.name, data.date, data.time)}
+                          className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105">View</button>
+                        </td>
                       </tr>
 
                       {expandedPersonnel === data && (
