@@ -7,6 +7,7 @@ import BodyCard from '../parentCard/BodyCard';
 import { useStore } from '../store/useStore';
 import AddPersonnelModal from '../modal/addPersonnelModal';
 import EditPersonnelModal from '../modal/editPersonnelModal';
+import DeletePersonnelModal from '../modal/deletePersonnelModal';
 import { toast } from 'react-toastify';
 
 function PersonnelBody() {
@@ -16,10 +17,11 @@ function PersonnelBody() {
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [selectedPersonnel, setSelectedPersonnel] = useState(null); 
   const [isEditOpen, setEditOpen] = useState(false);
+  const [isDeleteOpen, setDeleteOpen] = useState(false);
   const [expandedPersonnel, setExpandedPersonnel] = useState(null); // State to manage expanded card
 
   // Accessing the monitored personnel list from the store
-  const { monitoredPersonnel, addMonitoredPersonnel, removeMonitoredPersonnel } = useStore();
+  const { monitoredPersonnel, addMonitoredPersonnel, removeMonitoredPersonnel, clearSavingState } = useStore();
 
   // Fetch personnel data from Firestore
   useEffect(() => {
@@ -44,6 +46,7 @@ function PersonnelBody() {
   // Handle click to remove a personnel from monitoring
   const handleRemove = (person) => {
     removeMonitoredPersonnel(person.gearId); // Remove by gearId
+    clearSavingState(person.gearId); // Clear the saving state
   };
 
   // Handle click to delete a personnel
@@ -53,6 +56,8 @@ function PersonnelBody() {
       setPersonnel(personnel.filter((p) => p.id !== person.id));
     } catch (error) {
       toast.error("Error deleting personnel:", error);
+    } finally {
+      closeDeleteModal();
     }
   };
 
@@ -73,6 +78,16 @@ function PersonnelBody() {
 
   const closeEditModal = () => {
     setEditOpen(false);
+    setSelectedPersonnel(null); // Clear selected personnel on close
+  }
+
+  const openDeleteModal = (personnel = null) => {
+    setSelectedPersonnel(personnel); // Set selected personnel for editing (or null for adding)
+    setDeleteOpen(true);
+  }
+
+  const closeDeleteModal = () => {
+    setDeleteOpen(false);
     setSelectedPersonnel(null); // Clear selected personnel on close
   }
 
@@ -160,7 +175,7 @@ function PersonnelBody() {
                     )}
                     <button
                       className="px-4 py-2 bg-red text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
-                      onClick={() => handleDelete(person)}
+                      onClick={() => openDeleteModal(person)}
                     >
                       Delete
                     </button>
@@ -183,6 +198,13 @@ function PersonnelBody() {
       isOpen={isEditOpen}
       closeModal={closeEditModal}
       selectedPersonnel={selectedPersonnel}
+      />
+
+      <DeletePersonnelModal
+      isOpen={isDeleteOpen}
+      closeModal={closeDeleteModal}
+      onConfirm={handleDelete}
+      personnel={selectedPersonnel}
       />
     </div>
   );

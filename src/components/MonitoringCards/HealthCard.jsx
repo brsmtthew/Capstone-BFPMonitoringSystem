@@ -10,12 +10,22 @@ const HealthCard = ({ icon, title, value, description, warningIcon, children }) 
           <img src={icon} alt={title} className="w-8 h-8 mr-2" draggable="false" />
           <p className="font-bold sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[24px]">{title}</p>
         </div>
-        <button 
-          className={`md:px-1 lg:px-2 xl:px-3 2xl:px-4 py-1 rounded-2xl sm:text-[12px] md:text-[14px] lg:[16px] xl:text-[16px] 2xl:text-[18px] ${
-            hasValidValue ? 'bg-btnActive text-btnFontActive' : 'bg-gray text-lightGray'
-          }`}
-        >
-          {hasValidValue ? 'Active' : 'Inactive'}
+        <button className="flex items-center justify-center rounded-2xl">
+          {/* Small screens: show only a colored circle */}
+          <span
+            className={`md:hidden inline-block w-4 h-4 rounded-full ${
+              hasValidValue ? 'bg-green' : 'bg-gray'
+            }`}
+          ></span>
+
+          {/* Medium screens and above: show full text button */}
+          <span
+            className={`hidden md:inline px-2 py-1 rounded-2xl ${
+              hasValidValue ? 'bg-btnActive text-btnFontActive' : 'bg-gray text-lightGray'
+            }`}
+          >
+            {hasValidValue ? 'Active' : 'Inactive'}
+          </span>
         </button>
       </div>
       <div className="mt-4 flex flex-col justify-center items-center text-center p-4">
