@@ -100,58 +100,64 @@ function MonitoringBody() {
     }
   }, [personnel, setPersonnel]);
 
+  // Modified useEffect in MonitoringBody
   useEffect(() => {
-    if (selectedPersonnel?.gearId) {
-      const gearId = selectedPersonnel.gearId;
-  
-      // Fetch sensor data
-      const unsubscribeTemp = fetchData(`Monitoring/${gearId}/BodyTemperature`, gearId, 'bodyTemperature');
-      const unsubscribeEnvTemp = fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature');
-      const unsubscribeSmoke = fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor');
-      const unsubscribeToxic = fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor');
-      const unsubscribeHeartRate = fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate');
-      const unsubscribeBattery = fetchData(`Monitoring/${gearId}/Battery`, gearId, 'Battery');
-  
-      // Store unsubscribe functions
-      unsubscribeMap.current[gearId] = [
-        unsubscribeTemp, 
-        unsubscribeEnvTemp, 
-        unsubscribeSmoke, 
-        unsubscribeToxic, 
-        unsubscribeHeartRate,
-        unsubscribeBattery
-      ];
-  
-      return () => {
-        if (unsubscribeMap.current[gearId]) {
-          unsubscribeMap.current[gearId].forEach((unsubscribe) => unsubscribe());
-          delete unsubscribeMap.current[gearId];
-        }
-      };
-    }
-  }, [selectedPersonnel, setSensorData]);
-  
+    const currentMonitored = monitoredPersonnel.map(p => p.gearId);
+    
+    // Setup listeners for all monitored personnel
+    monitoredPersonnel.forEach(person => {
+      const gearId = person.gearId;
+      
+      if (!unsubscribeMap.current[gearId]) {
+        const unsubs = [
+          fetchData(`Monitoring/${gearId}/BodyTemperature`, gearId, 'bodyTemperature'),
+          fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature'),
+          fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor'),
+          fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor'),
+          fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate'),
+          fetchData(`Monitoring/${gearId}/Battery`, gearId, 'Battery')
+        ];
+        
+        unsubscribeMap.current[gearId] = unsubs;
+      }
+    });
+
+    // Cleanup for removed personnel
+    Object.keys(unsubscribeMap.current).forEach(gearId => {
+      if (!currentMonitored.includes(gearId)) {
+        unsubscribeMap.current[gearId].forEach(unsubscribe => unsubscribe());
+        delete unsubscribeMap.current[gearId];
+      }
+    });
+
+    return () => {
+      // Only clean up when component unmounts
+    };
+  }, [monitoredPersonnel, setSensorData]); // Now depends on monitoredPersonnel
+    
   // Monitor different sensor changes
   useEffect(() => {
-    if (selectedPersonnel?.gearId) {
-      const gearId = selectedPersonnel.gearId;
+    monitoredPersonnel.forEach(person => {
+      const gearId = person.gearId;
       const sensors = sensorData[gearId];
-  
       if (!sensors) return;
-  
+
       handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
-      handleSensorNotification(gearId, sensors.environmentalTemperature, 30, 28, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 470, 460, 'Smoke Level', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 390, 380, 'Toxic Gas Level', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.environmentalTemperature, 33, 32.8, 'Environmental Temperature', 'environmentalTemperature');
+      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke Level', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Toxic Gas Level', 'ToxicGasSensor');
       handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
-  
-    }
-  }, [sensorData[selectedPersonnel?.gearId], selectedPersonnel, handleSensorNotification]);
+    })
+  }, [sensorData, monitoredPersonnel, handleSensorNotification]);
   
   const monitoringHealthData = (person) => [
     {
       icon: BatterIcon,
-      title: 'Battery Percentage',
+      title: (
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          Battery Status
+        </span>
+      ),
       value: sensorData[person.gearId]?.Battery !== undefined && sensorData[person.gearId]?.Battery !== 0
         ? `${sensorData[person.gearId]?.Battery.toFixed(2)}%`
         : (
@@ -176,7 +182,11 @@ function MonitoringBody() {
     },    
     {
       icon: heartIcon,
-      title: 'Heart Rate',
+      title: (
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          Heart Rate
+        </span>
+      ),
       value: sensorData[person.gearId]?.HeartRate !== undefined && sensorData[person.gearId].HeartRate !== 0
         ? `${sensorData[person.gearId].HeartRate.toFixed(2)} BPM`
         : (
@@ -189,7 +199,11 @@ function MonitoringBody() {
     },
     {
       icon: bodytem,
-      title: 'Body Temperature',
+      title: (
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          Body Temperature
+        </span>
+      ),
       value: sensorData[person.gearId]?.bodyTemperature !== undefined && sensorData[person.gearId].bodyTemperature !== 0
         ? `${sensorData[person.gearId].bodyTemperature.toFixed(2)}°C`
         : (
@@ -206,8 +220,8 @@ function MonitoringBody() {
     {
       icon: enviTemp,
       title: (
-        <span className='text-[16px]'>
-          Envi Temperature
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          Environmental Temperature
         </span>
       ),
       value: sensorData[person.gearId]?.environmentalTemperature !== undefined && sensorData[person.gearId].environmentalTemperature !== 0
@@ -222,7 +236,11 @@ function MonitoringBody() {
     },
     {
       icon: danger,
-      title: 'Toxic Gas',
+      title: (
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          CO-Gas
+        </span>
+      ),
       value: sensorData[person.gearId]?.ToxicGasSensor !== undefined && sensorData[person.gearId].ToxicGasSensor !== 0
         ? `${sensorData[person.gearId].ToxicGasSensor} PPM`
         : (
@@ -238,7 +256,11 @@ function MonitoringBody() {
     },
     {
       icon: maskIcon,
-      title: 'Smoke',
+      title: (
+        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+          Smoke
+        </span>
+      ),
       value: sensorData[person.gearId]?.smokeSensor !== undefined && sensorData[person.gearId].smokeSensor !== 0
         ? `${sensorData[person.gearId].smokeSensor} PPM`
         : (
@@ -260,7 +282,7 @@ function MonitoringBody() {
         <div className="flex justify-center items-center h-screen">
           <p className="text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"
           onClick={() => navigate('/personnel')}>
-            Click here to go to the Personnel Page for monitoring.
+             Click here to add personnel for monitoring.
           </p>
         </div>
       
@@ -273,7 +295,9 @@ function MonitoringBody() {
                 className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
               >
                 <div className="flex-shrink-0 mb-6">
-                  <ProfileMonitoring personnel={person} />
+                  <ProfileMonitoring 
+                  key={person.gearId}
+                  personnel={person} />
                 </div>
                 <div className="flex-grow mb-6 lg:ml-4">
                   <HealthMonitoring monitoringHealthData={monitoringHealthData(person)} />

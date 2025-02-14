@@ -28,14 +28,18 @@ function ProfileMonitoring({ personnel }) {
   }, [temperature, environmentalTemperature, smokeSensor, ToxicGasSensor, HeartRate]);
 
   const handleButtonClick = () => {
-    if (isSaving) {
-      clearSavingState();
+    const gearId = personnel.gearId;
+    
+    if (isSaving[gearId]) {
+      clearSavingState(gearId);
     } else {
-      saveRecordings(); // Save immediately
-      const id = setInterval(saveRecordings, 5000);
-      setSavingState(true, id);
+      // Immediate save and start interval
+      saveRecordings(gearId);
+      const intervalId = setInterval(() => saveRecordings(gearId), 5000);
+      setSavingState(gearId, true, intervalId);
     }
   };
+
 
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
@@ -71,7 +75,7 @@ function ProfileMonitoring({ personnel }) {
             }`}
             onClick={handleButtonClick}
           >
-            {isSaving ? 'Saving Data...' : 'Save Record'}
+            {isSaving[personnel.gearId] ? 'Saving Data...' : 'Save Record'}
           </button>
         </div>
       </div>

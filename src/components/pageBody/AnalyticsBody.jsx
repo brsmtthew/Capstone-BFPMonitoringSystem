@@ -51,7 +51,10 @@ const AnalyticsBody = () => {
     toast.success("Analytics data has been saved.");
   };
   
-  
+  // New print handler
+  const handlePrint = () => {
+    window.print();
+  };  
 
   // Function to sort data by datetime
   const sortByDateTime = (data) => {
@@ -126,6 +129,12 @@ const AnalyticsBody = () => {
           >
             Save
           </button>
+          <button
+              onClick={handlePrint}
+              className="bg-green text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition mr-2"
+            >
+              Print
+            </button>
           <button
             onClick={handleReset}
             className="bg-red text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600 transition"
