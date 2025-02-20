@@ -11,8 +11,11 @@ import danger from './dashboardAssets/danger.png';
 import bodytem from './dashboardAssets/measure.png';
 import maskIcon from './dashboardAssets/mask.png';
 import warningIcon from './dashboardAssets/warning.png';
+import HeartIcon from './dashboardAssets/heart-rate (1).png'
+import SmokeIcon from './dashboardAssets/fire.png';
 import flamesIcon from './dashboardAssets/flames.png';
 import likeIcon from './dashboardAssets/like.png';
+import HighTemp from './dashboardAssets/high-temperature.png';
 import HeaderSection from '../header/HeaderSection';
 import ProfileMonitoring from '../MonitoringCards/ProfileMonitoring';
 import MonitoringSection from '../MonitoringCards/MonitoringSection';
@@ -144,8 +147,8 @@ function MonitoringBody() {
 
       handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
       handleSensorNotification(gearId, sensors.environmentalTemperature, 33, 32.8, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke Level', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Toxic Gas Level', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke Detector', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Toxic Gas Detector', 'ToxicGasSensor');
       handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
     })
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
@@ -194,8 +197,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.HeartRate >= 120 ? 'Elevated Heart Rate' : 'Normal Heart Rate',
-      warningIcon: sensorData[person.gearId]?.HeartRate >= 120 ? flamesIcon : likeIcon,
+      description: sensorData[person.gearId]?.HeartRate >= 120 ? (
+        <span className="text-red">Elevated Heart Rate</span>
+      ) : (
+        <span className="text-green">Normal Heart Rate</span>
+      ),
+      warningIcon: sensorData[person.gearId]?.HeartRate >= 120 ? HeartIcon : likeIcon,
     },
     {
       icon: bodytem,
@@ -211,8 +218,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.bodyTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
-      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? flamesIcon : likeIcon,
+      description: sensorData[person.gearId]?.bodyTemperature >= 40 ? (
+        <span className="text-red">Critical Temperature</span>
+      ) : (
+        <span className="text-green">Normal Temperature</span>
+      ),
+      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? HighTemp : likeIcon,
     },
   ];
   
@@ -231,7 +242,11 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? 'Critical Temperature' : 'Normal Temperature',
+      description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? (
+        <span className="text-red">Critical Temperature</span>
+      ) : (
+        <span className="text-green">Normal Temperature</span>
+      ),
       warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 40 ? flamesIcon : likeIcon,
     },
     {
@@ -250,8 +265,11 @@ function MonitoringBody() {
         ),
       description:
         sensorData[person.gearId]?.ToxicGasSensor >= 5
-          ? 'Toxic Gas Detected'
-          : 'No Toxic Gas Detected',
+          ? (
+            <span className="text-red">High Gas Level Detected</span>
+          ) : (
+            <span className="text-green">Normal Toxic Gas</span>
+          ),
       warningIcon: sensorData[person.gearId]?.ToxicGasSensor >= 5 ? flamesIcon : likeIcon,
     },
     {
@@ -268,8 +286,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.smokeSensor > 310 ? 'Critical Smoke Level' : 'Safe Level',
-      warningIcon: sensorData[person.gearId]?.smokeSensor > 310 ? flamesIcon : likeIcon,
+      description: sensorData[person.gearId]?.smokeSensor > 310 ? (
+        <span className="text-red">High Smoke level Detected</span>
+      ) : (
+        <span className="text-green">Normal Smoke level</span>
+      ),
+      warningIcon: sensorData[person.gearId]?.smokeSensor > 310 ? SmokeIcon : likeIcon,
     },
   ];
   
@@ -289,29 +311,28 @@ function MonitoringBody() {
       ) : (
         <BodyCard className={`${monitoredPersonnel.length > 1 ? 'overflow-y-auto max-h-[80vh]' : ''}`}>
           {monitoredPersonnel.map((person) => (
-            <div key={person.gearId} className="mb-6">
+            <div key={person.gearId} className="mb-6 max-w-[100%]">
               {/* First Row: Profile Monitoring and Health Monitoring */}
-              <div
-                className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
-              >
-                <div className="flex-shrink-0 mb-6">
-                  <ProfileMonitoring 
+            <div className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start">
+              <div className="flex-shrink-0 mb-6 w-full xl:max-w-96 2xl:max-w-96">
+                <ProfileMonitoring 
                   key={person.gearId}
-                  personnel={person} />
-                </div>
-                <div className="flex-grow mb-6 lg:ml-4">
-                  <HealthMonitoring monitoringHealthData={monitoringHealthData(person)} />
-                </div>
+                  personnel={person} 
+                />
               </div>
+              <div className="flex-grow mb-6 lg:ml-4 w-full">
+                <HealthMonitoring monitoringHealthData={monitoringHealthData(person)} />
+              </div>
+            </div>
 
               {/* Second Row: Notification Card and Environmental Monitoring */}
               <div
                 className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
               >
-                <div className="flex-shrink-0 mb-6">
+                <div className="flex-shrink-0 mb-6 w-full xl:max-w-96 2xl:max-w-96">
                   <NotificationCard personnel={person} />
                 </div>
-                <div className="flex-grow mb-6 lg:ml-4">
+                <div className="flex-grow mb-6 lg:ml-4 w-full">
                   <EnviMonitoring monitoringEnviData={monitoringEnviData(person)} />
                 </div>
               </div>

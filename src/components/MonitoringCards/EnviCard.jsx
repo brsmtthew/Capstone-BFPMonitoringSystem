@@ -8,12 +8,12 @@ const EnviCard = ({ icon, title, value, description, warningIcon, children }) =>
       <div className="bg-bfpNavy p-4 rounded-md flex items-center justify-between text-white">
         <div className="flex items-center">
           <img src={icon} alt={title} className="w-8 h-8 mr-2" draggable="false"/>
-          <p className="font-bold sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[24px]">{title}</p>
+          <p className="font-bold text-[8px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[24px]">{title}</p>
         </div>
         <button className="flex items-center justify-center rounded-2xl">
           {/* Small screens: show only a colored circle */}
           <span
-            className={`md:hidden inline-block w-4 h-4 rounded-full ${
+            className={`md:hidden inline-block w-2 h-2 rounded-full ${
               hasValidValue ? 'bg-green' : 'bg-gray'
             }`}
           ></span>
@@ -32,7 +32,7 @@ const EnviCard = ({ icon, title, value, description, warningIcon, children }) =>
         <p className="sm:text-[24px] md:text-[30px] lg:text-[38px] xl:text-[40px] 2xl:text-[56px] font-bold">{value}</p>
         {hasValidValue && description && (
           <div className="flex items-center mt-2">
-            <p className="sm:[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[24px]">{description}</p>
+            <p className="text-[8px] sm:[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[24px]">{description}</p>
             {warningIcon && (
               <img src={warningIcon} alt="Warning Icon" className="w-10 h-10 ml-2" draggable="false"/>
             )}

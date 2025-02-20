@@ -49,8 +49,6 @@ function DashboardBody() {
       const personnelRecordsSnapshot = await getDocs(collection(db, 'personnelRecords'));
       if (!personnelRecordsSnapshot.empty) {
         const records = personnelRecordsSnapshot.docs;
-
-        // If only one record exists, randomIndex will be 0.
         const randomIndex = records.length === 1 
           ? 0 
           : Math.floor(Math.random() * records.length);
@@ -76,7 +74,7 @@ function DashboardBody() {
         }));
 
         console.log('Fetched realTimeData:', realTimeData);
-        console.log('Fetch Notifications:', notificationsData);
+        console.log('Fetched Notifications:', notificationsData);
 
         // Update state with the fetched realTimeData and any personnel info if needed.
         setAnalyticsData({
@@ -92,7 +90,6 @@ function DashboardBody() {
     }
   };
 
-
   // Image carousel logic for the ProfileCard.
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % personnel.length);
@@ -107,7 +104,7 @@ function DashboardBody() {
 
   // Function to fetch image URL from Firebase Storage
   const fetchImageUrl = async (imagePath) => {
-    console.log("Fetching image for path:", imagePath); // Log the image path
+    console.log("Fetching image for path:", imagePath);
     const storage = getStorage();
     const imageRef = ref(storage, imagePath);
     try {
@@ -115,11 +112,29 @@ function DashboardBody() {
       return url;
     } catch (error) {
       console.error('Error fetching image from Firebase Storage:', error);
-      return 'https://via.placeholder.com/300x300'; // fallback URL
+      return 'https://via.placeholder.com/300x300';
     }
   };
-  
 
+  // Helper function to compute alert severity ratio based on sensor data.
+  const calculateAlertSeverityRatio = () => {
+    const sensorTypes = [
+      "Body Temperature",
+      "Environmental Temperature",
+      "Heart Rate",
+      "Toxic Gas Level",
+      "Smoke level"
+    ];
+    let severity = 0;
+    sensorTypes.forEach((sensor) => {
+      const sensorData = analyticsData.notifications.find((data) => data.sensor === sensor);
+      if (sensorData && sensorData.isCritical) {
+        severity += 20;
+      }
+    });
+    return severity;
+  };
+  
   useEffect(() => {
     if (!fetchedOnceRef.current) {
       fetchPersonnelData();
@@ -140,75 +155,103 @@ function DashboardBody() {
     return <p>No personnel data found.</p>;
   }
 
+  // Sort notifications from latest to outdated
+  const sortedNotifications = analyticsData.notifications.sort((a, b) => {
+    const dateA = a.timestamp.seconds ? new Date(a.timestamp.seconds * 1000) : new Date(a.timestamp);
+    const dateB = b.timestamp.seconds ? new Date(b.timestamp.seconds * 1000) : new Date(b.timestamp);
+    return dateB - dateA;
+  });  
+
   return (
     <div className="p-4 h-full flex flex-col bg-white font-montserrat">
       <HeaderSection title="DASHBOARD" />
 
       <div className="my-4 h-[3px] bg-separatorLine w-[80%] mx-auto" />
 
-
       {/* Parent Card */}
       <BodyCard>
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 lg:grid-rows-2 grid-flow-row-dense">
-          {/* Profile Card - Takes up 1st column across both rows */}
-          <div className="lg:row-span-2">
-            <ProfileCard
-              name={personnel[currentImageIndex].name}
-              position={personnel[currentImageIndex].position}
-              image={personnel[currentImageIndex].image}
-              onPrevious={prevImage}
-              onNext={nextImage}
-              fetchImageUrl={fetchImageUrl}
-            />
+        <div className="grid gap-4 sm:gap-6">
+          {/* First row: Profile Card and Dashboard Chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1">
+              <ProfileCard
+                name={personnel[currentImageIndex].name}
+                position={personnel[currentImageIndex].position}
+                image={personnel[currentImageIndex].image}
+                onPrevious={prevImage}
+                onNext={nextImage}
+                fetchImageUrl={fetchImageUrl}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <DashboardChart 
+                data={analyticsData.realTimeData}
+                personnelInfo={analyticsData.personnelInfo}
+              />
+            </div>
           </div>
 
-          {/* Overview Cards - Row 1, Columns 2 and 3 */}
-          <OverviewCard title="Total Personnel" description="The total number of personnel currently registered.">
-            <p className="text-[64px] font-bold text-black">{personnel.length}</p>
-            <p className='text-[28px] font-bold text-black'>Total Personnel</p>
-          </OverviewCard>
+          {/* Second row: Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* First OverviewCard */}
+            <OverviewCard
+              title="Total Personnel"
+              description="The total number of personnel currently registered."
+            >
+              <p className="text-[64px] font-bold text-black">{personnel.length}</p>
+              <p className="text-[28px] font-bold text-black">Total Personnel</p>
+            </OverviewCard>
 
-          <OverviewCard
-            title="Notification Status"
-            description="Previous Notifications for this Personnel"
-          >
-            <div className="max-h-64 overflow-y-auto">
-              {analyticsData.notifications && analyticsData.notifications.length > 0 ? (
-                analyticsData.notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-2 mb-2 rounded-lg w-96 ${
-                      notification.isCritical
-                        ? 'bg-red border border-red text-white'
-                        : 'bg-green border border-green text-white'
-                    }`}
-                  >
-                    <p className="text-lg font-semibold">{notification.message}</p>
-                    <p className="text-lg font-bold">Value: {notification.value}</p>
-                    <p className="text-sm">
-                      {notification.timestamp ? (
-                        notification.timestamp.seconds
-                          ? new Date(notification.timestamp.seconds * 1000).toLocaleString()
-                          : new Date(notification.timestamp).toLocaleString()
-                      ) : (
-                        "N/A"
-                      )}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[26px] font-semibold text-black">
-                  No notifications available.
+            {/* Second OverviewCard */}
+            <OverviewCard
+              title="Notification Status"
+              description="Previous Notifications for this Personnel"
+            >
+              <div className="max-h-64 overflow-y-auto text-center">
+                {sortedNotifications && sortedNotifications.length > 0 ? (
+                  sortedNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-2 mb-2 rounded-lg lg:w-80 xl:w-96 ${
+                        notification.isCritical
+                          ? 'bg-red border border-red text-white'
+                          : 'bg-green border border-green text-white'
+                      }`}
+                    >
+                      <p className="text-lg font-semibold">{notification.message}</p>
+                      <p className="text-lg font-bold">Value: {notification.value}</p>
+                      <p className="text-sm">
+                        {notification.timestamp ? (
+                          notification.timestamp.seconds
+                            ? new Date(notification.timestamp.seconds * 1000).toLocaleString()
+                            : new Date(notification.timestamp).toLocaleString()
+                        ) : (
+                          "N/A"
+                        )}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-[26px] font-semibold text-black">
+                    No notifications available.
+                  </p>
+                )}
+              </div>
+            </OverviewCard>
+
+            {/* Third OverviewCard */}
+            {/* On small/medium screens, this card will span 2 columns */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <OverviewCard
+                title="Alert Severity Ratio"
+                description="Based on critical sensor readings (each sensor worth 20%)."
+              >
+                <p className="text-[64px] font-bold text-black">
+                  {calculateAlertSeverityRatio()}%
                 </p>
-              )}
+                <p className="text-[28px] font-bold text-black">Severity Ratio</p>
+              </OverviewCard>
             </div>
-          </OverviewCard>
-
-
-          {/* DashboardChart - Spanning columns 2 and 3 in Row 2 */}
-          <div className="lg:col-span-2 max-w-full">
-            <DashboardChart data={analyticsData.realTimeData}
-            personnelInfo={analyticsData.personnelInfo}/>
           </div>
         </div>
       </BodyCard>

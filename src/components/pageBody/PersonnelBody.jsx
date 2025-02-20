@@ -103,7 +103,8 @@ function PersonnelBody() {
           <button
             type="button"
             onClick={openAddModal}
-            className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
+            className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105"
+
           >
             <svg
               className="me-1 -ms-1 w-5 h-5"

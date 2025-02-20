@@ -34,14 +34,14 @@ const LineChart = ({ data, xKey, yKey, color, title, description, yLabel, unit }
       <ResponsiveContainer width="100%" height="100%">
         <RechartsLineChart data={data}>
           <CartesianGrid stroke="#e0e0e0" strokeDasharray="5 5" />
-          <XAxis dataKey={xKey} tick={{ fill: '#fff' }} />
+          <XAxis dataKey={xKey} tick={{ fill: '#b59d38' }} />
           <YAxis
-            tick={{ fill: '#fff' }}
+            tick={{ fill: '#b59d38' }}
             label={{
               value: yLabel,
               angle: -90,
               position: 'insideLeft',
-              fill: '#fff',
+              fill: '#b59d38',
             }}
           />
           <Tooltip content={<CustomTooltip unit={unit} />} />

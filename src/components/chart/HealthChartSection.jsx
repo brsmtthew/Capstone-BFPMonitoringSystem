@@ -7,7 +7,7 @@ const HealthChartSection = ({HeartRate,temperatureData}) => {
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col text-center h-auto">
       <div className="p-3 w-full bg-bfpNavy rounded-lg mb-4 text-white">
-        <h3 className="text-white text-[24px] font-bold">Health Analytics</h3>
+        <h3 className="text-white text-[14px] sm:text-[16px] md:text-[18px] lg:text-[20px] xl:text-[24px] 2xl::text-[24px] font-bold">Health Analytics</h3>
       </div>
 
       {/* Center the grid and ensure the charts are centered */}

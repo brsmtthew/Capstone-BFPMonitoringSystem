@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../store/useStore';
 
 function NotificationCard({ personnel }) {
-  const { notifications, clearNotifications, selectedPersonnel } = useStore();
+  const { notifications, clearNotifications } = useStore();
 
   // Function to format timestamp to desired format
   const formatTimestamp = (timestamp) => {
@@ -21,10 +21,49 @@ function NotificationCard({ personnel }) {
     (notification) => notification.gearId === personnel.gearId
   );
 
+  // Function to compute severity ratio as a percentage
+  const computeSeverityRatio = () => {
+    const totalSensors = 5;
+    if (filteredNotifications.length === 0) return 0;
+
+    // Group notifications by sensorType and keep only the latest notification for each sensor
+    const sensorLatest = {};
+    filteredNotifications.forEach(notification => {
+      const sensor = notification.sensorType;
+      // If there isn't an entry yet or the current notification is newer, update it
+      if (
+        !sensorLatest[sensor] ||
+        sensorLatest[sensor].timestamp < notification.timestamp
+      ) {
+        sensorLatest[sensor] = notification;
+      }
+    });
+
+    // Count how many sensors are in a critical state based on their latest notification
+    const criticalCount = Object.values(sensorLatest).filter(
+      n => n.isCritical
+    ).length;
+
+    // Each sensor accounts for 20% (i.e. 1/5 of 100%)
+    const ratio = (criticalCount / totalSensors) * 100;
+    return Math.min(Math.round(ratio), 100);
+  };
+
+  
+
+  const severityRatio = computeSeverityRatio();
+
+  //Determining the color of the severity ratio bar
+  const getSeverityColor = () => {
+    if (severityRatio === 0) return 'bg-green';
+    if (severityRatio <= 40) return 'bg-yellow';
+    if (severityRatio <= 80) return 'bg-bfpOrange';
+    return 'bg-red';
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-72 w-72 sm:h-96 sm:w-96 md:h-96 md:w-96 
-                    lg:h-96 lg:w-96 xl:h-96 xl:w-96 2xl:h-96 2xl:w-96 font-montserrat">
+                    h-96 w-full sm:h-96 sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
       <div className="p-4 bg-bfpNavy rounded-lg text-white flex justify-between items-center">
         <h3 className="text-[20px] font-bold">Notification</h3>
         <button
@@ -52,6 +91,18 @@ function NotificationCard({ personnel }) {
         ) : (
           <div className="text-gray">No notifications for the selected personnel</div>
         )}
+      </div>
+      {/* Severity Ratio Section */}
+      <div className="p-2 border-t border-black">
+        <div className="w-full rounded-full h-1">
+        <div
+          className={`h-full p-1 rounded-full ${getSeverityColor()}`}
+          style={{ width: `${severityRatio}%` }}
+        ></div>
+        </div>
+        <p className="text-md font-bold text-center mt-1">
+          Severity Ratio of {severityRatio}%
+        </p>
       </div>
     </div>
   );
