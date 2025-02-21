@@ -41,19 +41,23 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
   // Use the personnelInfo prop for the header display.
   const personnelName = personnelInfo.personnelName || "Unknown";
   const personnelGearId = personnelInfo.gearId || "N/A";
+  const personnelDate = personnelInfo.date || "N/A";
 
   return (
-    <div className="h-96 w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
+    <div className="h-[500px] w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
       {/* Header */}
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white text-center">
-        <h3 className="text-lg font-bold">Dashboard Sensor Data</h3>
-        <p className="text-sm">Real-time monitoring of sensor readings</p>
+        <h3 className="text-lg font-bold">Sensor Data Overview</h3>
+        <p className="text-sm">Periodic Sensor Readings</p>
       </div>
 
       {/* Personnel Info Display */}
-      <div className="text-center p-2 text-white font-bold">
-        Monitoring: {personnelName} (Gear ID: {personnelGearId})
+      <div className="flex justify-center items-center space-x-4 p-2 text-white font-bold text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px]">
+        <span>Sensor Readings for: {personnelName}</span>
+        <span>Gear ID: {personnelGearId}</span>
+        <span>Date: {personnelDate}</span>
       </div>
+
 
       {/* Chart */}
       <div className="flex-grow p-4">

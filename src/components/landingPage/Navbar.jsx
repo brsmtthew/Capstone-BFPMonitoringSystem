@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
-import hardhat from "./landingAssets/labour.png";
+import logoIcon from "./landingAssets/smarthardhatAsset 1.svg";
 import { useAuth } from "../auth/AuthContext";
 import { toast } from "react-toastify";
 
@@ -30,7 +30,7 @@ const Navbar = () => {
     <nav className="flex items-center justify-between p-4 bg-white sticky top-0 z-50">
       {/* Left: Logo and Text */}
       <div className="flex items-center space-x-2">
-        <img src={hardhat} alt="Bureau of Fire Protection" className="w-10 h-10 sm:w-14 sm:h-14" />
+        <img src={logoIcon} alt="Bureau of Fire Protection" className="w-10 h-10 sm:w-14 sm:h-14" />
         <p className="font-semibold font-serif sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[26px]">
           <span className="text-bfpOrange font-bold">BFP</span>
           <span className="text-bfpNavy">SmartTrack</span>

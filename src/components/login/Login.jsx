@@ -5,7 +5,7 @@ import { auth } from "../../firebase/Firebase";
 import { toast, ToastContainer } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from './LoginAssets/firefighter2.jpg';
-import logo from './LoginAssets/labour.png';
+import logo from './LoginAssets/smarthardhatAsset 1.svg';
 import ForgotPassword from './ForgotPassword';
 
 function Login() {
