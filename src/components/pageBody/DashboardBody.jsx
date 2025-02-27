@@ -8,6 +8,7 @@ import OverviewCard from '../DashboardCard/OverViewCard';
 import ProfileCard from '../DashboardCard/ProfileCard';
 import BodyCard from '../parentCard/BodyCard';
 import DashboardChart from '../chart/DashboardChart';
+import Firefighters from './dashboardAssets/firefighters.png';
 
 function DashboardBody() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -192,17 +193,46 @@ function DashboardBody() {
           </div>
 
           {/* Second row: Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
             {/* First OverviewCard */}
             <OverviewCard
               title="Total Personnel"
               description="The total number of personnel currently registered."
             >
-              <p className="text-[64px] font-bold text-black">{personnel.length}</p>
-              <p className="text-[28px] font-bold text-black">Total Personnel</p>
+              <div className="grid grid-cols-2 items-center gap-4">
+                {/* Column 1: Firefighters Icon */}
+                <div className="flex justify-center">
+                  <img
+                    src={Firefighters}
+                    alt="Firefighters Icon"
+                    className="h-14 w-14 sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 xl:h-28 xl:w-28 2xl:w-32 2xl:h-32" // adjust size as needed
+                  />
+                </div>
+                {/* Column 2: Personnel count and label */}
+                <div className="flex flex-col justify-center text-center">
+                  <p className="text-[30px] sm:text-[38px] md:text-[42px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] font-bold text-black">
+                    {personnel.length}
+                  </p>
+                  <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
+                    Total Personnel
+                  </p>
+                </div>
+              </div>
+            </OverviewCard>
+            {/* Second OverviewCard */}
+            <OverviewCard
+              title="Alert Severity Ratio"
+              description="Based on critical sensor readings."
+            >
+              <p className="text-[30px] sm:text-[38px] md:text-[42px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] font-bold text-black">
+                {calculateAlertSeverityRatio()}%
+              </p>
+              <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">Severity Ratio</p>
             </OverviewCard>
 
-            {/* Second OverviewCard */}
+            {/* Third OverviewCard */}
+            {/* On small/medium screens, this card will span 2 columns */}
+            <div className="col-span-2 lg:col-span-1">
             <OverviewCard
               title="Notification Status"
               description="Previous Notifications for this Personnel"
@@ -218,9 +248,9 @@ function DashboardBody() {
                           : 'bg-green border border-green text-white'
                       }`}
                     >
-                      <p className="text-lg font-semibold">{notification.message}</p>
-                      <p className="text-lg font-bold">Value: {notification.value}</p>
-                      <p className="text-sm">
+                      <p className="text-[10px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[20px] font-semibold">{notification.message}</p>
+                      <p className="text-[10px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[20px]  font-bold">Value: {notification.value}</p>
+                      <p className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] xl:text-[16px] 2xl:text-[18px] ">
                         {notification.timestamp ? (
                           notification.timestamp.seconds
                             ? new Date(notification.timestamp.seconds * 1000).toLocaleString()
@@ -238,19 +268,6 @@ function DashboardBody() {
                 )}
               </div>
             </OverviewCard>
-
-            {/* Third OverviewCard */}
-            {/* On small/medium screens, this card will span 2 columns */}
-            <div className="sm:col-span-2 lg:col-span-1">
-              <OverviewCard
-                title="Alert Severity Ratio"
-                description="Based on critical sensor readings (each sensor worth 20%)."
-              >
-                <p className="text-[64px] font-bold text-black">
-                  {calculateAlertSeverityRatio()}%
-                </p>
-                <p className="text-[28px] font-bold text-black">Severity Ratio</p>
-              </OverviewCard>
             </div>
           </div>
         </div>

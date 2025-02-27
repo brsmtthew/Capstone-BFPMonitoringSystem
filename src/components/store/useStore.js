@@ -298,7 +298,7 @@ export const useStore = create((set, get) => ({
         isCritical: true,
       });
       toast.warn(`🔥 Critical ${sensorName} Detected: ${sensorValue}`);
-      get().setNotificationFlag(gearId, sensorType, 'critical');
+      get().setNotificationFlag(gearId, 'High', sensorType);
     } else if (condition === 'normal') {
       get().addNotification({
         id: uniqueId,

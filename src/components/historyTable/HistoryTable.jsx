@@ -16,7 +16,7 @@ function HistoryTable({ selectedPersonnel }) {
             db,
             `personnelRecords/${selectedPersonnel.documentId}/notifications`
           );
-          // Create a query that orders by timestamp descending.
+          // Query ordering by timestamp descending.
           const q = query(notificationsRef, orderBy("timestamp", "desc"));
           const notifSnapshot = await getDocs(q);
           const notificationsData = notifSnapshot.docs.map((doc) => ({
@@ -48,49 +48,97 @@ function HistoryTable({ selectedPersonnel }) {
   }
 
   return (
-    <div className="mt-4 bg-bfpOrange rounded-lg shadow-md p-6">
-      <h3 className="text-white text-lg font-bold mb-4">
+    <div className="mt-4 bg-bfpOrange rounded-lg shadow-md p-2 sm:p-3 md:p-4 lg:p-5 xl:p-5 2xl:p-6">
+      <h3 className="text-white text-[12px] sm:text-[14px] md:text-[16px] lg:[18px] xl:text-[20px] 2xl:text-[22px] font-bold mb-4">
         Notifications for {selectedPersonnel.name}
       </h3>
       <div className="relative overflow-x-auto">
         {loading ? (
           <p className="text-white">Loading notifications...</p>
         ) : (
-          <table className="w-full text-sm text-left text-white bg-bfpNavy">
-            <thead className="text-xs uppercase bg-searchTable text-white">
-              <tr>
-                <th className="px-6 py-3">Sensor</th>
-                <th className="px-6 py-3">Value</th>
-                <th className="px-6 py-3">Notification</th>
-                <th className="px-6 py-3">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <table className="w-full text-sm text-left text-white bg-bfpNavy">
+                <thead className="text-xs uppercase bg-searchTable text-white">
+                  <tr>
+                    <th className="px-6 py-3">Sensor</th>
+                    <th className="px-6 py-3">Value</th>
+                    <th className="px-6 py-3">Notification</th>
+                    <th className="px-6 py-3">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notifications.length > 0 ? (
+                    notifications.map((notif) => (
+                      <tr
+                        key={notif.id}
+                        className="border-b bg-bfpNavy hover:bg-searchTable"
+                      >
+                        <td className="px-6 py-3">{notif.sensor || "N/A"}</td>
+                        <td className="px-6 py-3">
+                          {notif.value === undefined ? "N/A" : notif.value}
+                        </td>
+                        <td className="px-6 py-3">{notif.message || "N/A"}</td>
+                        <td className="px-6 py-3">
+                          {new Date(notif.timestamp).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="px-6 py-3 text-center" colSpan={4}>
+                        No notifications available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="block md:hidden text-[8px]">
               {notifications.length > 0 ? (
                 notifications.map((notif) => (
-                  <tr
+                  <div
                     key={notif.id}
-                    className="border-b bg-bfpNavy hover:bg-searchTable"
+                    className="bg-bfpNavy rounded-lg shadow-md p-4 mb-4"
                   >
-                    <td className="px-6 py-3">{notif.sensor || "N/A"}</td>
-                    <td className="px-6 py-3">
-                      {notif.value === undefined ? "N/A" : notif.value}
-                    </td>
-                    <td className="px-6 py-3">{notif.message || "N/A"}</td>
-                    <td className="px-6 py-3">
-                      {new Date(notif.timestamp).toLocaleString()}
-                    </td>
-                  </tr>
+                    <div className="mb-2">
+                      <span className="font-semibold text-white">Sensor:</span>{" "}
+                      <span className="text-white">
+                        {notif.sensor || "N/A"}
+                      </span>
+                    </div>
+                    <div className="mb-2">
+                      <span className="font-semibold text-white">Value:</span>{" "}
+                      <span className="text-white">
+                        {notif.value === undefined ? "N/A" : notif.value}
+                      </span>
+                    </div>
+                    <div className="mb-2">
+                      <span className="font-semibold text-white">
+                        Notification:
+                      </span>{" "}
+                      <span className="text-white">
+                        {notif.message || "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white">
+                        Timestamp:
+                      </span>{" "}
+                      <span className="text-white">
+                        {new Date(notif.timestamp).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
                 ))
               ) : (
-                <tr>
-                  <td className="px-6 py-3 text-center" colSpan={4}>
-                    No notifications available.
-                  </td>
-                </tr>
+                <p className="text-white text-center">No notifications available.</p>
               )}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

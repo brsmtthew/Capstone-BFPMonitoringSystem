@@ -127,13 +127,13 @@ const AnalyticsBody = () => {
       extraContent={
         <div className="flex space-x-5">
           <div onClick={handleSave} className="cursor-pointer">
-            <img src={SaveIcon} alt="Save" className='h-8 w-8' />
+            <img src={SaveIcon} alt="Save" className='w-7 h-7 sm:h-7 sm:w-7 md:h-7 md:w-7 lg:w-7 lg:h-7 xl:h-7 xl:w-7 2xl:w-8 2xl:h-8' />
           </div>
           {/* <div onClick={handlePrint} className="cursor-pointer">
             <img src={PrintIcon} alt="Print" className='w-8 h-8' />
           </div> */}
           <div onClick={handleReset} className="cursor-pointer">
-            <img src={ResetIcon} alt="Reset" className='w-8 h-8' />
+            <img src={ResetIcon} alt="Reset" className='w-7 h-7 sm:h-7 sm:w-7 md:h-7 md:w-7 lg:w-7 lg:h-7 xl:h-7 xl:w-7 2xl:w-8 2xl:h-8' />
           </div>
         </div>
       } />

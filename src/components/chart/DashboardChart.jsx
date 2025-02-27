@@ -44,7 +44,7 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
   const personnelDate = personnelInfo.date || "N/A";
 
   return (
-    <div className="h-[500px] w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
+    <div className="h-full max-h-full w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
       {/* Header */}
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white text-center">
         <h3 className="text-lg font-bold">Sensor Data Overview</h3>
@@ -60,7 +60,7 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
 
 
       {/* Chart */}
-      <div className="flex-grow p-4">
+      <div className="flex-grow p-4 h-96 w-auto">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={combinedData}>
             <CartesianGrid stroke="#e0e0e0" strokeDasharray="5 5" />

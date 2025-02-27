@@ -147,8 +147,8 @@ function MonitoringBody() {
 
       handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
       handleSensorNotification(gearId, sensors.environmentalTemperature, 33, 32.8, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke Detector', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Toxic Gas Detector', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Carbon Monoxide', 'ToxicGasSensor');
       handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
     })
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
@@ -229,31 +229,10 @@ function MonitoringBody() {
   
   const monitoringEnviData = (person) => [
     {
-      icon: enviTemp,
-      title: (
-        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
-          Environmental Temperature
-        </span>
-      ),
-      value: sensorData[person.gearId]?.environmentalTemperature !== undefined && sensorData[person.gearId].environmentalTemperature !== 0
-        ? `${sensorData[person.gearId].environmentalTemperature}°C`
-        : (
-          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            No Data Available
-          </span>
-        ),
-      description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? (
-        <span className="text-red">Critical Temperature</span>
-      ) : (
-        <span className="text-green">Normal Temperature</span>
-      ),
-      warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 40 ? flamesIcon : likeIcon,
-    },
-    {
       icon: danger,
       title: (
         <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
-          CO-Gas
+          Toxic Gas
         </span>
       ),
       value: sensorData[person.gearId]?.ToxicGasSensor !== undefined && sensorData[person.gearId].ToxicGasSensor !== 0
@@ -293,6 +272,27 @@ function MonitoringBody() {
       ),
       warningIcon: sensorData[person.gearId]?.smokeSensor > 310 ? SmokeIcon : likeIcon,
     },
+    {
+      icon: enviTemp,
+      title: (
+        <span className='sm:text-[8px] md:text-[8x] lg:text-[10px] xl:text-[12px] 2xl:text-[12px]'>
+          Environmental Temperature
+        </span>
+      ),
+      value: sensorData[person.gearId]?.environmentalTemperature !== undefined && sensorData[person.gearId].environmentalTemperature !== 0
+        ? `${sensorData[person.gearId].environmentalTemperature}°C`
+        : (
+          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+            No Data Available
+          </span>
+        ),
+      description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? (
+        <span className="text-red">Critical Temperature</span>
+      ) : (
+        <span className="text-green">Normal Temperature</span>
+      ),
+      warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 40 ? flamesIcon : likeIcon,
+    }
   ];
   
 
@@ -302,7 +302,7 @@ function MonitoringBody() {
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
       {monitoredPersonnel.length === 0 ? (
         <div className="flex justify-center items-center h-screen">
-          <p className="text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"
+          <p className="text-[8px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text[22px] 2xl:text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"
           onClick={() => navigate('/personnel')}>
              Click here to add personnel for monitoring.
           </p>

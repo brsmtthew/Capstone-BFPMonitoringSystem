@@ -29,7 +29,7 @@ function NotificationCard({ personnel }) {
     // Group notifications by sensorType and keep only the latest notification for each sensor
     const sensorLatest = {};
     filteredNotifications.forEach(notification => {
-      const sensor = notification.sensorType;
+      const sensor = notification.sensor;
       // If there isn't an entry yet or the current notification is newer, update it
       if (
         !sensorLatest[sensor] ||
@@ -48,8 +48,6 @@ function NotificationCard({ personnel }) {
     const ratio = (criticalCount / totalSensors) * 100;
     return Math.min(Math.round(ratio), 100);
   };
-
-  
 
   const severityRatio = computeSeverityRatio();
 
