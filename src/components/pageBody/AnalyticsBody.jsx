@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import HeaderSection from '../header/HeaderSection';
 import BodyCard from '../parentCard/BodyCard';
 import HealthChartSection from '../chart/HealthChartSection';
@@ -13,8 +13,10 @@ const AnalyticsBody = () => {
   const location = useLocation();
   const [realTimeData, setRealTimeData] = useState([]);
   const [personnelInfo, setPersonnelInfo] = useState({ name: "", date: "", time: "" });
+  const hasShownToast = useRef(false);
   
   useEffect(() => {
+    if (hasShownToast.current) return;
     // Load the saved data from localStorage
     const savedData = JSON.parse(localStorage.getItem('overviewData'));
   
@@ -33,6 +35,7 @@ const AnalyticsBody = () => {
         time: location.state.time || "",
       });
     }
+    hasShownToast.current = true;
   }, [location.state]);
   
 

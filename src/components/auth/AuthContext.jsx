@@ -46,9 +46,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('expiry', expirationTime);
         setToken(newToken);
       } else {
-        if (window.location.pathname !== '/' && window.location.pathname !== '/forgot-password') {
+        if (window.location.pathname !== '/' &&
+          window.location.pathname !== '/forgot-password' &&
+          window.location.pathname !== '/login') {
           logout();
-        }
+        }      
       }
     });
 

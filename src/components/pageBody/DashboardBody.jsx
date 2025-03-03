@@ -123,8 +123,8 @@ function DashboardBody() {
       "Body Temperature",
       "Environmental Temperature",
       "Heart Rate",
-      "Toxic Gas Level",
-      "Smoke level"
+      "Carbon Monoxide",
+      "Smoke"
     ];
     let severity = 0;
     sensorTypes.forEach((sensor) => {

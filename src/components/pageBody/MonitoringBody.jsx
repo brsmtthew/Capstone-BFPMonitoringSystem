@@ -154,35 +154,35 @@ function MonitoringBody() {
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
   
   const monitoringHealthData = (person) => [
-    {
-      icon: BatterIcon,
-      title: (
-        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
-          Battery Status
-        </span>
-      ),
-      value: sensorData[person.gearId]?.Battery !== undefined && sensorData[person.gearId]?.Battery !== 0
-        ? `${sensorData[person.gearId]?.Battery.toFixed(2)}%`
-        : (
-          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            No Data Available
-          </span>
-        ),
-      description: sensorData[person.gearId]?.Battery >= 75 
-        ? 'Battery is Full' 
-        : sensorData[person.gearId]?.Battery >= 50 
-          ? 'Battery is Medium' 
-          : sensorData[person.gearId]?.Battery >= 25 
-            ? 'Battery is Low' 
-            : 'Critical Battery Level',
-      warningIcon: sensorData[person.gearId]?.Battery >= 75 
-        ? BatterIcon 
-        : sensorData[person.gearId]?.Battery >= 50 
-          ? BatteryHalf 
-          : sensorData[person.gearId]?.Battery >= 25 
-            ? LowBattery 
-            : lightingBattery, // Critical battery icon
-    },    
+    // {
+    //   icon: BatterIcon,
+    //   title: (
+    //     <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
+    //       Battery Status
+    //     </span>
+    //   ),
+    //   value: sensorData[person.gearId]?.Battery !== undefined && sensorData[person.gearId]?.Battery !== 0
+    //     ? `${sensorData[person.gearId]?.Battery.toFixed(2)}%`
+    //     : (
+    //       <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
+    //         No Data Available
+    //       </span>
+    //     ),
+    //   description: sensorData[person.gearId]?.Battery >= 75 
+    //     ? 'Battery is Full' 
+    //     : sensorData[person.gearId]?.Battery >= 50 
+    //       ? 'Battery is Medium' 
+    //       : sensorData[person.gearId]?.Battery >= 25 
+    //         ? 'Battery is Low' 
+    //         : 'Critical Battery Level',
+    //   warningIcon: sensorData[person.gearId]?.Battery >= 75 
+    //     ? BatterIcon 
+    //     : sensorData[person.gearId]?.Battery >= 50 
+    //       ? BatteryHalf 
+    //       : sensorData[person.gearId]?.Battery >= 25 
+    //         ? LowBattery 
+    //         : lightingBattery, // Critical battery icon
+    // },    
     {
       icon: heartIcon,
       title: (

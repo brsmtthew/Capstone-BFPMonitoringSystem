@@ -8,6 +8,7 @@ import BodyCard from "../parentCard/BodyCard";
 import HistoryTable from "../historyTable/HistoryTable";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import DeletePersonnelModal from "../modal/deletePersonnelModal";
 
 function HistoryBody() {
   const [historyData, setHistoryData] = useState([]);
@@ -18,6 +19,7 @@ function HistoryBody() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortOption, setSortOption] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -144,7 +146,21 @@ function HistoryBody() {
     return Promise.all(deletePromises);
   };
 
-  const handleDeleteSelected = async () => {
+  // Open the delete modal only if there are selected rows
+  const openDeleteModal = () => {
+    if (selectedRows.length === 0) {
+      toast.info("Please select at least one personnel to delete.");
+      return;
+    }
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  // This function will run when the user confirms deletion in the modal.
+  const confirmDelete = async () => {
     try {
       for (const documentId of selectedRows) {
         const docRef = doc(db, "personnelRecords", documentId);
@@ -162,11 +178,17 @@ function HistoryBody() {
       console.error("Error deleting personnel: ", error);
       toast.error("Error deleting personnel");
     }
+    closeDeleteModal();
   };
 
   const handleViewClick = async (documentId, name, date, time) => {
     try {
-      const realTimeDataRef = collection(db, 'personnelRecords', documentId, 'realTimeData');
+      const realTimeDataRef = collection(
+        db,
+        "personnelRecords",
+        documentId,
+        "realTimeData"
+      );
       const realTimeDataSnapshot = await getDocs(realTimeDataRef);
       const realTimeData = [];
 
@@ -174,7 +196,7 @@ function HistoryBody() {
         realTimeData.push({ id: doc.id, ...doc.data() });
       });
 
-      navigate('/analytics', { state: { realTimeData, name, date, time } });
+      navigate("/analytics", { state: { realTimeData, name, date, time } });
     } catch (error) {
       toast.error("Error fetching real-time data:");
     }
@@ -214,7 +236,7 @@ function HistoryBody() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute  mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
+                <div className="absolute mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
                   <button
                     onClick={() => handleSort("latest")}
                     className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"
@@ -234,7 +256,7 @@ function HistoryBody() {
                     Filter by Gear ID
                   </button>
                   <button
-                    onClick={handleDeleteSelected}
+                    onClick={openDeleteModal}
                     className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"
                   >
                     Delete Selected Data
@@ -400,6 +422,12 @@ function HistoryBody() {
           )}
         </div>
       </BodyCard>
+      {/* Render the DeletePersonnelModal */}
+      <DeletePersonnelModal
+        isOpen={isDeleteModalOpen}
+        closeModal={closeDeleteModal}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }
