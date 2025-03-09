@@ -1,14 +1,36 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../../firebase/Firebase'; // Import Firebase auth
+import { auth, db } from '../../firebase/Firebase'; // Import Firebase auth
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast } from 'react-toastify';
+import { doc, getDoc } from 'firebase/firestore';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
+      } else {
+        setUser(null);
+        setUserData(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Function to handle login and set expiry
   const login = async (user) => {
@@ -46,11 +68,14 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('expiry', expirationTime);
         setToken(newToken);
       } else {
-        if (window.location.pathname !== '/' &&
+        if (
+          window.location.pathname !== '/' &&
           window.location.pathname !== '/forgot-password' &&
-          window.location.pathname !== '/login') {
+          window.location.pathname !== '/login' &&
+          window.location.pathname !== '/signup'
+        ) {
           logout();
-        }      
+        }
       }
     });
 
@@ -64,7 +89,7 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout, user, userData }}>
       {children}
     </AuthContext.Provider>
   );

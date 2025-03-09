@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/Firebase'; // Firestore configuration
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'; // Firestore methods
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore'; // Firestore methods
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage methods
 import { toast } from 'react-toastify'; // Toast notification
+import logo from '../login/LoginAssets/smarthardhatAsset 1.svg';
+import { useAuth } from "../auth/AuthContext";
 
 // Initialize Firebase Storage
 const storage = getStorage();
 
 function AddPersonnelModal({ isOpen, closeModal }) {
+  const { userData} = useAuth();
   const [personnelInfo, setPersonnelInfo] = useState({
     gearId: '',
     name: '',
@@ -81,6 +84,19 @@ function AddPersonnelModal({ isOpen, closeModal }) {
     return newGearId;
   };
 
+  const logAction = async (actionType, data, userEmail) =>{
+    try {
+      await addDoc(collection(db, 'personnelAudit'), {
+        action: actionType,
+        data: data,
+        user: userEmail,
+        timestamp: serverTimestamp()
+      });
+    }catch (error){
+      toast.error("Error logging action", error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -109,6 +125,8 @@ function AddPersonnelModal({ isOpen, closeModal }) {
         image: imageUrl,
       });
 
+      await logAction("Add Personnel", { ...personnelInfo, image: imageUrl }, userData.email);
+
       // Close modal and show success message
       closeModal();
       toast.success('Personnel info saved successfully!');
@@ -122,13 +140,20 @@ function AddPersonnelModal({ isOpen, closeModal }) {
 
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${!isOpen && 'hidden'}`}
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${!isOpen && 'hidden'}`}
     >
       <div className="bg-lightGray p-6 rounded-lg shadow-lg w-3/4 lg:w-1/2 relative">
+        <div className="flex items-center mb-4">
+          <img src={logo} alt="logo" className="h-10 w-10 mr-2" />
+          <p className="font-semibold text-lg">
+            <span className="text-bfpOrange font-bold">BFP</span>
+            <span className="text-bfpNavy">SmartTrack</span>
+          </p>
+        </div>
         <button onClick={closeModal} className="absolute top-2 right-2 text-black">
           X
         </button>
-        <h2 className="text-xl font-bold mb-4 text-black">Add Personnel Information</h2>
+        <h2 className="text-xl font-bold mb-4 text-black text-center">Add Personnel Information</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Image Upload */}

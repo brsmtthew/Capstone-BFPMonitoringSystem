@@ -7,12 +7,14 @@ import History from './components/pages/History';
 import Analytics from './components/pages/Analytics';
 import Personnel from './components/pages/Personnel';
 import Monitoring from './components/pages/Monitoring';
+import Account from './components/pages/Account';
 import Navbar from './components/landingPage/Navbar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import {AuthProvider} from './components/auth/AuthContext';
 import ForgotPassword from './components/login/ForgotPassword';
+import SignUp from './components/login/SignUp';
 
 const Layout = ({ children }) => (
   <div>
@@ -27,6 +29,7 @@ function App() {
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
           path="/dashboard"
@@ -65,6 +68,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Personnel />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/account'
+          element={
+            <ProtectedRoute requiredRole='admin'>
+              <Account />
             </ProtectedRoute>
           }
         />

@@ -21,6 +21,8 @@ const auth = getAuth(app); // Initialize Auth
 const storage = getStorage(app); // Initialize Storage
 const realtimeDb = getDatabase(app); // Initialize Realtime Database
 
+const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+const secondaryAuth = getAuth(secondaryApp);
 
 // Named exports
-export { app, auth, db, storage, realtimeDb };
+export { app, auth, db, storage, realtimeDb, secondaryAuth, secondaryApp };

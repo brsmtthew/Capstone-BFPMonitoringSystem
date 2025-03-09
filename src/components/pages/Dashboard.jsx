@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '../landingPage/Navbar'
 import DashboardBody from '../pageBody/DashboardBody';
+
+
 
 const Dashboard = () => {
   return (

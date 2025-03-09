@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase/Firebase'; // Firestore configuration
-import { doc, updateDoc } from 'firebase/firestore'; // Firestore methods
+import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore'; // Firestore methods
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage'; // Firebase Storage methods
 import { toast } from 'react-toastify'; // Toast notification
+import logo from '../login/LoginAssets/smarthardhatAsset 1.svg';
+import { useAuth } from "../auth/AuthContext"; 
 
 // Initialize Firebase Storage
 const storage = getStorage();
 
 function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
+  const { userData } = useAuth();
+  const [ saving, setSaving] = useState(false);
   const [personnelInfo, setPersonnelInfo] = useState({
     gearId: '',
     name: '',
@@ -59,8 +63,25 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
     setImagePreview(file ? URL.createObjectURL(file) : null); // Generate preview URL or null
   };
 
+  // Log action function to track edits
+  const logAction = async (actionType, data, userEmail) => {
+    try {
+      await addDoc(collection(db, 'personnelAudit'), {
+        action: actionType,
+        data: data,
+        user: userEmail,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      toast.error("Error logging action", error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (saving) return; // Prevent multiple submissions
+    setSaving(true);
 
     try {
       let imageUrl = imagePreview;
@@ -83,24 +104,34 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
         image: imageUrl,
       });
 
+      await logAction("Edit Personnel", { ...personnelInfo, image: imageUrl }, userData.email);
+
       // Close modal and show success message
       closeModal();
       toast.success('Personnel info updated successfully!');
     } catch (error) {
       toast.error('Error updating personnel info:', error);
       console.error('Error updating personnel info:', error);
+    } finally {
+      setSaving(false)
     }
   };
 
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${!isOpen && 'hidden'}`}
-    >
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${!isOpen && 'hidden'}`}>
       <div className="bg-lightGray p-6 rounded-lg shadow-lg w-3/4 lg:w-1/2 relative">
+        <div className="flex items-center mb-4">
+          <img src={logo} alt="logo" className="h-10 w-10 mr-2" />
+            <p className="font-semibold text-lg">
+              <span className="text-bfpOrange font-bold">BFP</span>
+              <span className="text-bfpNavy">SmartTrack</span>
+            </p>
+          </div>
         <button onClick={closeModal} className="absolute top-2 right-2 text-black">
           X
         </button>
-        <h2 className="text-xl font-bold mb-4 text-black">Edit Personnel Information</h2>
+        <h2 className="text-xl font-bold mb-4 text-black text-center">Edit Personnel Information</h2>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Image Upload */}
@@ -240,12 +271,13 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
 
           {/* Submit Button */}
           <div className="flex justify-center mt-4">
-            <button
-              type="submit"
-              className="w-1/2 py-2 bg-bfpNavy text-white font-semibold rounded-full hover:bg-hoverBtn"
-            >
-              Save Changes
-            </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="w-1/2 py-2 bg-bfpNavy text-white font-semibold rounded-full hover:bg-hoverBtn"
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
           </div>
         </form>
       </div>

@@ -8,6 +8,7 @@ import BodyCard from "../parentCard/BodyCard";
 import HistoryTable from "../historyTable/HistoryTable";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuth} from "../auth/AuthContext";
 import DeletePersonnelModal from "../modal/deletePersonnelModal";
 
 function HistoryBody() {
@@ -21,6 +22,9 @@ function HistoryBody() {
   const [sortOption, setSortOption] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, userData } = useAuth();
+  const isAdmin = userData && userData.role === "admin";
+  const isViewAllowed = userData && userData.role === "admin" || userData.role === "user";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -256,8 +260,13 @@ function HistoryBody() {
                     Filter by Gear ID
                   </button>
                   <button
+                    disabled={!isAdmin}
                     onClick={openDeleteModal}
-                    className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"
+                    className={`w-full text-left px-4 py-2 ${
+                      !isAdmin
+                        ? 'bg-gray text-white cursor-not-allowed'
+                        : 'text-white hover:bg-searchTable'
+                    }`}
                   >
                     Delete Selected Data
                   </button>
@@ -313,7 +322,7 @@ function HistoryBody() {
                     {filteredData.map((data, index) => (
                       <React.Fragment key={index}>
                         <tr
-                          onClick={() => handleRowClick(data)}
+                          onDoubleClick={() => handleRowClick(data)}
                           className="border-b bg-bfpNavy hover:bg-searchTable cursor-pointer"
                         >
                           <td className="p-4">
@@ -331,6 +340,7 @@ function HistoryBody() {
                           <td className="px-6 py-3">{data.totalNotifications}</td>
                           <td className="px-6 py-3 flex justify-start">
                             <button
+                              disabled={!isViewAllowed}
                               onClick={() =>
                                 handleViewClick(
                                   data.documentId,
@@ -339,7 +349,11 @@ function HistoryBody() {
                                   data.time
                                 )
                               }
-                              className="bg-bfpOrange px-4 py-2 rounded-lg transform transition duration-300 hover:scale-105"
+                              className={`px-4 py-2 rounded-lg transform transition duration-300 ${
+                                !isViewAllowed
+                                  ? "bg-gray opacity-70 cursor-not-allowed"
+                                  : "bg-bfpOrange hover:scale-105"
+                              }`}
                             >
                               View
                             </button>
@@ -391,6 +405,7 @@ function HistoryBody() {
                     </div>
                     <div className="flex justify-between mt-2">
                       <button
+                        disabled={!isViewAllowed}
                         onClick={() =>
                           handleViewClick(
                             data.documentId,
@@ -399,7 +414,9 @@ function HistoryBody() {
                             data.time
                           )
                         }
-                        className="bg-bfpOrange px-3 py-2 rounded-lg text-white"
+                        className={`bg-bfpOrange px-3 py-2 rounded-lg text-white ${
+                          !isViewAllowed && "opacity-50 cursor-not-allowed"
+                        }`}
                       >
                         View
                       </button>

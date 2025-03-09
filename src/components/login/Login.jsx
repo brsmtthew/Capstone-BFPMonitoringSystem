@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
-import { auth } from "../../firebase/Firebase"; 
+import { auth, db } from "../../firebase/Firebase"; 
 import { toast, ToastContainer } from 'react-toastify'; 
 import 'react-toastify/dist/ReactToastify.css';
 import loginImage from './LoginAssets/firefighter2.jpg';
 import logo from './LoginAssets/smarthardhatAsset 1.svg';
 import ForgotPassword from './ForgotPassword';
+import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 
 function Login() {
   const navigate = useNavigate();
@@ -26,15 +27,48 @@ function Login() {
     setIsLoading(true); // Show loading spinner
 
     try {
-      // Firebase login
-      await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Login successful!", { position: "top-right" }); // Show success toast
-      navigate('/dashboard', { replace: true }); // Navigate to the dashboard on success
-    } catch (err) {
-      toast.error("Invalid email or password.", { position: "top-right" }); // Show error toast
-    } finally {
-      setIsLoading(false); // Hide loading
-    }
+      // Sign in user with Firebase Auth
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      const user = response.user;
+  
+      // Get user data from Firestore
+      const docRef = doc(db, "users", user.uid); // Correct way to reference a document
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+
+        if (userData.isBlock) {
+          toast.error("Your account has been blocked. Please contact the administrator.", { position: "top-right" });
+          setIsLoading(false);
+          return;
+        }
+        
+        if(userData.role === 'admin' || userData.role === 'user') {
+          await updateDoc(docRef, { lastLogin: new Date() }); // Update last login timestamp
+          toast.success("Login successful!", { position: "top-right" });
+          navigate('/dashboard', { replace: true }); // Redirect to Dashboard
+        } else {
+          toast.error("You do not have access.", { position: "top-right" });
+          setIsLoading(false);
+        }
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Login Error:", error.message);
+      let errorMessage = "An unexpected error occurred. Please try again.";
+    
+      // Customize error messages based on the error code
+      if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage = "The provided credentials are not valid. Please try again.";
+      }
+    
+      toast.error(errorMessage, { position: "top-right" });
+      setIsLoading(false);
+    }    
   };
 
   // Redirect the user to the Forgot Password UI
@@ -44,10 +78,14 @@ function Login() {
     navigate('/forgot-password'); // Ensure this route is defined in your routing configuration
   };
   
+  const handleSignUp = (e) => {
+    e.preventDefault();
+    console.log('Sign Up Clicked');
+    navigate('/signup'); // Ensure this route is defined in your routing configuration
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bfpNavy">
-      <ToastContainer />
       <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
         {/* Login Form Section */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center relative">
@@ -59,7 +97,7 @@ function Login() {
             </p>
           </div>
           <div className="mt-20">
-            <h2 className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[24px] text-center text-bfpNavy font-bold mb-2">ADMINISTRATOR ACCESS</h2>
+            <h2 className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[24px] text-center text-bfpNavy font-bold mb-2">USER LOGIN</h2>
             <p className="text-center text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[22px] text-bfpNavy mb-6">
               Sign in to securely manage and monitor real-time system performance.
             </p>
@@ -104,6 +142,15 @@ function Login() {
               >
                 Forgot Password?
               </button>
+              <p className="mt-4 text-center text-md text-black">
+                Don't have an account?{' '}
+                <span
+                  className="text-blue cursor-pointer hover:underline"
+                  onClick={handleSignUp}
+                >
+                  Sign Up
+                </span>
+              </p>
             </form>
           </div>
         </div>

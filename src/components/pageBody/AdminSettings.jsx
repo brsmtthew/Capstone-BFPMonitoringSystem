@@ -1,0 +1,346 @@
+import React, { useState, useEffect } from "react";
+import HeaderSection from "../header/HeaderSection";
+import BodyCard from "../parentCard/BodyCard";
+import { collection, getDocs, deleteDoc, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase/Firebase";
+import searchIcon from "../pageBody/dashboardAssets/glass.png";
+import EditIcon from "../pageBody/dashboardAssets/edit.png";
+import DeleteIcon from "../pageBody/dashboardAssets/delete.png";
+import AddUserModal from "../modal/AddUserModal";
+import EditUserModal from "../modal/EditUserModal";
+import DeletePersonnelModal from "../modal/deletePersonnelModal";
+import { toast } from "react-toastify";
+import { useAuth } from "../auth/AuthContext";
+import AccountTable from '../account/AccountTable';
+
+function AdminSettings() {
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [expandedPersonnel, setExpandedPersonnel] = useState(null);
+
+
+  useEffect(() => {
+    const usersRef = collection(db, "users");
+    const unsubscribe = onSnapshot(
+      usersRef,
+      (snapshot) => {
+        const usersData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setUsers(usersData);
+        setFilteredUsers(usersData);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching users:", error);
+        setLoading(false);
+      }
+    );
+  
+    return () => unsubscribe();
+  }, []);
+  
+
+  useEffect(() => {
+    const filtered = users
+      .filter((user) => user.email)
+      .filter((user) =>
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
+
+  const handleEdit = (userId) => {
+    setSelectedUserId(userId);
+    setShowEditUserModal(true);
+  };  
+
+  const handleRowDoubleClick = (user) => {
+    // Toggle the expanded row on double-click
+    setExpandedPersonnel(expandedPersonnel === user ? null : user);
+  };
+
+  const handleDelete = (userId) => {
+    setSelectedUserId(userId);
+    setShowDeleteUserModal(true);
+  };
+
+  const handleConfirmDelete = async (userId) => {
+    try {
+      await deleteDoc(doc(db, "users", userId));
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      setFilteredUsers((prev) => prev.filter((user) => user.id !== userId));
+      toast.success("User deleted successfully!", { position: "top-right" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Error deleting user: " + error.message, { position: "top-right" });
+    } finally {
+      setShowDeleteUserModal(false);
+    }
+  };
+
+  const handleBlock = async (userId) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, { isBlock: true });
+      toast.success("User blocked successfully!", { position: "top-right" });
+    } catch (error) {
+      console.error("Error blocking user:", error);
+      toast.error("Error blocking user: " + error.message, { position: "top-right" });
+    }
+  };
+
+  const handleUnblock = async (userId) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, { isBlock: false });
+      toast.success("User unblocked successfully!", { position: "top-right" });
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+      toast.error("Error unblocking user: " + error.message, { position: "top-right" });
+    }
+  };
+
+  const openAddUserModal = () => {
+    setShowAddUserModal(true);
+  };
+
+  const closeAddUserModal = () => {
+    setShowAddUserModal(false);
+  };
+
+  const openEditUserModal = (userId) => {
+    setShowEditUserModal(true);
+  };
+
+  const closeEditUserModal = () => {
+    setShowEditUserModal(false);
+  };
+
+  const protectedEmail = "acemalasaga30@gmail.com";
+  const isProtected = (email) => email === protectedEmail || email === userData.email;
+  const { userData} = useAuth();
+  
+
+  return (
+    <div className="p-4 min-h-screen flex flex-col bg-white font-montserrat">
+      <HeaderSection
+        title="MANAGE ACCOUNT"
+        extraContent={
+          <button
+            className="bg-bfpNavy px-2 py-1 sm:px-3 sm:py-1 md:px-3 md:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 2xl:px4 2xl:py-2 text-white rounded-lg hover:bg-bfpNavyDark transition duration-200 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[16px] 2xl:text-[16px]"
+            onClick={openAddUserModal}
+          >
+            Add Account
+          </button>
+        }
+      />
+      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+
+      <BodyCard>
+        <div className="bg-bfpNavy rounded-lg shadow-md p-6">
+          <div className="flex justify-end pb-4">
+            <div className="relative w-full md:w-auto">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search for users"
+                className="block p-2 pl-10 text-sm text-white bg-bfpNavy border border-white rounded-lg w-full md:w-80"
+              />
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <img src={searchIcon} alt="Search" className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-white text-center py-6">Loading...</div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-white text-center py-6">No users found</div>
+          ) : (
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm text-left text-white bg-bfpNavy">
+                  <thead className="text-xs uppercase bg-searchTable text-white">
+                    <tr>
+                      <th className="px-6 py-3">Email</th>
+                      <th className="px-6 py-3">Role</th>
+                      <th className="px-6 py-3">Last Login</th>
+                      <th className="px-6 py-3">Block</th>
+                      <th className="px-6 py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                  {filteredUsers.map((user) => (
+                    <React.Fragment key={user.id}>
+                      <tr
+                        onDoubleClick={() => handleRowDoubleClick(user)}
+                        className="border-b bg-bfpNavy hover:bg-searchTable"
+                      >
+                        <td className="px-6 py-3">{user.email}</td>
+                        <td className="px-6 py-3">{user.role}</td>
+                        <td className="px-6 py-3">
+                          {user.lastLogin
+                            ? new Date(user.lastLogin.seconds * 1000).toLocaleString()
+                            : "Never"}
+                        </td>
+                        <td className="px-6 py-3">
+                          {user.isBlock ? (
+                            <button
+                              onClick={() => !isProtected(user.email) && handleUnblock(user.id)}
+                              disabled={isProtected(user.email)}
+                              className={`${
+                                isProtected(user.email)
+                                  ? "cursor-not-allowed opacity-50"
+                                  : "hover:opacity-80 bg-green px-2 py-1 rounded"
+                              }`}
+                            >
+                              Unblock
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => !isProtected(user.email) && handleBlock(user.id)}
+                              disabled={isProtected(user.email)}
+                              className={`${
+                                isProtected(user.email)
+                                  ? "cursor-not-allowed opacity-50"
+                                  : "hover:opacity-80 bg-red px-2 py-1 rounded"
+                              }`}
+                            >
+                              Block
+                            </button>
+                          )}
+                        </td>
+                        <td className="px-6 py-3">
+                          <div className="flex space-x-4">
+                            <button
+                              onClick={() => !isProtected(user.email) && handleEdit(user.id)}
+                              disabled={isProtected(user.email)}
+                              className={`${
+                                isProtected(user.email) ? "cursor-not-allowed opacity-50" : "hover:opacity-80"
+                              }`}
+                            >
+                              <img src={EditIcon} alt="Edit" className="w-6 h-6" />
+                            </button>
+                            <button
+                              onClick={() => !isProtected(user.email) && handleDelete(user.id)}
+                              disabled={isProtected(user.email)}
+                              className={`${
+                                isProtected(user.email) ? "cursor-not-allowed opacity-50" : "hover:opacity-80"
+                              }`}
+                            >
+                              <img src={DeleteIcon} alt="Delete" className="w-6 h-6" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedPersonnel === user && (
+                        <tr className="bg-bfpNavy">
+                          <td colSpan="5">
+                            <AccountTable selectedPersonnel={user} />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="block md:hidden">
+                {filteredUsers.map((user) => (
+                  <div key={user.id} className="bg-searchTable rounded-lg shadow-md p-4 mb-4">
+                    {/* Email at the top */}
+                    <h3 className="text-lg font-bold text-white">{user.email}</h3>
+                    {/* Role */}
+                    <div className="mt-2 text-white text-sm">
+                      <p>
+                        <span className="font-semibold">Role:</span> {user.role}
+                      </p>
+                    </div>
+                    {/* Last Login */}
+                    <div className="mt-2 text-white text-sm">
+                      <p>
+                        <span className="font-semibold">Last Login:</span>{" "}
+                        {user.lastLogin
+                          ? new Date(user.lastLogin.seconds * 1000).toLocaleString()
+                          : "Never"}
+                      </p>
+                    </div>
+                    {/* Action Buttons */}
+                    <div className="flex justify-between mt-2">
+                      {user.isBlock ? (
+                        <button
+                          onClick={() => !isProtected(user.email) && handleUnblock(user.id)}
+                          disabled={isProtected(user.email)}
+                          className={`bg-green px-3 py-2 rounded-lg text-white ${
+                            isProtected(user.email) && "opacity-50 cursor-not-allowed"
+                          }`}
+                        >
+                          Unblock
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => !isProtected(user.email) && handleBlock(user.id)}
+                          disabled={isProtected(user.email)}
+                          className={`bg-red px-3 py-2 rounded-lg text-white ${
+                            isProtected(user.email) && "opacity-50 cursor-not-allowed"
+                          }`}
+                        >
+                          Block
+                        </button>
+                      )}
+                      <button
+                        onClick={() => !isProtected(user.email) && handleEdit(user.id)}
+                        disabled={isProtected(user.email)}
+                        className={`bg-bfpOrange px-3 py-2 rounded-lg text-white ${
+                          isProtected(user.email) && "opacity-50 cursor-not-allowed"
+                        }`}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => !isProtected(user.email) && handleDelete(user.id)}
+                        disabled={isProtected(user.email)}
+                        className={`bg-blue px-3 py-2 rounded-lg text-white ${
+                          isProtected(user.email) && "opacity-50 cursor-not-allowed"
+                        }`}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </BodyCard>
+
+      {showAddUserModal && <AddUserModal onClose={closeAddUserModal} />}
+      {showEditUserModal && (
+        <EditUserModal onClose={closeEditUserModal} userId={selectedUserId} />
+      )}
+      {showDeleteUserModal && (
+        <DeletePersonnelModal
+          isOpen={showDeleteUserModal}
+          closeModal={() => setShowDeleteUserModal(false)}
+          onConfirm={handleConfirmDelete}
+          personnel={selectedUserId}
+        />
+      )}
+    </div>
+  );
+}
+
+export default AdminSettings;
