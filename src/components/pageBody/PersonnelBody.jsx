@@ -81,6 +81,7 @@ function PersonnelBody() {
       await deleteDoc(doc(db, "personnelInfo", person.id));
       setPersonnel(personnel.filter((p) => p.id !== person.id));
       await logAction("Delete Personnel", person, userData.email);
+      toast.success("Personnel deleted successfully.");
     } catch (error) {
       toast.error("Error deleting personnel:", error);
     } finally {

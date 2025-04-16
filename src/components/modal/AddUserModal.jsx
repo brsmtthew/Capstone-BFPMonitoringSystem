@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, secondaryAuth } from "../../firebase/Firebase";
-import { setDoc, doc } from 'firebase/firestore';
+import { setDoc, doc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../login/LoginAssets/smarthardhatAsset 1.svg';
+import { useAuth } from '../auth/AuthContext';
 
 function AddUserModal({ onClose }) {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ function AddUserModal({ onClose }) {
   const [role, setRole] = useState("user");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword,  setShowPassword] = useState(false);
+  const { userData} = useAuth();
 
   // Helper: Hash a string using SHA-256
   const hashText = async (text) => {
@@ -22,6 +24,19 @@ function AddUserModal({ onClose }) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     return hashHex;
+  };
+
+  const logAction = async (actionType, data, userEmail) => {
+    try {
+      await addDoc(collection(db, 'adminAudit'), {
+        action: actionType,
+        data: data,
+        user: userEmail,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      toast.error("Error logging action: " + error.message, { position: "top-right" });
+    }
   };
 
   const handleAddUser = async (e) => {
@@ -48,7 +63,7 @@ function AddUserModal({ onClose }) {
         contact: contact,
         createdAt: new Date(),
       });
-
+      await logAction("Add User", { email, role, contact }, userData.email);
       toast.success("User added successfully!", { position: "top-right" });
 
       // Clear form fields

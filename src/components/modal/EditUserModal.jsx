@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logo from "../login/LoginAssets/smarthardhatAsset 1.svg";
+import { useAuth } from '../auth/AuthContext';
 
 function EditUserModal({ onClose, userId }) {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ function EditUserModal({ onClose, userId }) {
   const [role, setRole] = useState("user");
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const { userData} = useAuth();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -27,6 +29,19 @@ function EditUserModal({ onClose, userId }) {
     fetchUserData();
   }, [userId]);
 
+  const logAction = async (actionType, data, userEmail) => {
+    try {
+      await addDoc(collection(db, 'adminAudit'), {
+        action: actionType,
+        data: data,
+        user: userEmail,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      toast.error("Error logging action: " + error.message, { position: "top-right" });
+    }
+  };
+
   const handleEditUser = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password || !contact.trim()) {
@@ -42,8 +57,8 @@ function EditUserModal({ onClose, userId }) {
         role: role,
         contact: contact,
       });
+      await logAction("Edit User", { email, role, contact }, userData.email);
       toast.success("User updated successfully!");
-      console.log("User updated successfully!");
       if (onClose) onClose();
     } catch (err) {
       toast.error("Updating user failed. " + err.message, { position: "top-right" });

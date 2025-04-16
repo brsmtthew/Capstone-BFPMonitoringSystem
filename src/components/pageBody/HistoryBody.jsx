@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  onSnapshot,
+} from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
 import sortIcon from "./dashboardAssets/sort.png";
 import searchIcon from "./dashboardAssets/glass.png";
@@ -8,7 +14,7 @@ import BodyCard from "../parentCard/BodyCard";
 import HistoryTable from "../historyTable/HistoryTable";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuth} from "../auth/AuthContext";
+import { useAuth } from "../auth/AuthContext";
 import DeletePersonnelModal from "../modal/deletePersonnelModal";
 
 function HistoryBody() {
@@ -24,61 +30,68 @@ function HistoryBody() {
   const navigate = useNavigate();
   const { user, userData } = useAuth();
   const isAdmin = userData && userData.role === "admin";
-  const isViewAllowed = userData && userData.role === "admin" || userData.role === "user";
+  const isViewAllowed =
+    userData && (userData.role === "admin" || userData.role === "user");
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const personnelSnapshot = await getDocs(collection(db, "personnelRecords"));
-        const data = [];
+    const personnelRef = collection(db, "personnelRecords");
 
-        for (const docSnapshot of personnelSnapshot.docs) {
+    // onSnapshot fetches data once initially and then only when there's a change.
+    const unsubscribe = onSnapshot(
+      personnelRef,
+      (snapshot) => {
+        // Process each document and fetch its notifications subcollection once
+        const personnelPromises = snapshot.docs.map(async (docSnapshot) => {
           const personnel = docSnapshot.data();
           const documentId = docSnapshot.id;
 
           const notificationsRef = collection(docSnapshot.ref, "notifications");
+          // Using getDocs here means notifications are fetched only once when the personnel doc is fetched.
           const notifSnapshot = await getDocs(notificationsRef);
-          const notifications = [];
-
-          notifSnapshot.forEach((notifDoc) => {
+          const notifications = notifSnapshot.docs.map((notifDoc) => {
             const notifData = notifDoc.data();
             const date = new Date(notifData.timestamp);
-            const formattedDate = date.toLocaleDateString();
-            const formattedTime = date.toLocaleTimeString();
-            const gearId = notifData.gearId || "Unknown";
-
-            notifications.push({
-              gearId: gearId,
+            return {
+              gearId: notifData.gearId || "Unknown",
               event: notifData.event || "Critical",
-              date: formattedDate,
-              time: formattedTime,
+              date: date.toLocaleDateString(),
+              time: date.toLocaleTimeString(),
               sensor: notifData.sensor || "Unknown",
               value: notifData.value || "N/A",
               status: notifData.status || "Unknown",
-            });
+            };
           });
 
-          data.push({
-            documentId: documentId,
+          return {
+            documentId,
             gearId: personnel.gearId || "No gearId",
             name: personnel.personnelName,
             date: personnel.date || "No date",
             time: personnel.time || "No time",
             totalNotifications: notifications.length,
-            notifications: notifications,
-          });
-        }
+            notifications,
+          };
+        });
 
-        setHistoryData(data);
-        setFilteredData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+        // Once all promises resolve, update the state.
+        Promise.all(personnelPromises)
+          .then((data) => {
+            setHistoryData(data);
+            setFilteredData(data);
+          })
+          .catch((error) => {
+            console.error("Error processing snapshot:", error);
+          })
+          .finally(() => setLoading(false));
+      },
+      (error) => {
+        console.error("Error fetching personnelRecords:", error);
         setLoading(false);
       }
-    };
+    );
 
-    fetchData();
+    // Cleanup the subscription on unmount.
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -150,7 +163,6 @@ function HistoryBody() {
     return Promise.all(deletePromises);
   };
 
-  // Open the delete modal only if there are selected rows
   const openDeleteModal = () => {
     if (selectedRows.length === 0) {
       toast.info("Please select at least one personnel to delete.");
@@ -163,7 +175,6 @@ function HistoryBody() {
     setIsDeleteModalOpen(false);
   };
 
-  // This function will run when the user confirms deletion in the modal.
   const confirmDelete = async () => {
     try {
       for (const documentId of selectedRows) {
@@ -209,9 +220,7 @@ function HistoryBody() {
   return (
     <div className="p-4 min-h-screen flex flex-col font-montserrat">
       <HeaderSection title="HISTORY" />
-
       <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
-
       <BodyCard>
         <div className="bg-bfpNavy rounded-lg shadow-md p-6">
           {/* Controls */}
@@ -238,7 +247,6 @@ function HistoryBody() {
                   />
                 </svg>
               </button>
-
               {isDropdownOpen && (
                 <div className="absolute mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
                   <button
@@ -264,8 +272,8 @@ function HistoryBody() {
                     onClick={openDeleteModal}
                     className={`w-full text-left px-4 py-2 ${
                       !isAdmin
-                        ? 'bg-gray text-white cursor-not-allowed'
-                        : 'text-white hover:bg-searchTable'
+                        ? "bg-gray text-white cursor-not-allowed"
+                        : "text-white hover:bg-searchTable"
                     }`}
                   >
                     Delete Selected Data
@@ -273,7 +281,6 @@ function HistoryBody() {
                 </div>
               )}
             </div>
-
             <div className="relative w-full md:w-auto">
               <input
                 type="text"
@@ -287,7 +294,6 @@ function HistoryBody() {
               </div>
             </div>
           </div>
-
           {loading ? (
             <div className="text-white text-center py-6">Loading...</div>
           ) : filteredData.length === 0 ? (
@@ -371,7 +377,6 @@ function HistoryBody() {
                   </tbody>
                 </table>
               </div>
-
               {/* Mobile Card View */}
               <div className="block md:hidden">
                 {filteredData.map((data, index) => (
@@ -439,7 +444,6 @@ function HistoryBody() {
           )}
         </div>
       </BodyCard>
-      {/* Render the DeletePersonnelModal */}
       <DeletePersonnelModal
         isOpen={isDeleteModalOpen}
         closeModal={closeDeleteModal}

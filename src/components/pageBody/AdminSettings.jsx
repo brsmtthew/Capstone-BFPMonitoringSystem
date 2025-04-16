@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import HeaderSection from "../header/HeaderSection";
 import BodyCard from "../parentCard/BodyCard";
-import { collection, getDocs, deleteDoc, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, onSnapshot, updateDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
 import searchIcon from "../pageBody/dashboardAssets/glass.png";
 import EditIcon from "../pageBody/dashboardAssets/edit.png";
@@ -57,6 +57,19 @@ function AdminSettings() {
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
 
+  const logAction = async (actionType, data, userEmail) => {
+    try {
+      await addDoc(collection(db, 'adminAudit'), {
+        action: actionType,
+        data: data,
+        user: userEmail,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      toast.error("Error logging action: " + error.message, { position: "top-right" });
+    }
+  };
+
   const handleEdit = (userId) => {
     setSelectedUserId(userId);
     setShowEditUserModal(true);
@@ -74,9 +87,11 @@ function AdminSettings() {
 
   const handleConfirmDelete = async (userId) => {
     try {
+      const userToDelete = users.find((user) => user.id === userId);
       await deleteDoc(doc(db, "users", userId));
       setUsers((prev) => prev.filter((user) => user.id !== userId));
       setFilteredUsers((prev) => prev.filter((user) => user.id !== userId));
+      await logAction("Delete User", { email: userToDelete.email, role: userToDelete.role, contact: userToDelete.contact }, userData.email);
       toast.success("User deleted successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -88,8 +103,14 @@ function AdminSettings() {
 
   const handleBlock = async (userId) => {
     try {
+      const userToBlock = users.find((user) => user.id === userId);
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, { isBlock: true });
+      await logAction(
+        "Block User",
+        { email: userToBlock.email, role: userToBlock.role, contact: userToBlock.contact },
+        userData.email
+      );
       toast.success("User blocked successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error blocking user:", error);
@@ -99,8 +120,14 @@ function AdminSettings() {
 
   const handleUnblock = async (userId) => {
     try {
+      const userToBlock = users.find((user) => user.id === userId);
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, { isBlock: false });
+      await logAction(
+        "Unblock User",
+        { email: userToBlock.email, role: userToBlock.role, contact: userToBlock.contact },
+        userData.email
+      );
       toast.success("User unblocked successfully!", { position: "top-right" });
     } catch (error) {
       console.error("Error unblocking user:", error);
@@ -184,7 +211,7 @@ function AdminSettings() {
                     <React.Fragment key={user.id}>
                       <tr
                         onDoubleClick={() => handleRowDoubleClick(user)}
-                        className="border-b bg-bfpNavy hover:bg-searchTable"
+                        className="border-b bg-bfpNavy hover:bg-searchTable cursor-pointer"
                       >
                         <td className="px-6 py-3">{user.email}</td>
                         <td className="px-6 py-3">{user.role}</td>
