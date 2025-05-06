@@ -201,6 +201,7 @@ function AdminSettings() {
                     <tr>
                       <th className="px-6 py-3">Email</th>
                       <th className="px-6 py-3">Role</th>
+                      <th className="px-6 py-3">Created at</th>
                       <th className="px-6 py-3">Last Login</th>
                       <th className="px-6 py-3">Block</th>
                       <th className="px-6 py-3">Action</th>
@@ -215,6 +216,10 @@ function AdminSettings() {
                       >
                         <td className="px-6 py-3">{user.email}</td>
                         <td className="px-6 py-3">{user.role}</td>
+                        <td className="px-6 py-3">
+                          {user.createdAt
+                            ? new Date(user.createdAt.seconds * 1000).toLocaleString()
+                            : "N/A"}</td>
                         <td className="px-6 py-3">
                           {user.lastLogin
                             ? new Date(user.lastLogin.seconds * 1000).toLocaleString()
@@ -272,7 +277,7 @@ function AdminSettings() {
                       </tr>
                       {expandedPersonnel === user && (
                         <tr className="bg-bfpNavy">
-                          <td colSpan="5">
+                          <td colSpan="6">
                             <AccountTable selectedPersonnel={user} />
                           </td>
                         </tr>

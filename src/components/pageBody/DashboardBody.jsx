@@ -1,28 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import AddPersonnelModal from '../modal/addPersonnelModal';
-import { getStorage, ref, getDownloadURL } from 'firebase/storage';
-import { db } from '../../firebase/Firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import HeaderSection from '../header/HeaderSection';
-import OverviewCard from '../DashboardCard/OverViewCard';
-import ProfileCard from '../DashboardCard/ProfileCard';
-import BodyCard from '../parentCard/BodyCard';
-import DashboardChart from '../chart/DashboardChart';
-import Firefighters from './dashboardAssets/firefighters.png';
+import React, { useState, useEffect, useRef } from "react";
+import AddPersonnelModal from "../modal/addPersonnelModal";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { db } from "../../firebase/Firebase";
+import { collection, getDocs } from "firebase/firestore";
+import HeaderSection from "../header/HeaderSection";
+import OverviewCard from "../DashboardCard/OverViewCard";
+import ProfileCard from "../DashboardCard/ProfileCard";
+import BodyCard from "../parentCard/BodyCard";
+import DashboardChart from "../chart/DashboardChart";
+import Firefighters from "./dashboardAssets/firefighters.png";
 
 function DashboardBody() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [personnel, setPersonnel] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   // State for the analytics data which includes our realTimeData and personnel info (if needed)
   const [analyticsData, setAnalyticsData] = useState({
     realTimeData: [],
     notifications: [],
-    personnelInfo: {}
+    personnelInfo: {},
   });
 
+  const severityRatio = calculateAlertSeverityRatio(analyticsData.notifications);
   const fetchedOnceRef = useRef(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -30,14 +31,14 @@ function DashboardBody() {
   // Function to fetch personnel data from Firestore
   const fetchPersonnelData = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'personnelInfo'));
+      const querySnapshot = await getDocs(collection(db, "personnelInfo"));
       const data = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
       setPersonnel(data);
     } catch (error) {
-      console.error('Error fetching personnel data:', error);
+      console.error("Error fetching personnel data:", error);
     } finally {
       setLoading(false);
     }
@@ -47,18 +48,28 @@ function DashboardBody() {
   const fetchRandomRealTimeData = async () => {
     try {
       // Get all documents from the "personnelRecords" collection.
-      const personnelRecordsSnapshot = await getDocs(collection(db, 'personnelRecords'));
+      const personnelRecordsSnapshot = await getDocs(
+        collection(db, "personnelRecords")
+      );
       if (!personnelRecordsSnapshot.empty) {
         const records = personnelRecordsSnapshot.docs;
-        const randomIndex = records.length === 1 
-          ? 0 
-          : Math.floor(Math.random() * records.length);
+        const randomIndex =
+          records.length === 1 ? 0 : Math.floor(Math.random() * records.length);
         const randomPersonnelDoc = records[randomIndex];
-        console.log('Selected personnel record:', randomPersonnelDoc.id, randomPersonnelDoc.data());
+        console.log(
+          "Selected personnel record:",
+          randomPersonnelDoc.id,
+          randomPersonnelDoc.data()
+        );
 
         // Get the "realTimeData" subcollection for the chosen personnel record.
         const realTimeDataSnapshot = await getDocs(
-          collection(db, 'personnelRecords', randomPersonnelDoc.id, 'realTimeData')
+          collection(
+            db,
+            "personnelRecords",
+            randomPersonnelDoc.id,
+            "realTimeData"
+          )
         );
         const realTimeData = realTimeDataSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -67,15 +78,20 @@ function DashboardBody() {
 
         // **New:** Get the "notification" subcollection for the chosen personnel record.
         const notificationSnapshot = await getDocs(
-          collection(db, 'personnelRecords', randomPersonnelDoc.id, 'notifications')
+          collection(
+            db,
+            "personnelRecords",
+            randomPersonnelDoc.id,
+            "notifications"
+          )
         );
         const notificationsData = notificationSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        console.log('Fetched realTimeData:', realTimeData);
-        console.log('Fetched Notifications:', notificationsData);
+        console.log("Fetched realTimeData:", realTimeData);
+        console.log("Fetched Notifications:", notificationsData);
 
         // Update state with the fetched realTimeData and any personnel info if needed.
         setAnalyticsData({
@@ -84,10 +100,10 @@ function DashboardBody() {
           personnelInfo: randomPersonnelDoc.data(),
         });
       } else {
-        console.log('No personnel records found.');
+        console.log("No personnel records found.");
       }
     } catch (error) {
-      console.error('Error fetching random real time data:', error);
+      console.error("Error fetching random real time data:", error);
     }
   };
 
@@ -98,7 +114,7 @@ function DashboardBody() {
 
   // Previous image logic
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => 
+    setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? personnel.length - 1 : prevIndex - 1
     );
   };
@@ -112,29 +128,59 @@ function DashboardBody() {
       const url = await getDownloadURL(imageRef);
       return url;
     } catch (error) {
-      console.error('Error fetching image from Firebase Storage:', error);
-      return 'https://via.placeholder.com/300x300';
+      console.error("Error fetching image from Firebase Storage:", error);
+      return "https://via.placeholder.com/300x300";
     }
   };
 
-  // Helper function to compute alert severity ratio based on sensor data.
-  const calculateAlertSeverityRatio = () => {
-    const sensorTypes = [
-      "Body Temperature",
-      "Environmental Temperature",
-      "Heart Rate",
-      "Carbon Monoxide",
-      "Smoke"
-    ];
+  function calculateAlertSeverityRatio(notifications) {
+    // Clone & sort oldest→newest
+    const sorted = (notifications || []).slice().sort((a, b) => {
+      const ta = a.timestamp?.seconds
+        ? a.timestamp.seconds * 1000
+        : new Date(a.timestamp).getTime();
+      const tb = b.timestamp?.seconds
+        ? b.timestamp.seconds * 1000
+        : new Date(b.timestamp).getTime();
+      return ta - tb;
+    });
+  
     let severity = 0;
-    sensorTypes.forEach((sensor) => {
-      const sensorData = analyticsData.notifications.find((data) => data.sensor === sensor);
-      if (sensorData && sensorData.isCritical) {
-        severity += 20;
+    const activeSensors = new Set();
+  
+    sorted.forEach((notification) => {
+      let weight = 0;
+      switch (notification.sensor) {
+        case "Carbon Monoxide":
+          weight = 20;
+          break;
+        case "Heart Rate":
+        case "Body Temperature":
+          weight = 25;
+          break;
+        case "Smoke":
+        case "Environmental Temperature":
+          weight = 15;
+          break;
+        default:
+          return; // skip unknown sensors
+      }
+  
+      if (notification.isCritical) {
+        if (!activeSensors.has(notification.sensor)) {
+          activeSensors.add(notification.sensor);
+          severity += weight;
+        }
+      } else {
+        if (activeSensors.has(notification.sensor)) {
+          activeSensors.delete(notification.sensor);
+          severity -= weight;
+        }
       }
     });
-    return severity;
-  };
+  
+    return Math.max(0, severity);
+  }
   
   useEffect(() => {
     if (!fetchedOnceRef.current) {
@@ -158,10 +204,14 @@ function DashboardBody() {
 
   // Sort notifications from latest to outdated
   const sortedNotifications = analyticsData.notifications.sort((a, b) => {
-    const dateA = a.timestamp.seconds ? new Date(a.timestamp.seconds * 1000) : new Date(a.timestamp);
-    const dateB = b.timestamp.seconds ? new Date(b.timestamp.seconds * 1000) : new Date(b.timestamp);
+    const dateA = a.timestamp.seconds
+      ? new Date(a.timestamp.seconds * 1000)
+      : new Date(a.timestamp);
+    const dateB = b.timestamp.seconds
+      ? new Date(b.timestamp.seconds * 1000)
+      : new Date(b.timestamp);
     return dateB - dateA;
-  });  
+  });
 
   return (
     <div className="p-4 h-full flex flex-col bg-white font-montserrat">
@@ -185,7 +235,7 @@ function DashboardBody() {
               />
             </div>
             <div className="lg:col-span-2">
-              <DashboardChart 
+              <DashboardChart
                 data={analyticsData.realTimeData}
                 personnelInfo={analyticsData.personnelInfo}
               />
@@ -197,8 +247,7 @@ function DashboardBody() {
             {/* First OverviewCard */}
             <OverviewCard
               title="Total Personnel"
-              description="The total number of personnel currently registered."
-            >
+              description="The total number of personnel currently registered.">
               <div className="grid grid-cols-2 items-center gap-4">
                 {/* Column 1: Firefighters Icon */}
                 <div className="flex justify-center">
@@ -222,52 +271,59 @@ function DashboardBody() {
             {/* Second OverviewCard */}
             <OverviewCard
               title="Alert Severity Ratio"
-              description="Based on critical sensor readings."
-            >
+              description="Based on critical sensor readings.">
               <p className="text-[30px] sm:text-[38px] md:text-[42px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] font-bold text-black">
-                {calculateAlertSeverityRatio()}%
+                {severityRatio}%
               </p>
-              <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">Severity Ratio</p>
+              <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
+                Severity Ratio
+              </p>
             </OverviewCard>
 
             {/* Third OverviewCard */}
             {/* On small/medium screens, this card will span 2 columns */}
             <div className="col-span-2 lg:col-span-1">
-            <OverviewCard
-              title="Notification Status"
-              description="Previous Notifications for this Personnel"
-            >
-              <div className="max-h-64 overflow-y-auto text-center">
-                {sortedNotifications && sortedNotifications.length > 0 ? (
-                  sortedNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-2 mb-2 rounded-lg lg:w-80 xl:w-96 ${
-                        notification.isCritical
-                          ? 'bg-red border border-red text-white'
-                          : 'bg-green border border-green text-white'
-                      }`}
-                    >
-                      <p className="text-[10px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[20px] font-semibold">{notification.message}</p>
-                      <p className="text-[10px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[20px]  font-bold">Value: {notification.value}</p>
-                      <p className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] xl:text-[16px] 2xl:text-[18px] ">
-                        {notification.timestamp ? (
-                          notification.timestamp.seconds
-                            ? new Date(notification.timestamp.seconds * 1000).toLocaleString()
-                            : new Date(notification.timestamp).toLocaleString()
-                        ) : (
-                          "N/A"
-                        )}
-                      </p>
+              <OverviewCard
+                title="Notification Status"
+                description="Previous Notifications for this Personnel">
+                <div className="max-h-64 overflow-y-auto text-center p-2">
+                  {sortedNotifications && sortedNotifications.length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {sortedNotifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-1 mb-2 rounded-lg w-full ${
+                            notification.isCritical
+                              ? "bg-red border border-red text-white"
+                              : "bg-green border border-green text-white"
+                          }`}>
+                          <p className="text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] font-semibold">
+                            {notification.message}
+                          </p>
+                          <p className="text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] font-bold">
+                            Value: {notification.value}
+                          </p>
+                          <p className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[12px] xl:text-[14px] 2xl:text-[14px]">
+                            {notification.timestamp
+                              ? notification.timestamp.seconds
+                                ? new Date(
+                                    notification.timestamp.seconds * 1000
+                                  ).toLocaleString()
+                                : new Date(
+                                    notification.timestamp
+                                  ).toLocaleString()
+                              : "N/A"}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))
-                ) : (
-                  <p className="text-[26px] font-semibold text-black">
-                    No notifications available.
-                  </p>
-                )}
-              </div>
-            </OverviewCard>
+                  ) : (
+                    <p className="text-[26px] font-semibold text-black">
+                      No notifications available.
+                    </p>
+                  )}
+                </div>
+              </OverviewCard>
             </div>
           </div>
         </div>

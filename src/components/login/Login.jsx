@@ -38,6 +38,7 @@ function Login() {
       if (docSnap.exists()) {
         const userData = docSnap.data();
 
+
         if (userData.isBlock) {
           toast.error("Your account has been blocked. Please contact the administrator.", { position: "top-right" });
           setIsLoading(false);
@@ -53,7 +54,8 @@ function Login() {
           setIsLoading(false);
         }
       } else {
-        console.log("No such document!");
+        toast.error("User data not found. Please contact support.", { position: "top-right" });
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Login Error:", error.message);

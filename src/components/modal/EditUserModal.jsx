@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, where, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,6 +12,8 @@ function EditUserModal({ onClose, userId }) {
   const [role, setRole] = useState("user");
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const [adminCount, setAdminCount] = useState(0);
+  const [originalRole, setOriginalRole] = useState("user");
   const { userData} = useAuth();
 
   useEffect(() => {
@@ -28,6 +30,24 @@ function EditUserModal({ onClose, userId }) {
     };
     fetchUserData();
   }, [userId]);
+
+  // 1️⃣ Load the user’s current role
+  useEffect(() => {
+    getDoc(doc(db, "users", userId)).then(docSnap => {
+      const data = docSnap.data();
+      setRole(data.role);
+      setOriginalRole(data.role);
+    });
+  }, [userId]);
+
+  // 2️⃣ Count existing admins
+  useEffect(() => {
+    const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
+    const unsub = onSnapshot(adminQuery, snapshot => {
+      setAdminCount(snapshot.size);
+    });
+    return unsub;
+  }, []);
 
   const logAction = async (actionType, data, userEmail) => {
     try {
@@ -46,6 +66,11 @@ function EditUserModal({ onClose, userId }) {
     e.preventDefault();
     if (!email.trim() || !password || !contact.trim()) {
       toast.error("Please fill in all required fields.", { position: "top-right" });
+      return;
+    }
+
+    if (originalRole !== "admin" && role === "admin" && adminCount >= 2) {
+      toast.error("You already have 2 admins—cannot add another.", { position: "top-right" });
       return;
     }
 
@@ -117,7 +142,7 @@ function EditUserModal({ onClose, userId }) {
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="user">User</option>
-              <option value="admin">Admin</option>
+              <option value="admin" disabled= {originalRole != "admin" && adminCount >=2}>Admin {originalRole !== "admin" && adminCount >= 2 ? "(limit reached)" : ""}</option>
             </select>
           </div>
 

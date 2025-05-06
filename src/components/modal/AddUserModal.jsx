@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db, secondaryAuth } from "../../firebase/Firebase";
-import { setDoc, doc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { setDoc, doc, addDoc, collection, serverTimestamp, query, where, onSnapshot } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../login/LoginAssets/smarthardhatAsset 1.svg';
@@ -14,6 +14,7 @@ function AddUserModal({ onClose }) {
   const [role, setRole] = useState("user");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword,  setShowPassword] = useState(false);
+  const [adminCount, setAdminCount] = useState(0);
   const { userData} = useAuth();
 
   // Helper: Hash a string using SHA-256
@@ -39,10 +40,24 @@ function AddUserModal({ onClose }) {
     }
   };
 
+  // 1️⃣ Subscribe to count of admins
+  useEffect(() => {
+    const adminQuery = query(collection(db, "users"), where("role", "==", "admin"));
+    const unsub = onSnapshot(adminQuery, snapshot => {
+      setAdminCount(snapshot.size);
+    });
+    return unsub;
+  }, []);
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password.trim() || !contact.trim()) {
       toast.error("Please fill in all required fields.", { position: "top-right" });
+      return;
+    }
+
+    if (role === "admin" && adminCount >= 2) {
+      toast.error("Maximum 2 admins allowed.", { position: "top-right" });
       return;
     }
 
@@ -134,7 +149,7 @@ function AddUserModal({ onClose }) {
                   className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="user">User</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin" disabled={adminCount >= 2}>Admin {adminCount >= 2 ? "(limit reached)" : ""}</option>
                 </select>
               </div>
 

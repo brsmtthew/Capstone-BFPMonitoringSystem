@@ -10,53 +10,48 @@ function AccountTable({ selectedPersonnel }) {
 
   useEffect(() => {
     if (!selectedPersonnel) return;
-
+  
+    const sortByTimestampDesc = (a, b) => {
+      const aSec = a.timestamp?.seconds ?? 0;
+      const bSec = b.timestamp?.seconds ?? 0;
+      return bSec - aSec;
+    };
+  
     const fetchAudits = async () => {
       setLoading(true);
       try {
         if (selectedPersonnel.role === "admin") {
-          // For admin, fetch both adminAudit and personnelAudit concurrently
-          const adminAuditRef = collection(db, "adminAudit");
-          const personnelAuditRef = collection(db, "personnelAudit");
-
-          const adminQuery = query(
-            adminAuditRef,
-            where("user", "==", selectedPersonnel.email)
+          const adminSnapshot = await getDocs(
+            query(collection(db, "adminAudit"), where("user", "==", selectedPersonnel.email))
           );
-          const personnelQuery = query(
-            personnelAuditRef,
-            where("user", "==", selectedPersonnel.email)
+          const personnelSnapshot = await getDocs(
+            query(collection(db, "personnelAudit"), where("user", "==", selectedPersonnel.email))
           );
-
-          const [adminSnapshot, personnelSnapshot] = await Promise.all([
-            getDocs(adminQuery),
-            getDocs(personnelQuery)
-          ]);
-
-          const adminAuditData = adminSnapshot.docs.map((doc) => ({
+  
+          const adminAuditData = adminSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
           }));
-
-          const personnelAuditData = personnelSnapshot.docs.map((doc) => ({
+          adminAuditData.sort(sortByTimestampDesc);
+  
+          const personnelAuditData = personnelSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
           }));
-
+          personnelAuditData.sort(sortByTimestampDesc);
+  
           setAdminAudits(adminAuditData);
           setPersonnelAudits(personnelAuditData);
+  
         } else {
-          // For non-admins, only fetch personnelAudit logs
-          const personnelAuditRef = collection(db, "personnelAudit");
-          const q = query(
-            personnelAuditRef,
-            where("user", "==", selectedPersonnel.email)
+          const snapshot = await getDocs(
+            query(collection(db, "personnelAudit"), where("user", "==", selectedPersonnel.email))
           );
-          const snapshot = await getDocs(q);
-          const auditData = snapshot.docs.map((doc) => ({
+          const auditData = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
           }));
+          auditData.sort(sortByTimestampDesc);
           setPersonnelAudits(auditData);
         }
       } catch (error) {
@@ -65,14 +60,14 @@ function AccountTable({ selectedPersonnel }) {
         setLoading(false);
       }
     };
-
+  
     fetchAudits();
   }, [selectedPersonnel]);
-
+  
   return (
     <div className="mt-4 bg-bfpOrange rounded-xl shadow-md p-4">
       <h3 className="text-xl font-bold mb-4">
-        Personnel Audit Logs {selectedPersonnel?.email}
+        Audit Logs {selectedPersonnel?.email}
       </h3>
       {loading ? (
         <p>Loading audit logs...</p>
