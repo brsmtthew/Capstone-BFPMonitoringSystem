@@ -2,10 +2,10 @@ import React from 'react';
 
 const OverviewCard = ({ title, description, children, className }) => {
   return (
-    <div className={`bg-white relative flex flex-col rounded-lg shadow h-auto w-112 ${className}`}>
+    <div className={`bg-white relative flex flex-col rounded-lg shadow h-64 w-112 ${className}`}>
       <div className="p-4 bg-bfpNavy rounded-lg text-white">
-        <h3 className="text-[10px] sm:text-[16px] md:text-[17px] lg:text-[18px] xl:text-[19px] 2xl:text-[20px] font-medium">{title}</h3>
-        <p className="text-[8px] sm:text-[10px] md:text-[11px] lg:text-[12px] xl:text-[13px] 2xl:text-[14px]">{description}</p>
+        <h3 className="text-[12px] sm:text-[14px] md:text-[14px] lg:text-[16px] xl:text-[16px] 2xl:text-[18px] font-montserrat font-bold">{title}</h3>
+        <p className="text-[8px] sm:text-[9px] md:text-[9px] lg:text-[10px] xl:text-[12px] 2xl:text-[14px]">{description}</p>
       </div>
       <div className="relative grow flex flex-col items-center justify-center">
         {children}

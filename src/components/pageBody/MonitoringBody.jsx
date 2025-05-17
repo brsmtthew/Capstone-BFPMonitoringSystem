@@ -299,7 +299,7 @@ function MonitoringBody() {
   return (
     <div className="p-4 h-full flex flex-col bg-white">
       <HeaderSection title="REAL-TIME MONITORING" />
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
       {monitoredPersonnel.length === 0 ? (
         <div className="flex justify-center items-center h-screen">
           <p className="text-[8px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text[22px] 2xl:text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"

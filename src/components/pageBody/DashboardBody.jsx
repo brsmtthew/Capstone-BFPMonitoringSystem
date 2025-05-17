@@ -214,26 +214,16 @@ function DashboardBody() {
   });
 
   return (
-    <div className="p-4 h-full flex flex-col bg-white font-montserrat">
+    <div className="p-2 h-full flex flex-col bg-white font-montserrat">
       <HeaderSection title="DASHBOARD" />
 
-      <div className="my-4 h-[3px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-2 h-[3px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* Parent Card */}
       <BodyCard>
         <div className="grid gap-4 sm:gap-6">
           {/* First row: Profile Card and Dashboard Chart */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1">
-              <ProfileCard
-                name={personnel[currentImageIndex].name}
-                position={personnel[currentImageIndex].position}
-                image={personnel[currentImageIndex].image}
-                onPrevious={prevImage}
-                onNext={nextImage}
-                fetchImageUrl={fetchImageUrl}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4">
             <div className="lg:col-span-2">
               <DashboardChart
                 data={analyticsData.realTimeData}
@@ -248,7 +238,7 @@ function DashboardBody() {
             <OverviewCard
               title="Total Personnel"
               description="The total number of personnel currently registered.">
-              <div className="grid grid-cols-2 items-center gap-4">
+              <div className="grid grid-cols-2 items-center gap-2">
                 {/* Column 1: Firefighters Icon */}
                 <div className="flex justify-center">
                   <img
@@ -259,11 +249,11 @@ function DashboardBody() {
                 </div>
                 {/* Column 2: Personnel count and label */}
                 <div className="flex flex-col justify-center text-center">
-                  <p className="text-[30px] sm:text-[38px] md:text-[42px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] font-bold text-black">
+                  <p className="text-[28px] sm:text-[32px] md:text-[44px] lg:text-[48px] xl:text-[52px] 2xl:text-[52px] font-bold text-black">
                     {personnel.length}
                   </p>
-                  <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
-                    Total Personnel
+                  <p className="text-[10px] sm:text-[14px] md:text-[16px] lg:text-[16px] xl:text-[18px] 2xl:text-[20px] font-bold text-black">
+                    Current Active Personnel
                   </p>
                 </div>
               </div>
@@ -272,7 +262,7 @@ function DashboardBody() {
             <OverviewCard
               title="Alert Severity Ratio"
               description="Based on critical sensor readings.">
-              <p className="text-[30px] sm:text-[38px] md:text-[42px] lg:text-[52px] xl:text-[58px] 2xl:text-[64px] font-bold text-black">
+              <p className="text-[28px] sm:text-[32px] md:text-[44px] lg:text-[48px] xl:text-[50px] 2xl:text-[52px] font-bold text-black">
                 {severityRatio}%
               </p>
               <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
@@ -286,7 +276,7 @@ function DashboardBody() {
               <OverviewCard
                 title="Notification Status"
                 description="Previous Notifications for this Personnel">
-                <div className="max-h-64 overflow-y-auto text-center p-2">
+                <div className="max-h-40 overflow-y-auto text-center p-2">
                   {sortedNotifications && sortedNotifications.length > 0 ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                       {sortedNotifications.map((notification) => (
@@ -297,13 +287,13 @@ function DashboardBody() {
                               ? "bg-red border border-red text-white"
                               : "bg-green border border-green text-white"
                           }`}>
-                          <p className="text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] font-semibold">
+                          <p className="text-[10px] sm:text-[10px] md:text-[12px] lg:text-[12px] xl:text-[14px] 2xl:text-[14px] font-semibold">
                             {notification.message}
                           </p>
-                          <p className="text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] font-bold">
+                          <p className="text-[10px] sm:text-[12px] md:text-[12px] lg:text-[12px] xl:text-[14px] 2xl:text-[14px] font-bold">
                             Value: {notification.value}
                           </p>
-                          <p className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[12px] xl:text-[14px] 2xl:text-[14px]">
+                          <p className="text-[8px] sm:text-[8px] md:text-[10px] lg:text-[10px] xl:text-[12px] 2xl:text-[12px]">
                             {notification.timestamp
                               ? notification.timestamp.seconds
                                 ? new Date(

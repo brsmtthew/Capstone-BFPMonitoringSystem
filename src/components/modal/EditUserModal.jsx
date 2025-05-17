@@ -62,6 +62,12 @@ function EditUserModal({ onClose, userId }) {
     }
   };
 
+  const handleContactChange = (e) => {
+    let digit = e.target.value.replace(/\D/g, '');
+    if (digit.length > 11) digit = digit.slice(0, 11);
+    setContact(digit);
+  };
+
   const handleEditUser = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password || !contact.trim()) {
@@ -148,11 +154,14 @@ function EditUserModal({ onClose, userId }) {
 
           {/* Contact Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
             <input
               type="text"
               value={contact}
-              onChange={(e) => setContact(e.target.value)}
+              onChange={handleContactChange}    // use our new sanitizer
+              inputMode="numeric"               // mobile numeric keypad
+              maxLength={11}                    // block typing past 11
+              pattern="\d{11}"                  // HTML5 validate exactly 11 digits
               className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

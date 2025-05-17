@@ -108,8 +108,8 @@ function Summary({
                   <p className="text-2xl font-bold text-black mt-1">{breachCount}</p>
                 </div>
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
-                  <p className="text-xs text-black uppercase">Risk Duration</p>
-                  <p className="text-2xl font-bold text-black mt-1">{dangerTime}</p>
+                  <p className="text-[10px] text-black uppercase">Risk Duration</p>
+                  <p className="text-1xl font-bold text-black mt-1">{dangerTime}</p>
                 </div>
               </div>
             </div>

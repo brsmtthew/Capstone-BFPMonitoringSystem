@@ -140,7 +140,7 @@ const AnalyticsBody = () => {
           </div>
         }
       />
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       <BodyCard>
         <div className='mb-6'>

@@ -49,6 +49,12 @@ function AddUserModal({ onClose }) {
     return unsub;
   }, []);
 
+  const handleContactChange = (e) => {
+    let digit = e.target.value.replace(/\D/g, '');
+    if (digit.length > 11) digit = digit.slice(0, 11);
+    setContact(digit);
+  };
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     if (!email.trim() || !password.trim() || !contact.trim()) {
@@ -178,15 +184,18 @@ function AddUserModal({ onClose }) {
 
               <div>
                 <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
-                  Contact Number
+                  Phone Number
                 </label>
                 <input
-                  type="text"
+                  type="tel"
                   id="contact"
+                  inputMode='numeric'
+                  maxLength={11}
+                  pattern='\d{11}'
                   value={contact}
-                  onChange={(e) => setContact(e.target.value)}
+                  onChange={handleContactChange}
                   className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter user's contact number"
+                  placeholder="Enter user's phone number"
                 />
               </div>
 

@@ -42,22 +42,22 @@ function ProfileMonitoring({ personnel }) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-96 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
-      <div className="p-2 bg-bfpNavy rounded-lg text-white flex flex-col items-start">
+                    h-80 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
+      <div className="p-2 bg-bfpNavy rounded-t-lg text-white flex flex-col items-start">
         {personnel ? (
           <>
             <h3 className="text-lg font-bold">{personnel.name}</h3>
-            <p className="text-sm text-gray-300">{personnel.position}</p>
+            <p className="text-sm text-gray">{personnel.position}</p>
           </>
         ) : (
           <>
             <h3 className="text-lg font-bold">Select Personnel</h3>
-            <p className="text-sm text-gray-300">Personnel Position</p>
+            <p className="text-sm text-gray">Personnel Position</p>
           </>
         )}
       </div>
       <div className="flex-grow p-4 flex flex-col items-center justify-center">
-        <div className="rounded-full overflow-hidden mb-2 h-52 w-52 lg:h-52 lg:w-52 xl:h-52 xl:w-52">
+        <div className="rounded-full overflow-hidden mb-2 h-32 w-32 lg:h-32 lg:w-32 xl:h-36 xl:w-36 2xl:h-36 2xl:w-36">
           <img
             src={personnel?.image || 'https://via.placeholder.com/300x300'}
             alt="Profile"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { replace, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from "firebase/auth"; // Firebase Auth
 import { auth, db } from "../../firebase/Firebase"; 
 import { toast, ToastContainer } from 'react-toastify'; 
@@ -48,7 +48,9 @@ function Login() {
         if(userData.role === 'admin' || userData.role === 'user') {
           await updateDoc(docRef, { lastLogin: new Date() }); // Update last login timestamp
           toast.success("Login successful!", { position: "top-right" });
-          navigate('/dashboard', { replace: true }); // Redirect to Dashboard
+          setTimeout(() => {
+            navigate('/dashboard', {replace: true});
+          }, 1000); // 500ms delay
         } else {
           toast.error("You do not have access.", { position: "top-right" });
           setIsLoading(false);
@@ -82,87 +84,65 @@ function Login() {
   
   const handleSignUp = (e) => {
     e.preventDefault();
-    console.log('Sign Up Clicked');
     navigate('/signup'); // Ensure this route is defined in your routing configuration
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bfpNavy">
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full max-w-4xl flex flex-col md:flex-row">
-        {/* Login Form Section */}
-        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center relative">
-          <div className="absolute top-4 left-4 flex items-center">
-            <img src={logo} alt="logo" className="h-12 w-12 mr-2" />
-            <p className="font-semibold text-[16px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[24px]">
-              <span className="text-bfpOrange font-bold">BFP</span>
-              <span className="text-bfpNavy">SmartTrack</span>
-            </p>
-          </div>
-          <div className="mt-20">
-            <h2 className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[24px] text-center text-bfpNavy font-bold mb-2">USER LOGIN</h2>
-            <p className="text-center text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text-[20px] 2xl:text-[22px] text-bfpNavy mb-6">
-              Sign in to securely manage and monitor real-time system performance.
-            </p>
-            <form className="space-y-6" onSubmit={handleLogin}>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your password"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-2 bg-blue text-white font-semibold rounded-md hover:bg-hoverBtn transition duration-300"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Logging in...' : 'Login'}
-              </button>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="w-full py-2 text-blue font-semibold rounded-md hover:underline transition duration-300"
-              >
-                Forgot Password?
-              </button>
-              <p className="mt-4 text-center text-md text-black">
-                Don't have an account?{' '}
-                <span
-                  className="text-blue cursor-pointer hover:underline"
-                  onClick={handleSignUp}
-                >
-                  Sign Up
-                </span>
-              </p>
-            </form>
-          </div>
+    <div className="min-h-screen bg-bfpNavy flex items-center justify-center px-4">
+      <div className="bg-white rounded-xl shadow-lg flex flex-col md:flex-row w-full max-w-3xl overflow-hidden">
+        {/* Left Image */}
+        <div className="hidden md:block md:w-1/2">
+          <img src={loginImage} alt="Login Visual" className="object-cover h-full" />
         </div>
-        {/* Image Section */}
-        <div className="hidden md:flex md:w-1/2">
-          <img
-            src={loginImage}
-            alt="Login Visual"
-            className="object-cover w-full h-full"
-          />
+
+        {/* Form Section */}
+        <div className="w-full md:w-1/2 p-8">
+          <div className="flex items-center justify-center mb-6">
+            <img src={logo} alt="Logo" className="h-10 w-10 mr-2" />
+            <h1 className="text-2xl font-bold text-bfpNavy">
+              <span className="text-bfpOrange">BFP</span> SmartTrack
+            </h1>
+          </div>
+          <h2 className="text-lg font-semibold text-black text-center mb-4">User Login</h2>
+          <p className="text-center text-sm text-black mb-8">Securely manage and monitor performance.</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-black">Email</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="mt-1 w-full px-4 py-2 border border-bfpNavy rounded-md focus:outline-none focus:ring-2 focus:ring-bfpOrange"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-black">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="mt-1 w-full px-4 py-2 border border-bfpNavy rounded-md focus:outline-none focus:ring-2 focus:ring-bfpOrange"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2 bg-bfpNavy text-white font-semibold rounded-md hover:bg-hoverBtn transition"
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
+
+            <div className="flex justify-between text-sm">
+              <button type="button" onClick={() => navigate('/forgot-password')} className="text-blue hover:underline">Forgot password?</button>
+              <button type="button" onClick={() => navigate('/signup')} className="text-bfpOrange hover:underline">Sign up</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

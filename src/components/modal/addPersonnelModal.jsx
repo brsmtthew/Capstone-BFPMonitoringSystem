@@ -50,12 +50,23 @@ function AddPersonnelModal({ isOpen, closeModal }) {
   }, [isOpen]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
+
+  // Only allow numbers for the phone field
+  if (name === 'phone') {
+    const numericValue = value.replace(/\D/g, ''); // remove all non-digit characters
+    setPersonnelInfo((prev) => ({
+      ...prev,
+      [name]: numericValue,
+    }));
+  } else {
     setPersonnelInfo((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }
+};
+
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -246,6 +257,9 @@ function AddPersonnelModal({ isOpen, closeModal }) {
                 type="tel"
                 id="phone"
                 name="phone"
+                inputMode='numeric'
+                pattern="\d{11}"
+                maxLength={11}
                 value={personnelInfo.phone}
                 onChange={handleInputChange}
                 className="w-full mt-1 px-2 py-1 border border-black rounded-md"

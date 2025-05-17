@@ -9,6 +9,7 @@ export const AuthContext = createContext({
   token: null,
   login: async () => {},
   logout: async () => {},
+  handleLogoutClick: () => {}, //add this to track the logout
   user: null,
   userData: null,
 });
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
+  const userClickedLogout = useRef(false);
 
   // 1) Listen for auth changes & load userData
   useEffect(() => {
@@ -52,17 +54,22 @@ export const AuthProvider = ({ children }) => {
   const isLoggingOut = useRef(false); // Flag to prevent multiple logouts
   // 3) Logout
   const logout = async () => {
-    if (isLoggingOut.current) return;
-    isLoggingOut.current = true;
-
     await signOut(auth);
     localStorage.removeItem('token');
     localStorage.removeItem('expiry');
     setToken(null);
-    toast.success('Logout successful!', {
-      position: 'top-right',})
-    navigate('/');
   };
+
+  const handleLogoutClick = async () => {
+    try {
+      await logout();                        // CALL simplified logout
+      toast.success("Logout successful!", { position: "top-right" });  // TOAST here
+      navigate("/", { replace: true });     // NAVIGATE after toast
+    } catch (err) {
+      toast.error(`Error logging out: ${err.message}`);
+    }
+  };
+
 
   // 4) Token-expiry + inactivity timer
   useEffect(() => {
@@ -122,7 +129,7 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ token, login, logout, user, userData }}>
+    <AuthContext.Provider value={{ token, login, logout, handleLogoutClick, user, userData }}>
       {children}
     </AuthContext.Provider>
   );

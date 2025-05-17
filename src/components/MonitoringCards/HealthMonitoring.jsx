@@ -3,13 +3,13 @@ import HealthCard from './HealthCard';
 
 const HealthMonitoring = ({ monitoringHealthData = [] }) => {
   return (
-    <div className="bg-white w-full rounded-lg shadow-md xl:h-96 2xl:h-96">
-      <div className="bg-bfpNavy rounded-lg text-center text-white p-4">
-        <p className="font-bold sm:text-[18px] md:text-[22px] lg:text-[26px] font-montserrat text-white">
+    <div className="bg-white w-full rounded-lg shadow-md xl:h-80 2xl:h-80">
+      <div className="bg-bfpNavy rounded-t-lg text-center text-white p-4">
+        <p className="font-bold sm:text-[18px] md:text-[22px] lg:text-[24px] font-montserrat text-white">
           Health Monitoring
         </p>
       </div>
-      <div className="font-montserrat grid gap-4 grid-cols-1 sm:grid-cols-2 mt-4 p-4">
+      <div className="font-montserrat grid gap-4 grid-cols-1 sm:grid-cols-2 mt-2 p-2">
         {monitoringHealthData.map((data, index) => (
           <div key={index} className="col-span-1">
             <HealthCard 

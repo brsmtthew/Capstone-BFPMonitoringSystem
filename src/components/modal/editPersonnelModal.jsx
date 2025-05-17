@@ -51,10 +51,20 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setPersonnelInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // Only allow numbers for the phone field
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, ''); // remove all non-digit characters
+      setPersonnelInfo((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+    } else {
+      setPersonnelInfo((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -223,6 +233,9 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
                 type="tel"
                 id="phone"
                 name="phone"
+                inputMode='numeric'
+                maxLength={11}
+                pattern='\d{11}'
                 value={personnelInfo.phone}
                 onChange={handleInputChange}
                 className="w-full mt-1 px-2 py-1 border border-black rounded-md"

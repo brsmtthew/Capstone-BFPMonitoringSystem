@@ -162,14 +162,31 @@ function AdminSettings() {
         title="MANAGE ACCOUNT"
         extraContent={
           <button
-            className="bg-bfpNavy px-2 py-1 sm:px-3 sm:py-1 md:px-3 md:py-2 lg:px-4 lg:py-2 xl:px-4 xl:py-2 2xl:px4 2xl:py-2 text-white rounded-lg hover:bg-bfpNavyDark transition duration-200 text-[10px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[16px] 2xl:text-[16px]"
+            className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg 
+             text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] 
+             px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 
+             text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 
+             transform transition duration-300 hover:scale-105"
             onClick={openAddUserModal}
+            type="button"
           >
+            <svg
+              className="me-1 -ms-1 w-5 h-5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
             Add Account
           </button>
         }
       />
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       <BodyCard>
         <div className="bg-bfpNavy rounded-lg shadow-md p-6">

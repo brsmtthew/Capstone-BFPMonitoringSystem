@@ -151,7 +151,7 @@ function PersonnelBody() {
           </button>
         }
       />
-      <div className="my-4 h-[2px] bg-separatorLine w-[80%] mx-auto" />
+      <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
       {/* <div className="p-4 bg-gray rounded-md mb-4">
         <h2 className="text-lg font-bold text-gray-800">User Info</h2>
