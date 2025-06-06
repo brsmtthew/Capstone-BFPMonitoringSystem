@@ -88,11 +88,13 @@ function AdminSettings() {
   const handleConfirmDelete = async (userId) => {
     try {
       const userToDelete = users.find((user) => user.id === userId);
+      const username = userToDelete.email.split('@')[0];
+      const formatted = username.charAt(0).toUpperCase() + username.slice(1);
       await deleteDoc(doc(db, "users", userId));
       setUsers((prev) => prev.filter((user) => user.id !== userId));
       setFilteredUsers((prev) => prev.filter((user) => user.id !== userId));
       await logAction("Delete User", { email: userToDelete.email, role: userToDelete.role, contact: userToDelete.contact }, userData.email);
-      toast.success("User deleted successfully!", { position: "top-right" });
+      toast.error(`${formatted} has been deleted.`, { position: "top-right" });
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Error deleting user: " + error.message, { position: "top-right" });
@@ -104,6 +106,8 @@ function AdminSettings() {
   const handleBlock = async (userId) => {
     try {
       const userToBlock = users.find((user) => user.id === userId);
+      const username = userToBlock.email.split('@')[0];
+      const formatted = username.charAt(0).toUpperCase() + username.slice(1);
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, { isBlock: true });
       await logAction(
@@ -111,7 +115,7 @@ function AdminSettings() {
         { email: userToBlock.email, role: userToBlock.role, contact: userToBlock.contact },
         userData.email
       );
-      toast.success("User blocked successfully!", { position: "top-right" });
+      toast.warn(`${formatted} has been blocked.`, { position: "top-right" });
     } catch (error) {
       console.error("Error blocking user:", error);
       toast.error("Error blocking user: " + error.message, { position: "top-right" });
@@ -121,6 +125,8 @@ function AdminSettings() {
   const handleUnblock = async (userId) => {
     try {
       const userToBlock = users.find((user) => user.id === userId);
+      const username = userToBlock.email.split('@')[0];
+      const formatted = username.charAt(0).toUpperCase() + username.slice(1);
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, { isBlock: false });
       await logAction(
@@ -128,7 +134,7 @@ function AdminSettings() {
         { email: userToBlock.email, role: userToBlock.role, contact: userToBlock.contact },
         userData.email
       );
-      toast.success("User unblocked successfully!", { position: "top-right" });
+      toast.success(`${formatted} has been unblocked.`, { position: "top-right" });
     } catch (error) {
       console.error("Error unblocking user:", error);
       toast.error("Error unblocking user: " + error.message, { position: "top-right" });

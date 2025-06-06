@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -29,14 +29,79 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const DashboardChart = ({ data = [], personnelInfo = {} }) => {
   // Transform the fetched realTimeData into the shape the chart expects
-  const combinedData = data.map((item) => ({
-    time: item.time || "N/A",
-    heartRate: item.HeartRate || 0,
-    bodyTemp: item.bodyTemperature || 0,
-    smoke: item.smokeSensor || 0,
-    envTemp: item.environmentalTemperature || 0,
-    toxic: item.ToxicGasSensor || 0,
-  }));
+  const combinedData = useMemo(
+    () =>
+      data.map((item) => ({
+        time: item.time || "N/A",
+        heartRate: item.HeartRate || 0,
+        bodyTemp: item.bodyTemperature || 0,
+        smoke: item.smokeSensor || 0,
+        envTemp: item.environmentalTemperature || 0,
+        toxic: item.ToxicGasSensor || 0,
+      })),
+    [data]
+  );
+
+  // Statistical functions for filtering
+  const mean = (arr) => arr.reduce((sum, v) => sum + v, 0) / arr.length;
+  const median = (arr) => {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0
+      ? (sorted[mid - 1] + sorted[mid]) / 2
+      : sorted[mid];
+  };
+  const stdDev = (arr, m) =>
+    Math.sqrt(arr.reduce((sum, v) => sum + Math.pow(v - m, 2), 0) / arr.length);
+  const mad = (arr, med) => {
+    const deviations = arr.map((v) => Math.abs(v - med));
+    return median(deviations);
+  };
+
+  // Filter combined data by z-score or MAD per metric
+  const filteredData = useMemo(() => {
+    if (!combinedData.length) return [];
+
+    // extract arrays
+    const hrValues = combinedData.map((d) => d.heartRate);
+    const btValues = combinedData.map((d) => d.bodyTemp);
+    const envValues = combinedData.map((d) => d.envTemp);
+    const smokeValues = combinedData.map((d) => d.smoke);
+    const toxicValues = combinedData.map((d) => d.toxic);
+
+    // compute stats
+    const hrMean = mean(hrValues);
+    const hrStd = stdDev(hrValues, hrMean);
+    const btMean = mean(btValues);
+    const btStd = stdDev(btValues, btMean);
+    const envMean = mean(envValues);
+    const envStd = stdDev(envValues, envMean);
+
+    const smokeMed = median(smokeValues);
+    const smokeMad = mad(smokeValues, smokeMed);
+    const toxicMed = median(toxicValues);
+    const toxicMad = mad(toxicValues, toxicMed);
+
+    // thresholds
+    const zThresh = 3;
+    const madThresh = 3;
+
+    return combinedData.filter((d) => {
+      const hrZ = Math.abs((d.heartRate - hrMean) / hrStd);
+      const btZ = Math.abs((d.bodyTemp - btMean) / btStd);
+      const envZ = Math.abs((d.envTemp - envMean) / envStd);
+      const smokeZ = Math.abs((0.6745 * (d.smoke - smokeMed)) / smokeMad);
+      const toxicZ = Math.abs((0.6745 * (d.toxic - toxicMed)) / toxicMad);
+
+      return (
+        hrZ <= zThresh &&
+        btZ <= zThresh &&
+        envZ <= zThresh &&
+        smokeZ <= madThresh &&
+        toxicZ <= madThresh
+      );
+    });
+  }, [combinedData]);
 
   // Use the personnelInfo prop for the header display.
   const personnelName = personnelInfo.personnelName || "Unknown";
@@ -58,11 +123,10 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
         <span>Date: {personnelDate}</span>
       </div>
 
-
       {/* Chart */}
       <div className="flex-grow p-4 h-96 w-auto">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={combinedData}>
+          <LineChart data={filteredData}>
             <CartesianGrid stroke="#e0e0e0" strokeDasharray="5 5" />
             <XAxis dataKey="time" tick={{ fill: "#fff" }} />
             <YAxis tick={{ fill: "#fff" }} />

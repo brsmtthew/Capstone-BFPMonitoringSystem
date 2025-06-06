@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../login/LoginAssets/smarthardhatAsset 1.svg';
 
@@ -33,7 +33,6 @@ function WiFiModal({ onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <ToastContainer />
       <div className="bg-white shadow-lg rounded-lg overflow-hidden w-full max-w-md">
         <div className="p-8 relative">
           {/* Logo */}

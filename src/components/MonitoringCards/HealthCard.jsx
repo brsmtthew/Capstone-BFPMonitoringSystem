@@ -4,7 +4,7 @@ const HealthCard = ({ icon, title, value, description, warningIcon, children }) 
   const hasValidValue = value && typeof value === 'string';
 
   return (
-    <div className="h-auto w-full bg-white rounded-lg shadow-md">
+    <div className="h-auto w-full bg-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 ease-in-out">
       <div className="bg-bfpNavy p-2 rounded-t-md flex items-center justify-between text-white">
         <div className="flex items-center">
           <img src={icon} alt={title} className="w-3 h-3 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-6 2xl:h-6 mr-2" draggable="false" />

@@ -47,14 +47,20 @@ function PersonnelBody() {
   };
 
   // Fetch personnel data from Firestore
+  // 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "personnelInfo"),
       (querySnapshot) => {
-        const personnelData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const personnelData = querySnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          // sort in-place by the numeric part of gearId (so pr001, pr002, …)
+          .sort((a, b) => {
+            const numA = parseInt(a.gearId.replace(/\D/g, ""), 10);
+            const numB = parseInt(b.gearId.replace(/\D/g, ""), 10);
+            return numA - numB;
+          });
+
         setPersonnel(personnelData);
         setLoading(false);
       }
@@ -62,6 +68,7 @@ function PersonnelBody() {
 
     return () => unsubscribe();
   }, []);
+
 
   // Handle click to monitor a personnel
   const handleMonitor = (person) => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { doc, getDoc, updateDoc, addDoc, collection, serverTimestamp, where, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../firebase/Firebase";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import logo from "../login/LoginAssets/smarthardhatAsset 1.svg";
 import { useAuth } from '../auth/AuthContext';

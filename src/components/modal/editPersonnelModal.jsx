@@ -93,6 +93,10 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
     if (saving) return; // Prevent multiple submissions
     setSaving(true);
 
+    // Prepare formatted username for toast messages
+    const rawUsername = selectedPersonnel?.email?.split('@')[0] || personnelInfo.name;
+    const formattedName = rawUsername.charAt(0).toUpperCase() + rawUsername.slice(1);
+
     try {
       let imageUrl = imagePreview;
 
@@ -118,7 +122,7 @@ function EditPersonnelModal({ isOpen, closeModal, selectedPersonnel }) {
 
       // Close modal and show success message
       closeModal();
-      toast.success('Personnel info updated successfully!');
+      toast.success(`${formattedName} info updated successfully!`, { position: 'top-right' });
     } catch (error) {
       toast.error('Error updating personnel info:', error);
       console.error('Error updating personnel info:', error);

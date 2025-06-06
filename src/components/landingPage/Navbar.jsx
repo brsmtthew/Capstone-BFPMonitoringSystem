@@ -135,10 +135,10 @@ const Navbar = () => {
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center p-2 rounded-full hover:bg-hoverBtn transition duration-300 hover:scale-105 border border-bfpNavy"
             >
+              <FaUser className="w-7 h-7 text-bfpNavy" />
               <span className="mr-2 text-sm font-medium text-bfpNavy">
                 {user?.email ? user?.email.split("@")[0] : "User"}
               </span>
-              <FaUser className="w-7 h-7 text-bfpNavy" />
             </button>
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg">
