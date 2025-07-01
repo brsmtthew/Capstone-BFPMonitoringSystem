@@ -9,12 +9,28 @@ const EnvironmentChartSection = ({ smokeData, enviData, ToxicGas, HeartRate, tem
     <div className="bg-white rounded-lg shadow-lg flex flex-col text-center h-auto max-w-full">
       {/* Section Header */}
       <div className="p-3 w-full bg-bfpNavy rounded-lg mb-4 text-white">
-        <h3 className="text-white text-[24px] font-bold">Environmental Analytics</h3>
+        <h3 className="text-white text-[24px] font-bold">Visual Analytics</h3>
       </div>
 
       {/* Grid Layout for Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-x-auto mb-4">
-        {/* Smoke Detection - Bar Chart (First Column, First Row) */}
+        {/* ✅ Body Temperature - Line Chart (First Column, First Row) */}
+        <ResponsiveContainer>
+          <div className="flex justify-center col-span-1">
+            <LineChart
+              data={temperatureData}
+              xKey="time"
+              yKey="value"
+              color="#00C49F" // bfpBlue
+              title="Body Temperature"
+              yLabel="°C"
+              description="This chart shows body temperature trends over time."
+              unit="°C"
+            />
+          </div>
+        </ResponsiveContainer>
+
+        {/* ✅ Smoke Detection - Bar Chart (Second Column, First Row) */}
         <ResponsiveContainer>
           <div className="flex justify-center col-span-1">
             <BarChart
@@ -30,50 +46,52 @@ const EnvironmentChartSection = ({ smokeData, enviData, ToxicGas, HeartRate, tem
           </div>
         </ResponsiveContainer>
 
-        {/* Toxic Gas - Bar Chart (Second Column, First Row) */}
+        {/* ✅ Toxic Gas - Bar Chart (First Column, Second Row) */}
         <ResponsiveContainer>
-        <div className="flex justify-center col-span-1">
-          <BarChart
-            data={ToxicGas}
-            xKey="time"
-            yKey="value"
-            color="#0088FE"
-            title="Toxic Gas Detection"
-            description="This chart shows the toxic gas levels detected over time."
-            yLabel="Level"
-            unit="PPM"
-          />
-        </div>
+          <div className="flex justify-center col-span-1">
+            <BarChart
+              data={ToxicGas}
+              xKey="time"
+              yKey="value"
+              color="#0088FE"
+              title="Toxic Gas Detection"
+              description="This chart shows the toxic gas levels detected over time."
+              yLabel="Level"
+              unit="PPM"
+            />
+          </div>
         </ResponsiveContainer>
 
-        {/* Environmental Temperature - Line Chart (Second Row, First Column) */}
+        {/* ✅ Environmental Temperature - Line Chart (Second Column, Second Row) */}
         <ResponsiveContainer>
-        <div className="flex justify-center col-span-1">
-          <LineChart
-            data={enviData}
-            xKey="time"
-            yKey="value"
-            color="#FFBB28"
-            title="Environmental Temperature"
-            description="This chart displays the environmental temperature over time."
-            yLabel="°C"
-            unit="°C"
-          />
-        </div>
+          <div className="flex justify-center col-span-1">
+            <LineChart
+              data={enviData}
+              xKey="time"
+              yKey="value"
+              color="#FFBB28"
+              title="Environmental Temperature"
+              description="This chart displays the environmental temperature over time."
+              yLabel="°C"
+              unit="°C"
+            />
+          </div>
         </ResponsiveContainer>
 
-        {/* Overview - (Second Row, Second Column) */}
-        <ResponsiveContainer>
-        <div className="flex justify-center col-span-1">
-          <Overview
-            HeartRate={HeartRate}
-            temperatureData={temperatureData}
-            smokeData={smokeData}
-            enviData={enviData}
-            ToxicGas={ToxicGas}
-          />
+        {/* ✅ Overview - (Third Row, Span 2 Columns) */}
+        <div className="lg:col-span-2">
+          <ResponsiveContainer>
+            <div className="flex justify-center">
+              <Overview
+                HeartRate={HeartRate}
+                temperatureData={temperatureData}
+                smokeData={smokeData}
+                enviData={enviData}
+                ToxicGas={ToxicGas}
+              />
+            </div>
+          </ResponsiveContainer>
         </div>
-        </ResponsiveContainer>
       </div>
     </div>
   );

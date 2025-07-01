@@ -109,19 +109,16 @@ const AnalyticsBody = () => {
     [realTimeData]
   );
   const enviDataSeries = useMemo(
-    () => prepareSeries('environmentalTemperature', 'Z'),
+    () => prepareSeries('environmentalTemperature', 'z'),
     [realTimeData]
   );
   const toxicSeries = useMemo(
     () => prepareSeries('ToxicGasSensor', 'MAD'),
     [realTimeData]
   );
-  const heartRateSeries = useMemo(
-    () => prepareSeries('HeartRate', 'MAD'),
-    [realTimeData]
-  );
+  
   const temperatureDataSeries = useMemo(
-    () => prepareSeries('bodyTemperature', 'Z'),
+    () => prepareSeries('bodyTemperature', 'z'),
     [realTimeData]
   );
 
@@ -131,12 +128,12 @@ const AnalyticsBody = () => {
         title="ANALYTICS OVERVIEW"
         extraContent={
           <div className="flex space-x-5">
-            <div onClick={handleSave} className="cursor-pointer">
+            {/* <div onClick={handleSave} className="cursor-pointer">
               <img src={SaveIcon} alt="Save" className="w-7 h-7" />
             </div>
             <div onClick={handleReset} className="cursor-pointer">
               <img src={ResetIcon} alt="Reset" className="w-7 h-7" />
-            </div>
+            </div> */}
           </div>
         }
       />
@@ -148,22 +145,17 @@ const AnalyticsBody = () => {
             name={personnelInfo.name}
             date={personnelInfo.date}
             time={personnelInfo.time}
-            HeartRate={heartRateSeries}
             temperatureData={temperatureDataSeries}
             smokeData={smokeDataSeries}
             enviData={enviDataSeries}
             ToxicGas={toxicSeries}
           />
         </div>
-        <div className="mb-6">
-          <HealthChartSection HeartRate={heartRateSeries} temperatureData={temperatureDataSeries} />
-        </div>
 
         <EnvironmentChartSection
           smokeData={smokeDataSeries}
           enviData={enviDataSeries}
           ToxicGas={toxicSeries}
-          HeartRate={heartRateSeries}
           temperatureData={temperatureDataSeries}
         />
       </BodyCard>

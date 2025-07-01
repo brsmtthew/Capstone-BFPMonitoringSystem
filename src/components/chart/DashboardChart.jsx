@@ -33,7 +33,6 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
     () =>
       data.map((item) => ({
         time: item.time || "N/A",
-        heartRate: item.HeartRate || 0,
         bodyTemp: item.bodyTemperature || 0,
         smoke: item.smokeSensor || 0,
         envTemp: item.environmentalTemperature || 0,
@@ -63,15 +62,12 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
     if (!combinedData.length) return [];
 
     // extract arrays
-    const hrValues = combinedData.map((d) => d.heartRate);
     const btValues = combinedData.map((d) => d.bodyTemp);
     const envValues = combinedData.map((d) => d.envTemp);
     const smokeValues = combinedData.map((d) => d.smoke);
     const toxicValues = combinedData.map((d) => d.toxic);
 
     // compute stats
-    const hrMean = mean(hrValues);
-    const hrStd = stdDev(hrValues, hrMean);
     const btMean = mean(btValues);
     const btStd = stdDev(btValues, btMean);
     const envMean = mean(envValues);
@@ -87,14 +83,12 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
     const madThresh = 3;
 
     return combinedData.filter((d) => {
-      const hrZ = Math.abs((d.heartRate - hrMean) / hrStd);
       const btZ = Math.abs((d.bodyTemp - btMean) / btStd);
       const envZ = Math.abs((d.envTemp - envMean) / envStd);
       const smokeZ = Math.abs((0.6745 * (d.smoke - smokeMed)) / smokeMad);
       const toxicZ = Math.abs((0.6745 * (d.toxic - toxicMed)) / toxicMad);
 
       return (
-        hrZ <= zThresh &&
         btZ <= zThresh &&
         envZ <= zThresh &&
         smokeZ <= madThresh &&
@@ -132,12 +126,6 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
             <YAxis tick={{ fill: "#fff" }} />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Line
-              type="monotone"
-              dataKey="heartRate"
-              stroke="#ff0000"
-              name="Heart Rate"
-            />
             <Line
               type="monotone"
               dataKey="smoke"

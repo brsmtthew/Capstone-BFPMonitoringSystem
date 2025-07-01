@@ -112,11 +112,6 @@ const Navbar = () => {
                 </ul>
               </div>
               <div className="p-4 border-t">
-                <button onClick={openWiFiModal}
-                className="w-full flex justify-center gap-x-2 text-white hover:bg-hoverBtn text-lg rounded-lg py-2 bg-bfpNavy mb-4">
-                  <img src={WiFiIcon} alt="WiFi" className="w-5 h-5" />
-                  <span>WiFi</span>
-                </button>
                 <button
                   onClick={handleLogout}
                   className="w-full bg-bfpNavy text-white hover:bg-hoverBtn text-lg rounded-lg py-2 hover:bg-opacity-90"
@@ -143,14 +138,9 @@ const Navbar = () => {
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg">
                 <div className="px-2 py-2 text-sm text-black space-y-1">
-                  <p className="text-sm font-bold">Email: {user?.email}</p>
-                  <p className="text-black text-xs font-semibold">Role: {userData?.role || "User"}</p>
+                  <p className="text-md font-bold">Email: {user?.email}</p>
+                  <p className="text-gray text-sm font-semibold">Role: {userData?.role || "User"}</p>
                   <div className="h-[1px] bg-separatorLine my-2" />
-                  <button onClick={openWiFiModal}
-                  className="w-full flex items-center justify-center gap-x-2 text-sm text-white hover:bg-hoverBtn rounded-lg px-2 py-1 bg-bfpNavy hover:scale-105">
-                      <img src={WiFiIcon} alt="WiFi" className="w-5 h-5" />
-                      <span>WiFi</span>
-                  </button>
                   <button
                     onClick={handleLogout}
                     className="w-full mt-2 bg-red text-white hover:bg-hoverBtn rounded-lg py-1 px-2 hover:bg-opacity-90 hover:scale-105"

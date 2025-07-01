@@ -35,7 +35,6 @@ function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-bfpNavy">
-      <ToastContainer />
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Forgot Password</h2>
         <form onSubmit={handleResetPassword} className="space-y-4">

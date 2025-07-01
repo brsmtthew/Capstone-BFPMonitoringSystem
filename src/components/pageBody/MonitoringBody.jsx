@@ -29,6 +29,7 @@ import LowBattery from './dashboardAssets/low-battery.png';
 import lightingBattery from './dashboardAssets/lighting.png';
 import { toast } from "react-toastify";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import RealTime from '../MonitoringCards/RealTime';
 
 function MonitoringBody() {
   const {
@@ -84,6 +85,8 @@ function MonitoringBody() {
         setSensorData(gearId, sensorType, Number(data.Percentage));
       } else if (data?.Reading !== undefined) {
         setSensorData(gearId, sensorType, Number(data.Reading));
+      } else if (data?.Temperature != undefined) {
+        setSensorData(gearId, sensorType, Number(data.Temperature));
       }
     });
     return unsubscribe;
@@ -117,7 +120,7 @@ function MonitoringBody() {
           fetchData(`Monitoring/${gearId}/Environmental`, gearId, 'environmentalTemperature'),
           fetchData(`Monitoring/${gearId}/SmokeSensor`, gearId, 'smokeSensor'),
           fetchData(`Monitoring/${gearId}/ToxicGasSensor`, gearId, 'ToxicGasSensor'),
-          fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate'),
+          // fetchData(`Monitoring/${gearId}/HeartRate`, gearId, 'HeartRate'),
           fetchData(`Monitoring/${gearId}/Battery`, gearId, 'Battery')
         ];
         
@@ -145,65 +148,15 @@ function MonitoringBody() {
       const sensors = sensorData[gearId];
       if (!sensors) return;
 
-      handleSensorNotification(gearId, sensors.bodyTemperature, 30, 25, 'Body Temperature', 'bodyTemperature');
-      handleSensorNotification(gearId, sensors.environmentalTemperature, 33, 32.8, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 450, 445, 'Smoke', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 300, 280, 'Carbon Monoxide', 'ToxicGasSensor');
-      handleSensorNotification(gearId, sensors.HeartRate, 120, 80, 'Heart Rate', 'HeartRate');
+      handleSensorNotification(gearId, sensors.bodyTemperature, 45, 37.5, 'Body Temperature', 'bodyTemperature');
+      handleSensorNotification(gearId, sensors.environmentalTemperature, 50, 49, 'Environmental Temperature', 'environmentalTemperature');
+      handleSensorNotification(gearId, sensors.smokeSensor, 100, 99, 'Smoke', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 150, 149, 'Carbon Monoxide', 'ToxicGasSensor');
+      // handleSensorNotification(gearId, sensors.HeartRate, 100, 80, 'Heart Rate', 'HeartRate');
     })
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
   
   const monitoringHealthData = (person) => [
-    // {
-    //   icon: BatterIcon,
-    //   title: (
-    //     <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
-    //       Battery Status
-    //     </span>
-    //   ),
-    //   value: sensorData[person.gearId]?.Battery !== undefined && sensorData[person.gearId]?.Battery !== 0
-    //     ? `${sensorData[person.gearId]?.Battery.toFixed(2)}%`
-    //     : (
-    //       <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-    //         No Data Available
-    //       </span>
-    //     ),
-    //   description: sensorData[person.gearId]?.Battery >= 75 
-    //     ? 'Battery is Full' 
-    //     : sensorData[person.gearId]?.Battery >= 50 
-    //       ? 'Battery is Medium' 
-    //       : sensorData[person.gearId]?.Battery >= 25 
-    //         ? 'Battery is Low' 
-    //         : 'Critical Battery Level',
-    //   warningIcon: sensorData[person.gearId]?.Battery >= 75 
-    //     ? BatterIcon 
-    //     : sensorData[person.gearId]?.Battery >= 50 
-    //       ? BatteryHalf 
-    //       : sensorData[person.gearId]?.Battery >= 25 
-    //         ? LowBattery 
-    //         : lightingBattery, // Critical battery icon
-    // },    
-    {
-      icon: heartIcon,
-      title: (
-        <span className='sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px]'>
-          Heart Rate
-        </span>
-      ),
-      value: sensorData[person.gearId]?.HeartRate !== undefined && sensorData[person.gearId].HeartRate !== 0
-        ? `${sensorData[person.gearId].HeartRate.toFixed(2)} BPM`
-        : (
-          <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
-            No Data Available
-          </span>
-        ),
-      description: sensorData[person.gearId]?.HeartRate >= 120 ? (
-        <span className="text-red">Elevated Heart Rate</span>
-      ) : (
-        <span className="text-green">Normal Heart Rate</span>
-      ),
-      warningIcon: sensorData[person.gearId]?.HeartRate >= 120 ? HeartIcon : likeIcon,
-    },
     {
       icon: bodytem,
       title: (
@@ -218,12 +171,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.bodyTemperature >= 40 ? (
+      description: sensorData[person.gearId]?.bodyTemperature >= 37.5 ? (
         <span className="text-red">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? HighTemp : likeIcon,
+      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 37.5 ? HighTemp : likeIcon,
     },
   ];
   
@@ -243,13 +196,13 @@ function MonitoringBody() {
           </span>
         ),
       description:
-        sensorData[person.gearId]?.ToxicGasSensor >= 5
+        sensorData[person.gearId]?.ToxicGasSensor >= 150
           ? (
             <span className="text-red">High Gas Level Detected</span>
           ) : (
             <span className="text-green">Normal Toxic Gas</span>
           ),
-      warningIcon: sensorData[person.gearId]?.ToxicGasSensor >= 5 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.ToxicGasSensor >= 150 ? flamesIcon : likeIcon,
     },
     {
       icon: maskIcon,
@@ -265,12 +218,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.smokeSensor > 310 ? (
+      description: sensorData[person.gearId]?.smokeSensor > 100 ? (
         <span className="text-red">High Smoke level Detected</span>
       ) : (
         <span className="text-green">Normal Smoke level</span>
       ),
-      warningIcon: sensorData[person.gearId]?.smokeSensor > 310 ? SmokeIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.smokeSensor > 100 ? SmokeIcon : likeIcon,
     },
     {
       icon: enviTemp,
@@ -280,21 +233,20 @@ function MonitoringBody() {
         </span>
       ),
       value: sensorData[person.gearId]?.environmentalTemperature !== undefined && sensorData[person.gearId].environmentalTemperature !== 0
-        ? `${sensorData[person.gearId].environmentalTemperature}°C`
+        ? `${sensorData[person.gearId].environmentalTemperature.toFixed(2)}°C`
         : (
           <span className='sm:text-[16px] md:text-[20px] lg:text-[32px]'>
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.environmentalTemperature >= 40 ? (
+      description: sensorData[person.gearId]?.environmentalTemperature >= 50 ? (
         <span className="text-red">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 40 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 50 ? flamesIcon : likeIcon,
     }
   ];
-  
 
   return (
     <div className="p-4 h-full flex flex-col bg-white">
@@ -310,44 +262,38 @@ function MonitoringBody() {
       
       ) : (
         <BodyCard className={`${monitoredPersonnel.length > 1 ? 'overflow-y-auto max-h-[80vh]' : ''}`}>
-          {monitoredPersonnel.map((person) => (
-            <div key={person.gearId} className="mb-6 max-w-[100%]">
-              {/* First Row: Profile Monitoring and Health Monitoring */}
-            <div className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start">
-              <div className="flex-shrink-0 mb-6 w-full xl:max-w-96 2xl:max-w-96">
-                <ProfileMonitoring 
-                  key={person.gearId}
-                  personnel={person} 
-                />
-              </div>
-              <div className="flex-grow mb-6 lg:ml-4 w-full">
-                <HealthMonitoring monitoringHealthData={monitoringHealthData(person)} />
-              </div>
-            </div>
+          {/* MonitoringBody */}
+          <div className="grid grid-cols-1 gap-4  overflow-y-auto max-h-[80vh]">
+            {monitoredPersonnel.map((person) => (
+              <div key={person.gearId} className="mb-6">
+                <div className="flex flex-col xl:flex-row gap-4">
+                  {/* Left stack: fixed width */}
+                  <div className="w-full xl:w-96 flex flex-col gap-4">
+                    <ProfileMonitoring personnel={person} />
+                    <NotificationCard   personnel={person} />
+                  </div>
 
-              {/* Second Row: Notification Card and Environmental Monitoring */}
-              <div
-                className="flex flex-col sm:items-center md:items-center lg:items-center xl:flex-row xl:items-start xl:justify-start"
-              >
-                <div className="flex-shrink-0 mb-6 w-full xl:max-w-96 2xl:max-w-96">
-                  <NotificationCard personnel={person} />
+                  {/* Right pane: flex‑1 → fills remaining space */}
+                  <div className="w-full flex-1">
+                    <RealTime
+                      monitoringHealthData={monitoringHealthData(person)}
+                      monitoringEnviData={monitoringEnviData(person)}
+                    />
+                  </div>
                 </div>
-                <div className="flex-grow mb-6 lg:ml-4 w-full">
-                  <EnviMonitoring monitoringEnviData={monitoringEnviData(person)} />
-                </div>
-              </div>
 
-              {/* Remove Button */}
-              <div className="mt-4 flex justify-center">
-                <button
-                  className="mt-4 px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600"
-                  onClick={() => handleRemovePersonnel(person.gearId)}
-                >
-                  Remove from Monitoring
-                </button>
+                {/* Remove button */}
+                <div className="mt-4 flex justify-center">
+                  <button
+                    className="px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600"
+                    onClick={() => handleRemovePersonnel(person.gearId)}
+                  >
+                    Remove from Monitoring
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </BodyCard>
       )}
     </div>

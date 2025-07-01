@@ -152,15 +152,14 @@ function DashboardBody() {
       let weight = 0;
       switch (notification.sensor) {
         case "Carbon Monoxide":
-          weight = 20;
+          weight = 25;
           break;
-        case "Heart Rate":
         case "Body Temperature":
           weight = 25;
           break;
         case "Smoke":
         case "Environmental Temperature":
-          weight = 15;
+          weight = 25;
           break;
         default:
           return; // skip unknown sensors

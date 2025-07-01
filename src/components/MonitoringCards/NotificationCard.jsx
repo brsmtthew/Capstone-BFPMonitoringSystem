@@ -54,8 +54,8 @@ function NotificationCard({ personnel }) {
   //Determining the color of the severity ratio bar
   const getSeverityColor = () => {
     if (severityRatio === 0) return 'bg-green';
-    if (severityRatio <= 40) return 'bg-yellow';
-    if (severityRatio <= 80) return 'bg-bfpOrange';
+    if (severityRatio <= 50) return 'bg-yellow';
+    if (severityRatio <= 75) return 'bg-bfpOrange';
     return 'bg-red';
   };
 

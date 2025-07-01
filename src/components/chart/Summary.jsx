@@ -4,13 +4,13 @@ function Summary({
   name = '',
   date = '',
   time = '',
-  HeartRate = [],
+  // HeartRate = [],
   temperatureData = [],
   smokeData = [],
   enviData = [],
   ToxicGas = []
 }) {
-  console.log('Sensor data', { HeartRate, temperatureData, smokeData, enviData, ToxicGas });
+  console.log('Sensor data', { temperatureData, smokeData, enviData, ToxicGas });
 
   // Helper to compute average
   const computeAverage = (series) => {
@@ -60,11 +60,11 @@ function Summary({
 
   // Define sensors and their thresholds
   const sensors = [
-    { title: 'Heart Rate', series: HeartRate, threshold: 100 },
-    { title: 'Body Temp', series: temperatureData, threshold: 40 },
-    { title: 'Smoke Level', series: smokeData, threshold: 450 },
-    { title: 'Env Temp', series: enviData, threshold: 40 },
-    { title: 'Toxic Gas', series: ToxicGas, threshold: 350 }
+    // { title: 'Heart Rate', series: HeartRate, threshold: 100 },
+    { title: 'Body Temp', series: temperatureData, threshold: 45 },
+    { title: 'Smoke Level', series: smokeData, threshold: 100 },
+    { title: 'Env Temp', series: enviData, threshold: 50 },
+    { title: 'Toxic Gas', series: ToxicGas, threshold: 150 }
   ];
 
   return (
@@ -83,7 +83,7 @@ function Summary({
       </div>
 
       {/* Sensor Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
         {sensors.map((sensor, idx) => {
           const avg = computeAverage(sensor.series).toFixed(1);
           const { breachCount, dangerSeconds } = computeThresholdMetrics(sensor.series, sensor.threshold);
@@ -98,7 +98,7 @@ function Summary({
                 {/* sensor icon placeholder: replace with actual icon component */}
                 {sensor.title}
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font">
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
                   <p className="text-xs text-black uppercase">Average</p>
                   <p className="text-2xl font-bold text-black mt-1">{avg}</p>

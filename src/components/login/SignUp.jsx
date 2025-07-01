@@ -9,9 +9,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import signupImage from './LoginAssets/firefighter2.jpg';
 import logo from './LoginAssets/smarthardhatAsset 1.svg';
 
-// SHA-256 hash of valid admin key
+// SHA-256 hash of valid admin key BFPTAGUMCITYR11
 const ADMIN_KEY_HASH =
-  'f4daddba374588316fda85f51c243ca40d4f8aa3b70bbeb37504fad680bf39e3';
+  'f107267c06f385d046fc327fc81def00569e4ec12ab3f1d52f2f2c96d5425051';
 
 // Utility: Hash text with SHA-256
 const hashText = async (text) => {

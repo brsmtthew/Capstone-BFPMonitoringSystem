@@ -13,7 +13,6 @@ export const useStore = create((set, get) => ({
   lastUpdatedEnvTemp: null,
   smokeSensor: null,
   ToxicGasSensor: null,
-  HeartRate: null,
   isSaving: {},
   intervalId: {},
   sensorData: {},
@@ -67,9 +66,6 @@ export const useStore = create((set, get) => ({
 
   // Set toxic gas sensor data
   setToxicGasSensor: (ToxicGasData) => set({ ToxicGasSensor: ToxicGasData }),
-
-  // Set heart rate data
-  setHeartRate: (heartRateData) => set({ HeartRate: heartRateData }),
 
   // Updated setSavingState for gearId-specific state
   setSavingState: (gearId, isSaving, intervalId) => {
@@ -233,7 +229,6 @@ export const useStore = create((set, get) => ({
         environmentalTemperature: sensorData[personnel.gearId]?.environmentalTemperature ?? null,
         smokeSensor: sensorData[personnel.gearId]?.smokeSensor ?? null,
         ToxicGasSensor: sensorData[personnel.gearId]?.ToxicGasSensor ?? null,
-        HeartRate: sensorData[personnel.gearId]?.HeartRate ?? null,
       };
   
       const realTimeDataRef = collection(docRef, 'realTimeData');

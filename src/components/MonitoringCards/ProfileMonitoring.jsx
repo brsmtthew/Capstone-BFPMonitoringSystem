@@ -2,13 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 
 function ProfileMonitoring({ personnel }) {
-  const { notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor, HeartRate, updateNotificationState, isSaving, intervalId, setSavingState, clearSavingState, saveRecordings } = useStore();
+  const { notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor,  updateNotificationState, isSaving, intervalId, setSavingState, clearSavingState, saveRecordings } = useStore();
   const [lastSavedData, setLastSavedData] = useState({
     temperature: null,
     environmentalTemperature: null,
     smokeSensor: null,
     ToxicGasSensor: null,
-    HeartRate: null,
   });
 
   // Refs to store the latest state values
@@ -16,7 +15,6 @@ function ProfileMonitoring({ personnel }) {
   const environmentalTemperatureRef = useRef(environmentalTemperature);
   const smokeSensorRef = useRef(smokeSensor);
   const ToxicGasSensorRef = useRef(ToxicGasSensor);
-  const HeartRateRef = useRef(HeartRate);
 
   // Update refs whenever state changes
   useEffect(() => {
@@ -24,8 +22,7 @@ function ProfileMonitoring({ personnel }) {
     environmentalTemperatureRef.current = environmentalTemperature;
     smokeSensorRef.current = smokeSensor;
     ToxicGasSensorRef.current = ToxicGasSensor;
-    HeartRateRef.current = HeartRate;
-  }, [temperature, environmentalTemperature, smokeSensor, ToxicGasSensor, HeartRate]);
+  }, [temperature, environmentalTemperature, smokeSensor, ToxicGasSensor]);
 
   const handleButtonClick = () => {
     const gearId = personnel.gearId;
