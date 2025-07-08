@@ -9,6 +9,8 @@ import AddPersonnelModal from "../modal/addPersonnelModal";
 import EditPersonnelModal from "../modal/editPersonnelModal";
 import DeletePersonnelModal from "../modal/deletePersonnelModal";
 import { toast } from "react-toastify";
+import LocationModal from "../modal/LocationModal";
+import searchIcon from "./dashboardAssets/glass.png";
 
 import { useAuth } from "../auth/AuthContext";
 
@@ -20,7 +22,12 @@ function PersonnelBody() {
   const [selectedPersonnel, setSelectedPersonnel] = useState(null);
   const [isEditOpen, setEditOpen] = useState(false);
   const [isDeleteOpen, setDeleteOpen] = useState(false);
-  const [expandedPersonnel, setExpandedPersonnel] = useState(null); // State to manage expanded card
+  const [isLocationOpen, setLocationOpen] = useState(false);
+  const [selectedForLocation, setSelectedForLocation] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   const { user, userData } = useAuth();
 
@@ -47,7 +54,6 @@ function PersonnelBody() {
   };
 
   // Fetch personnel data from Firestore
-  // 
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "personnelInfo"),
@@ -69,11 +75,31 @@ function PersonnelBody() {
     return () => unsubscribe();
   }, []);
 
+  const handleActivateClick = (person) => {
+    setSelectedForLocation(person);
+    setLocationOpen(true);
+  };
 
-  // Handle click to monitor a personnel
-  const handleMonitor = (person) => {
-    addMonitoredPersonnel(person);
-    navigate("/monitoring", { state: { selectedPersonnel: person } });
+  const filteredPersonnel = personnel.filter((person) =>
+    person.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    person.gearId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentPersonnel = filteredPersonnel.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredPersonnel.length / itemsPerPage);
+
+
+  const handleLocationSelect = (location) => {
+    // add to store with location if needed
+    addMonitoredPersonnel({ ...selectedForLocation, location });
+    // navigate with person and location
+    navigate("/monitoring", {
+      state: { selectedPersonnel: selectedForLocation, location },
+    });
+    // reset state
+    setSelectedForLocation(null);
   };
 
   // Handle click to remove a personnel from monitoring
@@ -126,37 +152,63 @@ function PersonnelBody() {
     setSelectedPersonnel(null); // Clear selected personnel on close
   };
 
-  const toggleExpand = (personId) => {
-    setExpandedPersonnel(expandedPersonnel === personId ? null : personId);
-  };
-
-  useEffect(() => {
-    console.log("User:", user);
-    console.log("User Data:", userData);
-  }, [user, userData]);
-
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection
         title="PERSONNEL LIST"
         extraContent={
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
-            <svg
-              className="me-1 -ms-1 w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                fillRule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clipRule="evenodd"></path>
-            </svg>
-            Add Personnel
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by Name or GearId"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-1 rounded-lg border border-gray text-md focus:outline-none focus:ring-2 focus:ring-bfpNavy"
+              />
+              <img
+                src={searchIcon}
+                alt="Search Icon"
+                className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 opacity-60"
+              />
+            </div>
+            {/* <button
+              type="button"
+              onClick={openAddModal}
+              className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
+              <svg
+                className="me-1 -ms-1 w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clipRule="evenodd"></path>
+              </svg>
+              Add Personnel
+            </button> */}
+            {userData?.role === 'admin' && (
+              <button
+              type="button"
+              onClick={openAddModal}
+              className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
+              <svg
+                className="me-1 -ms-1 w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fillRule="evenodd"
+                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                  clipRule="evenodd"></path>
+              </svg>
+              Add Personnel
+            </button>
+            )}
+          </div>
         }
+
       />
       <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
 
@@ -171,13 +223,12 @@ function PersonnelBody() {
       ) : (
         <div>
           <BodyCard>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {personnel.length > 0 ? (
-                personnel.map((person) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPersonnel.length > 0 ? (
+                currentPersonnel.map((person) => (
                   <div
                     key={person.id}
-                    className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center cursor-pointer"
-                    onDoubleClick={() => toggleExpand(person.id)}>
+                    className="bg-bfpNavy shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center cursor-pointer">
                     <img
                       src={person.image || "https://via.placeholder.com/150"}
                       alt={person.name}
@@ -188,45 +239,46 @@ function PersonnelBody() {
                     </h3>
                     <p className="text-sm text-white">{person.position}</p>
                     <p className="text-sm text-white">{person.gearId}</p>
-                    {expandedPersonnel === person.id && (
-                      <div className="mt-4 text-white">
-                        <p>
-                          <strong>Age:</strong> {person.age}
-                        </p>
-                        <p>
-                          <strong>Birthdate:</strong> {person.birthdate}
-                        </p>
-                        <p>
-                          <strong>Phone:</strong> {person.phone}
-                        </p>
-                      </div>
-                    )}
                     <div className="mt-4 flex space-x-2">
-                      <button
+                      {userData?.role === 'admin' && (
+                        <button
+                          className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                          onClick={() => openEditModal(person)}>
+                          Edit
+                        </button>
+                      )}
+                      {/* <button
                         className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
                         onClick={() => openEditModal(person)}>
                         Edit
-                      </button>
+                      </button> */}
                       {!monitoredPersonnel.some(
                         (monitored) => monitored.gearId === person.gearId
                       ) ? (
                         <button
-                          className="bg-green text-white hover:bg-hoverBtn hover:scale-105 px-4 py-2 rounded-lg transition duration-300"
-                          onClick={() => handleMonitor(person)}>
-                          Active
+                          className="bg-gray text-white hover:bg-hoverBtn hover:scale-105 px-4 py-2 rounded-lg transition duration-300"
+                          onClick={() => handleActivateClick(person)}>
+                          Inactive
                         </button>
                       ) : (
                         <button
-                          className="px-4 py-2 bg-red text-white rounded-lg hover:bg-bfpOrange transform transition duration-300 hover:scale-105"
+                          className="px-4 py-2 bg-green text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
                           onClick={() => handleRemove(person)}>
-                          Remove
+                          Active
                         </button>
                       )}
-                      <button
+                      {userData?.role === 'admin' && (
+                        <button
+                          className="px-4 py-2 bg-red text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
+                          onClick={() => openDeleteModal(person)}>
+                          Delete
+                        </button>
+                      )}
+                      {/* <button
                         className="px-4 py-2 bg-red text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
                         onClick={() => openDeleteModal(person)}>
                         Delete
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 ))
@@ -237,6 +289,35 @@ function PersonnelBody() {
           </BodyCard>
         </div>
       )}
+      <div className="flex justify-center mt-2 space-x-4">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 bg-gray rounded hover:bg-hoverBtn disabled:opacity-50 text-white"
+        >
+          Prev
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === i + 1
+                ? "bg-bfpNavy text-white"
+                : "bg-gray hover:bg-hoverBtn text-white"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 bg-gray rounded hover:bg-hoverBtn disabled:opacity-50 text-white"
+        >
+          Next
+        </button>
+      </div>
       <AddPersonnelModal
         isOpen={isAddModalOpen}
         closeModal={closeAddModal}
@@ -255,6 +336,12 @@ function PersonnelBody() {
         onConfirm={handleDelete}
         personnel={selectedPersonnel}
       />
+      {isLocationOpen && (
+        <LocationModal
+          onClose={() => setLocationOpen(false)}
+          onSelectLocation={handleLocationSelect}
+        />
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ const Overview = ({ temperatureData, smokeData, enviData, ToxicGas }) => {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={combinedData}>
             <CartesianGrid stroke="#e0e0e0" strokeDasharray="5 5" />
-            <XAxis dataKey="time" tick={{ fill: "#fff", fontSize: 9 }} angle={-20} />
+            <XAxis dataKey="time" interval={Math.floor(combinedData.length / 10)} tick={{ fill: "#fff", fontSize: 9 }} angle={-20} />
             <YAxis tick={{ fill: "#fff" }} />
             <Tooltip />
             <Legend />

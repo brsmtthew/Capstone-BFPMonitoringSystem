@@ -47,7 +47,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="flex items-center justify-between p-4 bg-white sticky top-0 z-50">
+      <nav className="flex items-center justify-between p-2 bg-white sticky top-0 z-50">
         {/* Left: Logo and Text */}
         <div className="flex items-center space-x-2">
           <img src={logoIcon} alt="Bureau of Fire Protection" className="w-8 h-8 sm:w-14 sm:h-14" />
@@ -136,7 +136,7 @@ const Navbar = () => {
               </span>
             </button>
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border rounded shadow-lg">
+              <div className="absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg">
                 <div className="px-2 py-2 text-sm text-black space-y-1">
                   <p className="text-md font-bold">Email: {user?.email}</p>
                   <p className="text-gray text-sm font-semibold">Role: {userData?.role || "User"}</p>

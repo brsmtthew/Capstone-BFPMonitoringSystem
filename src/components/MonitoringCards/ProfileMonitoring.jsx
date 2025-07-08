@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
+import LocationIcon from '../pageBody/dashboardAssets/placeholder.png';
+import { useAuth } from '../auth/AuthContext';
 
 function ProfileMonitoring({ personnel }) {
+  const { userData } = useAuth(); // ⬅️ get user role
   const { notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor,  updateNotificationState, isSaving, intervalId, setSavingState, clearSavingState, saveRecordings } = useStore();
   const [lastSavedData, setLastSavedData] = useState({
     temperature: null,
@@ -39,39 +42,72 @@ function ProfileMonitoring({ personnel }) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-80 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
-      <div className="p-2 bg-bfpNavy rounded-t-lg text-white flex flex-col items-start">
-        {personnel ? (
-          <>
-            <h3 className="text-lg font-bold">{personnel.name}</h3>
-            <p className="text-sm text-gray">{personnel.position}</p>
-          </>
-        ) : (
-          <>
-            <h3 className="text-lg font-bold">Select Personnel</h3>
-            <p className="text-sm text-gray">Personnel Position</p>
-          </>
+                    h-72 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
+      <div className="p-2 bg-bfpNavy rounded-t-lg text-white flex items-center justify-between">
+        <div className="flex flex-col">
+          {personnel ? (
+            <>
+              <h1 className="text-lg font-bold">{personnel.name}</h1>
+              <p className="text-[12px] text-gray">{personnel.position}</p>
+            </>
+          ) : (
+            <>
+              <h3 className="text-lg font-bold">Select Personnel</h3>
+              <p className="text-[12px] text-gray-300">Personnel Position</p>
+            </>
+          )}
+        </div>
+
+        {personnel?.location && (
+          <div className="flex items-center gap-1 text-white text-md font-medium mr-3">
+            <img src={LocationIcon} alt="Location" className="w-6 h-6" />
+            <span>{personnel.location}</span>
+          </div>
         )}
       </div>
-      <div className="flex-grow p-4 flex flex-col items-center justify-center">
-        <div className="rounded-full overflow-hidden mb-2 h-32 w-32 lg:h-32 lg:w-32 xl:h-36 xl:w-36 2xl:h-36 2xl:w-36">
+      <div className="flex-grow flex flex-col items-center justify-center">
+        <div className="rounded-full overflow-hidden mb-2 h-32 w-32 lg:h-32 lg:w-32 xl:h-32 xl:w-32 2xl:h-36 2xl:w-36">
           <img
             src={personnel?.image || 'https://via.placeholder.com/300x300'}
             alt="Profile"
             className="h-full w-full object-cover"
           />
         </div>
-        <div className="text-center mt-4">
-          <button
+        <div className="text-center mt-2">
+          {/* <button
             className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
               isSaving
-                ? 'bg-bfpOrange hover:bg-red'
-                : 'bg-bfpNavy hover:bg-hoverBtn'
+                ? 'bg-bfpNavy hover:bg-hoverBtn'
+                : 'bg-bfpOrange hover:bg-hoverBtn'
             }`}
             onClick={handleButtonClick}
           >
             {isSaving[personnel.gearId] ? 'Saving Data...' : 'Save Record'}
-          </button>
+          </button> */}
+          {/* <button
+            disabled={userData?.role !== 'admin'}
+            className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
+              isSaving[personnel?.gearId]
+                ? 'bg-bfpNavy hover:bg-hoverBtn'
+                : 'bg-bfpOrange hover:bg-hoverBtn'
+            } ${userData?.role !== 'admin' ? 'bg-gray cursor-not-allowed' : ''}`}
+            onClick={handleButtonClick}
+            title={userData?.role !== 'admin' ? 'Only admin can save data.' : ''}
+          >
+            {isSaving[personnel?.gearId] ? 'Saving Data...' : 'Save Record'}
+          </button> */}
+          {userData?.role === 'admin' && (
+            <button
+              className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
+                isSaving[personnel?.gearId]
+                  ? 'bg-bfpOrange hover:bg-hoverBtn'
+                  : 'bg-bfpNavy hover:bg-hoverBtn'
+              }`}
+              onClick={handleButtonClick}
+            >
+              {isSaving[personnel?.gearId] ? 'Saving Data...' : 'Save Record'}
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -48,6 +48,7 @@ const LineChart = ({ data, xKey, yKey, color, title, description, yLabel, unit }
               dataKey={xKey} 
               tick={{ fill: '#fff', fontSize: 9 }} 
               angle={-20} 
+              interval={Math.floor(data.length / 10)}
             />
             <YAxis
               tick={{ fill: '#fff' }}

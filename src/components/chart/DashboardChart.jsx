@@ -29,17 +29,22 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const DashboardChart = ({ data = [], personnelInfo = {} }) => {
   // Transform the fetched realTimeData into the shape the chart expects
-  const combinedData = useMemo(
-    () =>
-      data.map((item) => ({
-        time: item.time || "N/A",
-        bodyTemp: item.bodyTemperature || 0,
-        smoke: item.smokeSensor || 0,
-        envTemp: item.environmentalTemperature || 0,
-        toxic: item.ToxicGasSensor || 0,
-      })),
-    [data]
-  );
+  const combinedData = useMemo(() => {
+    const sorted = [...data].sort((a, b) => {
+      const baseDate = "1970-01-01";
+      const aTime = new Date(`${baseDate} ${a.time}`);
+      const bTime = new Date(`${baseDate} ${b.time}`);
+      return aTime - bTime;
+    });
+
+    return sorted.map((item) => ({
+      time: item.time || "N/A",
+      bodyTemp: item.bodyTemperature || 0,
+      smoke: item.smokeSensor || 0,
+      envTemp: item.environmentalTemperature || 0,
+      toxic: item.ToxicGasSensor || 0,
+    }));
+  }, [data]);
 
   // Statistical functions for filtering
   const mean = (arr) => arr.reduce((sum, v) => sum + v, 0) / arr.length;
@@ -106,8 +111,8 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
     <div className="h-full max-h-full w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
       {/* Header */}
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white text-center">
-        <h3 className="text-lg font-bold">Sensor Data Overview</h3>
-        <p className="text-sm">Periodic Sensor Readings</p>
+        <h3 className="text-lg font-bold">Responder Sensor Trends</h3>
+        <p className="text-sm">Sensor Readings Over Time</p>
       </div>
 
       {/* Personnel Info Display */}

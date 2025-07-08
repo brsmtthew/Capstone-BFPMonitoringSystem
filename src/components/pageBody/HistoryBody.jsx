@@ -68,6 +68,7 @@ function HistoryBody() {
             name: personnel.personnelName,
             date: personnel.date || "No date",
             time: personnel.time || "No time",
+            location: personnel.location || "Unknown",
             totalNotifications: notifications.length,
             notifications,
           };
@@ -98,9 +99,11 @@ function HistoryBody() {
     const filtered = historyData.filter((data) => {
       const name = data.name || "";
       const gearId = data.gearId || "";
+      const location = data.location || "";
       return (
         name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        gearId.toLowerCase().includes(searchTerm.toLowerCase())
+        gearId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.toLowerCase().includes(searchTerm.toLowerCase())
       );
     });
     setFilteredData(filtered);
@@ -196,7 +199,7 @@ function HistoryBody() {
     closeDeleteModal();
   };
 
-  const handleViewClick = async (documentId, name, date, time) => {
+  const handleViewClick = async (documentId, name, gearId,date, time) => {
     try {
       const realTimeDataRef = collection(
         db,
@@ -211,7 +214,7 @@ function HistoryBody() {
         realTimeData.push({ id: doc.id, ...doc.data() });
       });
 
-      navigate("/analytics", { state: { realTimeData, name, date, time } });
+      navigate("/analytics", { state: { realTimeData, name, gearId,date, time } });
     } catch (error) {
       toast.error("Error fetching real-time data:");
     }
@@ -320,6 +323,7 @@ function HistoryBody() {
                       <th className="px-6 py-3">Name</th>
                       <th className="px-6 py-3">Date</th>
                       <th className="px-6 py-3">Time</th>
+                      <th className="px-6 py-3">Barangay</th>
                       <th className="px-6 py-3">Total Notifications</th>
                       <th className="px-6 py-3">Analytics</th>
                     </tr>
@@ -343,6 +347,7 @@ function HistoryBody() {
                           <td className="px-6 py-3">{data.name}</td>
                           <td className="px-6 py-3">{data.date}</td>
                           <td className="px-6 py-3">{data.time}</td>
+                          <td className="px-6 py-3">{data.location}</td>
                           <td className="px-6 py-3">{data.totalNotifications}</td>
                           <td className="px-6 py-3 flex justify-start">
                             <button
@@ -351,8 +356,9 @@ function HistoryBody() {
                                 handleViewClick(
                                   data.documentId,
                                   data.name,
+                                  data.gearId,
                                   data.date,
-                                  data.time
+                                  data.time,
                                 )
                               }
                               className={`px-4 py-2 rounded-lg transform transition duration-300 ${
@@ -367,7 +373,7 @@ function HistoryBody() {
                         </tr>
                         {expandedPersonnel === data && (
                           <tr className="bg-bfpNavy">
-                            <td colSpan="7">
+                            <td colSpan="8">
                               <HistoryTable selectedPersonnel={data} />
                             </td>
                           </tr>
@@ -415,6 +421,7 @@ function HistoryBody() {
                           handleViewClick(
                             data.documentId,
                             data.name,
+                            data.gearId,
                             data.date,
                             data.time
                           )

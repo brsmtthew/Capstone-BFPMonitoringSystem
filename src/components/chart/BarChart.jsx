@@ -44,7 +44,7 @@ export const BarChart = ({ data, xKey, yKey, color, title, description, yLabel, 
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart 
             data={data}
-            barGap={3}
+            barGap={1}
             barCategoryGap={0}
             margin={{left: 10, right: 10}}
           >
@@ -53,9 +53,7 @@ export const BarChart = ({ data, xKey, yKey, color, title, description, yLabel, 
               dataKey={xKey} 
               tick={{ fill: '#fff', fontSize: 9 }}
               angle={-20}
-              interval={0}
-              textAnchor="end"
-              padding={{left: 10, right: 10}}
+              interval={Math.floor(data.length / 10)}
             />
             <YAxis
               tick={{ fill: '#fff' }}
@@ -67,7 +65,7 @@ export const BarChart = ({ data, xKey, yKey, color, title, description, yLabel, 
               fill={color}
               stroke={color}
               strokeWidth={2}
-              barSize={30}
+              barSize={data.length > 20 ? 3 : 20}
             />
           </RechartsBarChart>
         </ResponsiveContainer>

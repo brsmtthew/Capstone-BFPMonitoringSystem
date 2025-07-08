@@ -253,7 +253,7 @@ function MonitoringBody() {
       <HeaderSection title="REAL-TIME MONITORING" />
       <div className="my-2 h-[2px] bg-separatorLine w-[80%] mx-auto" />
       {monitoredPersonnel.length === 0 ? (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex justify-center items-center flex-grow">
           <p className="text-[8px] sm:text-[14px] md:text-[16px] lg:text-[18px] xl:text[22px] 2xl:text-[24px] bg-bfpNavy px-6 py-2 text-white rounded-lg cursor-pointer"
           onClick={() => navigate('/personnel')}>
              Click here to add personnel for monitoring.
@@ -268,28 +268,19 @@ function MonitoringBody() {
               <div key={person.gearId} className="mb-6">
                 <div className="flex flex-col xl:flex-row gap-4">
                   {/* Left stack: fixed width */}
-                  <div className="w-full xl:w-96 flex flex-col gap-4">
-                    <ProfileMonitoring personnel={person} />
-                    <NotificationCard   personnel={person} />
-                  </div>
-
-                  {/* Right pane: flex‑1 → fills remaining space */}
                   <div className="w-full flex-1">
                     <RealTime
                       monitoringHealthData={monitoringHealthData(person)}
                       monitoringEnviData={monitoringEnviData(person)}
+                      gearId={person.gearId}
+                      onRemove={handleRemovePersonnel}
                     />
                   </div>
-                </div>
-
-                {/* Remove button */}
-                <div className="mt-4 flex justify-center">
-                  <button
-                    className="px-4 py-2 bg-red text-white rounded-lg hover:bg-red-600"
-                    onClick={() => handleRemovePersonnel(person.gearId)}
-                  >
-                    Remove from Monitoring
-                  </button>
+                  {/* Right pane: flex‑1 → fills remaining space */}
+                  <div className="w-full xl:w-96 flex flex-col gap-4">
+                    <ProfileMonitoring personnel={person} />
+                    <NotificationCard   personnel={person} />
+                  </div>
                 </div>
               </div>
             ))}

@@ -38,7 +38,7 @@ const Login = () => {
       const snap = await getDoc(userRef);
 
       if (!snap.exists()) {
-        toast.error('User record missing. Please contact support.', { position: 'top-right' });
+        toast.error('User not found. Please register or contact support.', { position: 'top-right' });
         setLoading(false);
         return;
       }
@@ -98,7 +98,7 @@ const Login = () => {
                 type="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="you@example.com"
+                placeholder="user@gmail.com"
                 className="mt-1 w-full px-4 py-2 border border-bfpNavy rounded-md focus:outline-none focus:ring-2 focus:ring-bfpOrange"
               />
             </div>
@@ -112,7 +112,7 @@ const Login = () => {
                   type={showPassword ? 'text' : 'password'} // Changed type to toggle show/hide password
                   value={form.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
+                  placeholder="password123"
                   className="mt-1 w-full px-4 py-2 border border-bfpNavy rounded-md focus:outline-none focus:ring-2 focus:ring-bfpOrange"
                 />
                 <button

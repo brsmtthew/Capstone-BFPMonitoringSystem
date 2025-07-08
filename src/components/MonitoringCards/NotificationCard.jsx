@@ -61,15 +61,15 @@ function NotificationCard({ personnel }) {
 
   return (
     <div className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-80 w-full sm:h-80 sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
+                    h-72 w-full sm:h-80 sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white flex justify-between items-center">
         <h3 className="text-[18px] font-bold">Notification</h3>
-        <button
+        {/* <button
           className="text-xs text-white bg-red px-6 py-3 rounded-lg hover:bg-bfpOrange"
           onClick={clearNotifications}
         >
           Clear
-        </button>
+        </button> */}
       </div>
       <div className="flex-grow p-4 overflow-y-auto">
         {filteredNotifications.length > 0 ? (

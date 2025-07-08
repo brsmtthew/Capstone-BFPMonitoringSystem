@@ -161,7 +161,7 @@ function AddPersonnelModal({ isOpen, closeModal }) {
             <span className="text-bfpNavy">SmartTrack</span>
           </p>
         </div>
-        <button onClick={closeModal} className="absolute top-2 right-2 text-black">
+        <button onClick={closeModal} className="absolute top-2 right-2 text-red text-2xl font-bold hover:text-bfpNavy">
           X
         </button>
         <h2 className="text-xl font-bold mb-4 text-black text-center">Add Personnel Information</h2>
@@ -276,33 +276,23 @@ function AddPersonnelModal({ isOpen, closeModal }) {
               <label htmlFor="position" className="block text-sm font-medium text-black">
                 Position
               </label>
-              <input
-                type="text"
+              <select
                 id="position"
                 name="position"
                 value={personnelInfo.position}
                 onChange={handleInputChange}
-                className="w-full mt-1 px-2 py-1 border border-black rounded-md"
-                placeholder="Enter position"
+                className="w-full mt-1 px-2 py-1 border border-black rounded-md bg-white"
                 required
-              />
-            </div>
-
-            {/* Age */}
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-black">
-                Age
-              </label>
-              <input
-                type="number"
-                id="age"
-                name="age"
-                value={personnelInfo.age}
-                onChange={handleInputChange}
-                className="w-full mt-1 px-2 py-1 border border-black rounded-md"
-                placeholder="Enter age"
-                required
-              />
+              >
+                <option value="" disabled>Select position</option>
+                <option value="Fire Officer I">Fire Officer I</option>
+                <option value="Fire Officer II">Fire Officer II</option>
+                <option value="Fire Officer III">Fire Officer III</option>
+                <option value="Senior Fire Officer">Senior Fire Officer</option>
+                <option value="Team Leader">Team Leader</option>
+                <option value="Rescue Specialist">Rescue Specialist</option>
+                <option value="Medic">Medic</option>
+              </select>
             </div>
           </div>
 
@@ -310,7 +300,7 @@ function AddPersonnelModal({ isOpen, closeModal }) {
           <div className="flex justify-center mt-4">
             <button
               type="submit"
-              className="w-1/2 py-2 bg-bfpNavy text-white font-semibold rounded-full hover:bg-hoverBtn"
+              className="w-1/2 py-2 bg-bfpNavy text-white font-semibold rounded-full hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
             >
               {saving ? 'Saving...' : 'Save Personnel'}
             </button>

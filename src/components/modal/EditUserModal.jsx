@@ -112,7 +112,7 @@ function EditUserModal({ onClose, userId }) {
         </div>
 
         {/* Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-600 hover:text-gray-800">
+        <button onClick={onClose} className="absolute top-4 right-4 text-red text-2xl font-bold hover:text-bfpNavy">
           ✕
         </button>
 
@@ -169,7 +169,7 @@ function EditUserModal({ onClose, userId }) {
           {/* Update Button */}
           <button
             type="submit"
-            className="w-full py-2 bg-blue text-white font-semibold rounded-md hover:bg-blue-700 transition duration-300"
+            className="w-full py-2 bg-bfpNavy text-white font-semibold rounded-md hover:bg-blue-700 transform transition duration-300 hover:scale-105"
             disabled={isLoading}
           >
             {isLoading ? "Updating user..." : "Update User"}

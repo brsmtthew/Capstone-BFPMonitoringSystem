@@ -226,7 +226,7 @@ function AdminSettings() {
                       <th className="px-6 py-3">Role</th>
                       <th className="px-6 py-3">Created at</th>
                       <th className="px-6 py-3">Last Login</th>
-                      <th className="px-6 py-3">Block</th>
+                      <th className="px-6 py-3">Access</th>
                       <th className="px-6 py-3">Action</th>
                     </tr>
                   </thead>
