@@ -4,6 +4,7 @@ import { auth, db } from '../../firebase/Firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast } from 'react-toastify';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useStore } from '../store/useStore';
 
 export const AuthContext = createContext({
   token: null,
@@ -62,14 +63,16 @@ export const AuthProvider = ({ children }) => {
 
   const handleLogoutClick = async () => {
     try {
-      await logout();                        // CALL simplified logout
-      toast.success("Logout successful!", { position: "top-right" });  // TOAST here
-      navigate("/", { replace: true });     // NAVIGATE after toast
+      const clearAll = useStore.getState().clearAllMonitoredPersonnel;
+      clearAll(); // ✅ remove monitored personnel before logging out
+
+      await logout();                        
+      toast.success("Logout successful!", { position: "top-right" });  
+      navigate("/", { replace: true });     
     } catch (err) {
       toast.error(`Error logging out: ${err.message}`);
     }
   };
-
 
   // 4) Token-expiry + inactivity timer
   useEffect(() => {

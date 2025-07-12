@@ -48,6 +48,7 @@ function MonitoringBody() {
   const { state } = useLocation(); // Access data passed via navigate
   const unsubscribeMap = useRef({});
   const navigate = useNavigate(); // Initialize navigation
+  const { isSaving } = useStore();
 
   useEffect(() => {
     if (state?.selectedPersonnel) {
@@ -274,6 +275,7 @@ function MonitoringBody() {
                       monitoringEnviData={monitoringEnviData(person)}
                       gearId={person.gearId}
                       onRemove={handleRemovePersonnel}
+                      isSaving={isSaving}
                     />
                   </div>
                   {/* Right pane: flex‑1 → fills remaining space */}

@@ -26,6 +26,13 @@ const AnalyticsBody = () => {
   const [gearDateRange, setGearDateRange] = useState({ start: "", end: "" });
   const hasShownToast = useRef(false);
   const hasFetchedInitialData = useRef(false);
+  const [isRawShown, setIsRawShown] = useState(false);
+  const [outliers, setOutliers] = useState({
+  smoke: [],
+  envi: [],
+  toxic: [],
+  temp: [],
+});
 
   const fetchInitialData = async () => {
     try {
@@ -220,37 +227,61 @@ const AnalyticsBody = () => {
     const gear = e.target.value;
     setSelectedGearId(gear);
 
+    if (gear === "") {
+      // User re-selected "Select Gear IDs"
+      setSelectedMonth("");
+      setRawSubset([]);
+      setAvailableMonths([]);
+      setPersonnelInfo({ name: "", date: "", time: "", gearId: "" });
+      setGearDateRange({ start: "", end: "" });
+
+      // Re-fetch the initial default data
+      fetchInitialData();
+      return;
+    }
     // rebuild month list & date range for this gear
     const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
     ];
     const mset = new Set();
     const dates = [];
+
+    let foundInfo = null;
+
     allData.forEach(({ personnelInfo, realTimeData }) => {
       if (personnelInfo.gearId === gear) {
+        if (!foundInfo) foundInfo = personnelInfo;
+
         realTimeData.forEach((ent) => {
           if (ent.date) {
             const [mm, dd, yy] = ent.date.split("/");
             const m = parseInt(mm, 10) - 1;
             if (m >= 0 && m < 12) {
               mset.add(monthNames[m]);
-              dates.push(new Date(`${yy}-${mm}-${dd}`));
+              dates.push(new Date(`${yy}-${mm + 1}-${dd}`)); // Note: mm+1 to fix month offset
             }
           }
         });
       }
     });
+
+    // ✅ Set personnel info right away
+    if (foundInfo) {
+      setPersonnelInfo({
+        name: foundInfo.personnelName || "",
+        date: foundInfo.date || "",
+        time: foundInfo.time || "",
+        gearId: foundInfo.gearId || "",
+      });
+    } else {
+      setPersonnelInfo({ name: "", date: "", time: "", gearId: "" });
+    }
+
+    // ✅ Still update available months
+    setAvailableMonths(Array.from(mset));
+
+    // ✅ Set gear date range, for UI display (not filtering)
     dates.sort((a, b) => a - b);
     if (dates.length) {
       const start = monthNames[dates[0].getMonth()];
@@ -260,14 +291,23 @@ const AnalyticsBody = () => {
       setGearDateRange({ start: "", end: "" });
     }
 
-    setAvailableMonths(Array.from(mset));
+    // Reset month selection, but DO NOT filter anything yet
     setSelectedMonth("");
-    filterData(gear, "");
+    setRawSubset([]); // optional: clear data
+    toast.info("Please select a month to view data.");
   };
+
 
   const handleMonthChange = (e) => {
     const mon = e.target.value;
     setSelectedMonth(mon);
+
+    if (!mon) {
+      setRawSubset([]);
+      toast.info("Please select a valid month to view data.");
+      return;
+    }
+
     filterData(selectedGearId, mon);
   };
 
@@ -395,6 +435,13 @@ const AnalyticsBody = () => {
       (d) => !keptSet.has(`${d.date} ${d.time} ${d.value}`)
     );
 
+     setOutliers((prev) => ({
+      ...prev,
+      [key === "smokeSensor" ? "smoke" :
+      key === "environmentalTemperature" ? "envi" :
+      key === "ToxicGasSensor" ? "toxic" : "temp"]: removed,
+    }));
+
     console.log(
       `\n=== ${key.toUpperCase()} - Removed Outliers using ${method} ===`
     );
@@ -403,22 +450,81 @@ const AnalyticsBody = () => {
     return filtered;
   };
 
-  const smokeDataSeries = useMemo(
-    () => prepareSeries("smokeSensor", "MAD"),
-    [rawSubset]
-  );
-  const enviDataSeries = useMemo(
-    () => prepareSeries("environmentalTemperature", "z"),
-    [rawSubset]
-  );
-  const toxicSeries = useMemo(
-    () => prepareSeries("ToxicGasSensor", "z"),
-    [rawSubset]
-  );
-  const temperatureDataSeries = useMemo(
-    () => prepareSeries("bodyTemperature", "z"),
-    [rawSubset]
-  );
+  const smokeDataSeries = useMemo(() => {
+    if (isRawShown) {
+      const sortedRaw = [...rawSubset].sort(
+        (a, b) =>
+          new Date(`${a.date} ${a.time}`) -
+          new Date(`${b.date} ${b.time}`)
+      );
+      return sortedRaw
+        .filter((d) => d.smokeSensor !== undefined)
+        .map((d) => ({
+          date: d.date,
+          time: d.time,
+          value: d.smokeSensor,
+        }));
+    } else {
+      return prepareSeries("smokeSensor", "MAD");
+    }
+  }, [rawSubset, isRawShown]);
+
+  const enviDataSeries = useMemo(() => {
+    if (isRawShown) {
+      const sortedRaw = [...rawSubset].sort(
+        (a, b) =>
+          new Date(`${a.date} ${a.time}`) -
+          new Date(`${b.date} ${b.time}`)
+      );
+      return sortedRaw
+        .filter((d) => d.environmentalTemperature !== undefined)
+        .map((d) => ({
+          date: d.date,
+          time: d.time,
+          value: d.environmentalTemperature,
+        }));
+    } else {
+      return prepareSeries("environmentalTemperature", "z");
+    }
+  }, [rawSubset, isRawShown]);
+
+  const toxicSeries = useMemo(() => {
+    if (isRawShown) {
+      const sortedRaw = [...rawSubset].sort(
+        (a, b) =>
+          new Date(`${a.date} ${a.time}`) -
+          new Date(`${b.date} ${b.time}`)
+      );
+      return sortedRaw
+        .filter((d) => d.ToxicGasSensor !== undefined)
+        .map((d) => ({
+          date: d.date,
+          time: d.time,
+          value: d.ToxicGasSensor,
+        }));
+    } else {
+      return prepareSeries("ToxicGasSensor", "z");
+    }
+  }, [rawSubset, isRawShown]);
+
+  const temperatureDataSeries = useMemo(() => {
+    if (isRawShown) {
+      const sortedRaw = [...rawSubset].sort(
+        (a, b) =>
+          new Date(`${a.date} ${a.time}`) -
+          new Date(`${b.date} ${b.time}`)
+      );
+      return sortedRaw
+        .filter((d) => d.bodyTemperature !== undefined)
+        .map((d) => ({
+          date: d.date,
+          time: d.time,
+          value: d.bodyTemperature,
+        }));
+    } else {
+      return prepareSeries("bodyTemperature", "z");
+    }
+  }, [rawSubset, isRawShown]);
 
   return (
     <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
@@ -426,47 +532,69 @@ const AnalyticsBody = () => {
         title="ANALYTICS OVERVIEW"
         extraContent={
           <div className="flex space-x-5">
-            <select
-              value={selectedGearId}
-              onChange={handleGearChange}
-              className="px-3 py-1 border rounded-md bg-white text-black shadow-sm">
-              <option value="" disabled>
-                Select Gear IDs
-              </option>
-              {availableGearIds.map((id) => (
-                <option key={id} value={id}>
-                  {id}
+            <div className="hidden lg:flex space-x-5">
+              <select
+                value={selectedGearId}
+                onChange={handleGearChange}
+                className="w-full sm:w-32 md:w-36 lg:w-40 px-3 py-1 border rounded-md bg-white text-black shadow-sm">
+                <option value="">
+                  Select Gear IDs
                 </option>
-              ))}
-            </select>
-            <select
-              value={selectedMonth}
-              onChange={handleMonthChange}
-              disabled={!selectedGearId}
-              className="px-3 py-1 border rounded-md bg-white text-gray-700 shadow-sm">
-              <option value="">Select Month</option>
-              {[
-                "January",
-                "February",
-                "March",
-                "April",
-                "May",
-                "June",
-                "July",
-                "August",
-                "September",
-                "October",
-                "November",
-                "December",
-              ].map((m) => (
-                <option
-                  key={m}
-                  value={m}
-                  disabled={!availableMonths.includes(m)}>
-                  {m}
-                </option>
-              ))}
-            </select>
+                {availableGearIds.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={selectedMonth}
+                onChange={handleMonthChange}
+                disabled={!selectedGearId}
+                className="w-full sm:w-32 md:w-36 lg:w-40 px-3 py-1 border rounded-md bg-white text-black shadow-sm">
+                <option value="">Select Month</option>
+                {[
+                  "January",
+                  "February",
+                  "March",
+                  "April",
+                  "May",
+                  "June",
+                  "July",
+                  "August",
+                  "September",
+                  "October",
+                  "November",
+                  "December",
+                ].map((m) => (
+                  <option
+                    key={m}
+                    value={m}
+                    disabled={!availableMonths.includes(m)}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div
+              onClick={() => setIsRawShown((prev) => !prev)}
+              className={`
+                flex items-center cursor-pointer rounded-full px-1 transition-all duration-300
+                ${isRawShown ? "bg-bfpOrange" : "bg-bfpNavy"}
+                w-12 h-7 sm:w-12 sm:h-7 md:w-12 md:h-7 lg:w-24 lg:h-9
+              `}
+            >
+              <div
+                className={`
+                  bg-white rounded-full shadow-md transition-transform duration-300
+                  w-4 h-4 sm:w-4 sm:h-4 md:w-4 md:h-4 lg:w-5 lg:h-5
+                  ${isRawShown ? "translate-x-[1.7rem] lg:translate-x-[4.0rem]" : "translate-x-1"}
+                `}
+              />
+              {/* Text shown only on lg and above */}
+              <span className="hidden lg:inline ml-2 mr-2 text-white font-semibold text-sm">
+                {isRawShown ? "Raw" : "Filter"}
+              </span>
+            </div>
           </div>
         }
       />
@@ -486,6 +614,7 @@ const AnalyticsBody = () => {
             startMonth={gearDateRange.start}
             endMonth={gearDateRange.end}
             selectedMonth={selectedMonth}
+            outliers={outliers}
           />
         </div>
         <EnvironmentChartSection

@@ -1,11 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useStore } from '../store/useStore';
-import LocationIcon from '../pageBody/dashboardAssets/placeholder.png';
-import { useAuth } from '../auth/AuthContext';
+import React, { useState, useEffect, useRef } from "react";
+import { useStore } from "../store/useStore";
+import LocationIcon from "../pageBody/dashboardAssets/placeholder.png";
+import { useAuth } from "../auth/AuthContext";
+import DeletePersonnelModal from "../modal/deletePersonnelModal";
 
 function ProfileMonitoring({ personnel }) {
   const { userData } = useAuth(); // ⬅️ get user role
-  const { notifications, temperature, environmentalTemperature, smokeSensor, ToxicGasSensor,  updateNotificationState, isSaving, intervalId, setSavingState, clearSavingState, saveRecordings } = useStore();
+  const {
+    notifications,
+    temperature,
+    environmentalTemperature,
+    smokeSensor,
+    ToxicGasSensor,
+    updateNotificationState,
+    isSaving,
+    intervalId,
+    setSavingState,
+    clearSavingState,
+    saveRecordings,
+  } = useStore();
   const [lastSavedData, setLastSavedData] = useState({
     temperature: null,
     environmentalTemperature: null,
@@ -18,6 +31,12 @@ function ProfileMonitoring({ personnel }) {
   const environmentalTemperatureRef = useRef(environmentalTemperature);
   const smokeSensorRef = useRef(smokeSensor);
   const ToxicGasSensorRef = useRef(ToxicGasSensor);
+  const [isStopModalOpen, setIsStopModalOpen] = useState(false);
+
+  const handleConfirmStop = () => {
+    clearSavingState(personnel.gearId);
+    setIsStopModalOpen(false);
+  };
 
   // Update refs whenever state changes
   useEffect(() => {
@@ -29,9 +48,10 @@ function ProfileMonitoring({ personnel }) {
 
   const handleButtonClick = () => {
     const gearId = personnel.gearId;
-    
+
     if (isSaving[gearId]) {
-      clearSavingState(gearId);
+      // clearSavingState(gearId);
+      setIsStopModalOpen(true);
     } else {
       // Immediate save and start interval
       saveRecordings(gearId);
@@ -41,7 +61,8 @@ function ProfileMonitoring({ personnel }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg flex flex-col 
+    <div
+      className="bg-white rounded-lg shadow-lg flex flex-col 
                     h-72 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
       <div className="p-2 bg-bfpNavy rounded-t-lg text-white flex items-center justify-between">
         <div className="flex flex-col">
@@ -68,7 +89,7 @@ function ProfileMonitoring({ personnel }) {
       <div className="flex-grow flex flex-col items-center justify-center">
         <div className="rounded-full overflow-hidden mb-2 h-32 w-32 lg:h-32 lg:w-32 xl:h-32 xl:w-32 2xl:h-36 2xl:w-36">
           <img
-            src={personnel?.image || 'https://via.placeholder.com/300x300'}
+            src={personnel?.image || "https://via.placeholder.com/300x300"}
             alt="Profile"
             className="h-full w-full object-cover"
           />
@@ -105,11 +126,37 @@ function ProfileMonitoring({ personnel }) {
               }`}
               onClick={handleButtonClick}
             >
-              {isSaving[personnel?.gearId] ? 'Saving Data...' : 'Save Record'}
+              {isSaving[personnel?.gearId] ? 'End Recording' : 'Start Recording'}
             </button>
           )}
+          {/* {userData?.role === "admin" &&
+          userData?.email !== "malasaga252@gmail.com" ? (
+            <button
+              className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
+                isSaving[personnel?.gearId]
+                  ? "bg-bfpOrange hover:bg-hoverBtn"
+                  : "bg-bfpNavy hover:bg-hoverBtn"
+              }`}
+              onClick={handleButtonClick}>
+              {isSaving[personnel?.gearId] ? "Saving Data..." : "Save Record"}
+            </button>
+          ) : (
+            <button
+              disabled
+              className="px-6 py-2 text-[18px] rounded-2xl text-white mb-2 bg-gray cursor-not-allowed"
+              title="Access restricted for this account.">
+              Save Record
+            </button>
+          )} */}
         </div>
       </div>
+      <DeletePersonnelModal
+        isOpen={isStopModalOpen}
+        closeModal={() => setIsStopModalOpen(false)}
+        onConfirm={handleConfirmStop}
+        personnel={personnel} // optional here since you're not deleting
+        customMessage="Are you sure you want to stop saving data?"
+      />
     </div>
   );
 }

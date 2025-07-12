@@ -23,7 +23,7 @@ function NotificationCard({ personnel }) {
 
   // Function to compute severity ratio as a percentage
   const computeSeverityRatio = () => {
-    const totalSensors = 5;
+    const totalSensors = 4;
     if (filteredNotifications.length === 0) return 0;
 
     // Group notifications by sensorType and keep only the latest notification for each sensor
@@ -54,7 +54,7 @@ function NotificationCard({ personnel }) {
   //Determining the color of the severity ratio bar
   const getSeverityColor = () => {
     if (severityRatio === 0) return 'bg-green';
-    if (severityRatio <= 50) return 'bg-yellow';
+    if (severityRatio <= 25) return 'bg-yellow';
     if (severityRatio <= 75) return 'bg-bfpOrange';
     return 'bg-red';
   };

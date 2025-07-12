@@ -1,19 +1,20 @@
-import React from 'react';
-import HealthCard from './HealthCard';
-import EnviCard from './EnviCard';
+import React from "react";
+import HealthCard from "./HealthCard";
+import EnviCard from "./EnviCard";
 
 const RealTime = ({
   monitoringHealthData = [],
   monitoringEnviData = [],
   gearId,
-  onRemove
+  onRemove,
+  isSaving,
 }) => {
   return (
     <div className="bg-white w-full h-full rounded-lg shadow-md">
       {/* Header */}
       <div className="bg-bfpNavy rounded-t-lg text-center text-white p-3">
         <p className="font-bold sm:text-[18px] md:text-[22px] lg:text-[24px] font-montserrat">
-          Real-Time Monitoring
+          Live Sensor Data
         </p>
       </div>
 
@@ -47,9 +48,19 @@ const RealTime = ({
       </div>
       <div className="p-4 mt-auto">
         <button
-          className="w-fit px-4 py-2 bg-red hover:bg-hoverBtn text-white rounded-lg hover:bg-red-600"
-          onClick={() => onRemove(gearId)}
-        >
+          className={`w-fit px-4 py-2 text-white rounded-lg ${
+            isSaving[gearId]
+              ? "bg-gray cursor-not-allowed"
+              : "bg-red hover:bg-hoverBtn"
+          }`}
+          onClick={() => {
+            if (isSaving[gearId]) {
+              toast.warning("🛑 Please stop recording before removing.");
+            } else {
+              onRemove(gearId);
+            }
+          }}
+          disabled={isSaving[gearId]}>
           Remove from Monitoring
         </button>
       </div>

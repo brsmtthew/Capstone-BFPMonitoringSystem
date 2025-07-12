@@ -301,16 +301,16 @@ function DashboardBody() {
               description={`Highest count in ${topBarangay.monthLabel || "–"}`}>
               <div className="flex flex-col items-center justify-center space-y-2 py-4">
                 {/* Barangay Name */}
-                <p className="text-4xl font-semibold text-gray-800">
+                <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-black">
                   {topBarangay.name || "N/A"}
                 </p>
 
                 {/* Count */}
                 <div className="flex items-baseline space-x-1">
-                  <span className="text-4xl font-bold text-blue">
+                  <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-red">
                     {topBarangay.count ?? 0}
                   </span>
-                  <span className="text-3xl font-medium text-gray">
+                  <span className="text-xl sm:text-1xl md:text-2xl lg:text-3xl font-medium text-black">
                     {topBarangay.count === 1 ? "record" : "records"}
                   </span>
                 </div>
@@ -320,43 +320,27 @@ function DashboardBody() {
             {/* Second OverviewCard */}
             <OverviewCard
               title="Sensor Alert Severity"
-              description="Based on critical sensor readings.">
-              {activeSensorNames.length === 0 ? (
-                // Centered layout if no active sensors
-                <div className="text-center">
-                  <p className="text-[28px] sm:text-[32px] md:text-[44px] lg:text-[48px] xl:text-[50px] 2xl:text-[52px] font-bold text-black">
-                    {severity}%
-                  </p>
-                  <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
-                    Severity Ratio
-                  </p>
-                </div>
-              ) : (
-                // Split layout if there are active sensors
-                <div className="flex justify-between items-center w-full px-4 ml-10">
-                  {/* Left: Active Sensors */}
-                  <div className="text-left">
-                    <p className="text-2xl font-semibold text-black">
-                      Affected Sensors:
-                    </p>
-                    <ul className="text-lg font-medium text-red">
-                      {activeSensorNames.map((sensor) => (
-                        <li key={sensor}>• {sensor}</li>
-                      ))}
-                    </ul>
-                  </div>
+              description="Based on critical sensor readings."
+            >
+              <div className="w-full text-center space-y-2">
+                {/* Severity Percentage */}
+                <p className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-black">
+                  {severity}%
+                </p>
 
-                  {/* Right: Severity Info */}
-                  <div className="text-right mr-10">
-                    <p className="mr-10 text-[28px] sm:text-[32px] md:text-[44px] lg:text-[48px] xl:text-[50px] 2xl:text-[52px] font-bold text-black">
-                      {severity}%
-                    </p>
-                    <p className="text-[10px] sm:text-[18px] md:text-[20px] lg:text-[22px] xl:text-[24px] 2xl:text-[28px] font-bold text-black">
-                      Severity Ratio
-                    </p>
-                  </div>
-                </div>
-              )}
+                {/* Severity Label */}
+                <p className="text-base sm:text-md md:text-lg lg:text-2xl font-semibold text-black">
+                  Severity Ratio
+                </p>
+
+                {/* Affected Sensors */}
+                <p className="text-xs sm:text-xs md:text-md lg:text-lg font-medium text-black">
+                  Affected Sensors:{" "}
+                  <span className="text-red font-bold">
+                    {activeSensorNames.length > 0 ? activeSensorNames.join(", ") : "None"}
+                  </span>
+                </p>
+              </div>
             </OverviewCard>
 
             {/* Third OverviewCard */}

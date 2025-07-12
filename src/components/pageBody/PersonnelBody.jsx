@@ -37,6 +37,7 @@ function PersonnelBody() {
     addMonitoredPersonnel,
     removeMonitoredPersonnel,
     clearSavingState,
+    isSaving,
   } = useStore();
 
   // Log action function to record deletion events (and others if needed)
@@ -164,7 +165,7 @@ function PersonnelBody() {
                 placeholder="Search by Name or GearId"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-1 rounded-lg border border-gray text-md focus:outline-none focus:ring-2 focus:ring-bfpNavy"
+                className="w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 pl-10 pr-4 py-1 rounded-lg border border-gray text-md focus:outline-none focus:ring-2 focus:ring-bfpNavy"
               />
               <img
                 src={searchIcon}
@@ -190,21 +191,21 @@ function PersonnelBody() {
             </button> */}
             {userData?.role === 'admin' && (
               <button
-              type="button"
-              onClick={openAddModal}
-              className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
-              <svg
-                className="me-1 -ms-1 w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg">
-                <path
-                  fillRule="evenodd"
-                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                  clipRule="evenodd"></path>
-              </svg>
-              Add Personnel
-            </button>
+                type="button"
+                onClick={openAddModal}
+                className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
+                <svg
+                  className="me-1 -ms-1 w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    fillRule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clipRule="evenodd"></path>
+                </svg>
+                <span className="hidden xl:inline">Add Personnel</span>
+              </button>
             )}
           </div>
         }
@@ -256,14 +257,20 @@ function PersonnelBody() {
                         (monitored) => monitored.gearId === person.gearId
                       ) ? (
                         <button
-                          className="bg-gray text-white hover:bg-hoverBtn hover:scale-105 px-4 py-2 rounded-lg transition duration-300"
-                          onClick={() => handleActivateClick(person)}>
+                          className={`bg-gray text-white hover:bg-hoverBtn hover:scale-105 px-4 py-2 rounded-lg transition duration-300 ${
+                            isSaving[person.gearId] ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          onClick={() => !isSaving[person.gearId] && handleActivateClick(person)}
+                          disabled={isSaving[person.gearId]}>
                           Inactive
                         </button>
                       ) : (
                         <button
-                          className="px-4 py-2 bg-green text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105"
-                          onClick={() => handleRemove(person)}>
+                          className={`px-4 py-2 bg-green text-white rounded-lg hover:bg-hoverBtn transform transition duration-300 hover:scale-105 ${
+                            isSaving[person.gearId] ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          onClick={() => !isSaving[person.gearId] && handleRemove(person)}
+                          disabled={isSaving[person.gearId]}>
                           Active
                         </button>
                       )}
