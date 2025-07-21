@@ -165,7 +165,7 @@ function PersonnelBody() {
                 placeholder="Search by Name or GearId"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 pl-10 pr-4 py-1 rounded-lg border border-gray text-md focus:outline-none focus:ring-2 focus:ring-bfpNavy"
+                className="w-28 sm:w-32 md:w-36 lg:w-56 xl:w-64 pl-10 pr-4 py-1 rounded-lg border border-gray text-md focus:outline-none focus:ring-2 focus:ring-bfpNavy"
               />
               <img
                 src={searchIcon}
@@ -195,10 +195,11 @@ function PersonnelBody() {
                 onClick={openAddModal}
                 className="text-white inline-flex items-center bg-bfpNavy hover:bg-hoverBtn font-medium rounded-lg text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] px-2 py-2 sm:px-2.5 md:px-3 lg:px-4 xl:px-5 2xl:px-5 sm:py-2 lg:py-2 xl:py-2.5 2xl:py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transform transition duration-300 hover:scale-105">
                 <svg
-                  className="me-1 -ms-1 w-5 h-5"
+                  className="w-5 h-5 xl:me-1 xl:-ms-1"
                   fill="currentColor"
                   viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg">
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path
                     fillRule="evenodd"
                     d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"

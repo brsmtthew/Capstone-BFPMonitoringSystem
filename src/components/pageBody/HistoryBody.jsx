@@ -28,6 +28,7 @@ function HistoryBody() {
   const [sortOption, setSortOption] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  const [actionLabel, setActionLabel] = useState("Action");
   const { user, userData } = useAuth();
   const isAdmin = userData && userData.role === "admin";
   const isViewAllowed =
@@ -75,15 +76,30 @@ function HistoryBody() {
         });
 
         // Once all promises resolve, update the state.
+        // Promise.all(personnelPromises)
+        //   .then((data) => {
+        //     setHistoryData(data);
+        //     setFilteredData(data);
+        //   })
+        //   .catch((error) => {
+        //     console.error("Error processing snapshot:", error);
+        //   })
+        //   .finally(() => setLoading(false));
         Promise.all(personnelPromises)
-          .then((data) => {
-            setHistoryData(data);
-            setFilteredData(data);
-          })
-          .catch((error) => {
-            console.error("Error processing snapshot:", error);
-          })
-          .finally(() => setLoading(false));
+        .then((data) => {
+          // Sort by latest before setting state
+          const sortedData = data.sort(
+            (a, b) => new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time)
+          );
+
+          setHistoryData(sortedData);
+          setFilteredData(sortedData);
+          setSortOption("latest"); // Optional: to keep UI state updated
+        })
+        .catch((error) => {
+          console.error("Error processing snapshot:", error);
+        })
+        .finally(() => setLoading(false));
       },
       (error) => {
         console.error("Error fetching personnelRecords:", error);
@@ -136,24 +152,32 @@ function HistoryBody() {
 
   const handleSort = (option) => {
     let sortedData = [...filteredData];
+    let label = "Action";
     switch (option) {
-      case "latest":
-        sortedData.sort(
-          (a, b) =>
-            new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time)
-        );
-        break;
+      // case "latest":
+      //   sortedData.sort(
+      //     (a, b) =>
+      //       new Date(b.date + " " + b.time) - new Date(a.date + " " + a.time)
+      //   );
+      //   break;
       case "name":
         sortedData.sort((a, b) => a.name.localeCompare(b.name));
+        label = "name";
         break;
       case "gearId":
         sortedData.sort((a, b) => a.gearId.localeCompare(b.gearId));
+        label = "gearId";
+        break;
+      case "location": // ✅ NEW CASE for Barangay
+        sortedData.sort((a, b) => a.location.localeCompare(b.location));
+        label = "barangay";
         break;
       default:
         break;
     }
     setFilteredData(sortedData);
     setSortOption(option);
+    setActionLabel(label);
     setIsDropdownOpen(false);
   };
 
@@ -233,7 +257,7 @@ function HistoryBody() {
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="inline-flex items-center text-white font-medium rounded-lg text-sm px-3 py-1.5 focus:outline-none border bg-bfpNavy"
               >
-                Action
+                {actionLabel}
                 <svg
                   className="w-2.5 h-2.5 ml-2"
                   xmlns="http://www.w3.org/2000/svg"
@@ -253,10 +277,10 @@ function HistoryBody() {
               {isDropdownOpen && (
                 <div className="absolute mt-2 bg-bfpNavy rounded-lg shadow-lg w-48 z-10">
                   <button
-                    onClick={() => handleSort("latest")}
+                    onClick={() => handleSort("location")}
                     className="w-full text-left text-white px-4 py-2 hover:bg-searchTable"
                   >
-                    Filter by Date
+                    Filter by Barangay
                   </button>
                   <button
                     onClick={() => handleSort("name")}
@@ -270,7 +294,7 @@ function HistoryBody() {
                   >
                     Filter by Gear ID
                   </button>
-                  <button
+                  {/* <button
                     disabled={!isAdmin}
                     onClick={openDeleteModal}
                     className={`w-full text-left px-4 py-2 ${
@@ -280,7 +304,7 @@ function HistoryBody() {
                     }`}
                   >
                     Delete Selected Data
-                  </button>
+                  </button> */}
                 </div>
               )}
             </div>
@@ -308,7 +332,7 @@ function HistoryBody() {
                 <table className="w-full text-sm text-left text-white bg-bfpNavy">
                   <thead className="text-xs uppercase bg-searchTable text-white">
                     <tr>
-                      <th className="p-4">
+                      {/* <th className="p-4">
                         <input
                           type="checkbox"
                           className="w-4 h-4 rounded text-green"
@@ -318,7 +342,7 @@ function HistoryBody() {
                             selectedRows.length === filteredData.length
                           }
                         />
-                      </th>
+                      </th> */}
                       <th className="px-6 py-3">Gear ID</th>
                       <th className="px-6 py-3">Name</th>
                       <th className="px-6 py-3">Date</th>
@@ -335,14 +359,14 @@ function HistoryBody() {
                           onDoubleClick={() => handleRowClick(data)}
                           className="border-b bg-bfpNavy hover:bg-searchTable cursor-pointer"
                         >
-                          <td className="p-4">
+                          {/* <td className="p-4">
                             <input
                               type="checkbox"
                               className="w-4 h-4 rounded text-green"
                               checked={selectedRows.includes(data.documentId)}
                               onChange={() => handleSelectRow(data.documentId)}
                             />
-                          </td>
+                          </td> */}
                           <td className="px-6 py-3">{data.gearId}</td>
                           <td className="px-6 py-3">{data.name}</td>
                           <td className="px-6 py-3">{data.date}</td>

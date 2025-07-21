@@ -27,7 +27,7 @@ export default {
       'end-gradient': '#1C3B2E',
       btnActive: "#196244",
       btnFontActive: "#02F690",
-      yellow: "#FFD700", 
+      yellow: "#e6b400", 
       histoColor: "#284B63",
       red: "#990000",
       solidGreen: "#00FF00",

@@ -31,13 +31,17 @@ const HealthCard = ({ icon, title, value, description, warningIcon, children }) 
       <div className="mt-4 flex flex-col justify-center items-center text-center p-1 sm:p-2 md:p-2 lg:p-3 xl:p-2 2xl:p-2">
         <p className="text-[16px] sm:text-[24px] md:text-[30px] lg:text-[36px] xl:text-[38px] 2xl:text-[48px] font-bold">{value}</p>
         {hasValidValue && description && (
-          <div className="flex items-center mt-2">
-            <p className="text-[8px] sm:[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px]">{description}</p>
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <p className="text-[8px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] leading-tight">
+              {description}
+            </p>
             {warningIcon && (
-              <>
-                <img src={warningIcon} alt="Warning Icon" className="w-4 h-4 sm:hidden" draggable="false"/>
-                <img src={warningIcon} alt="Warning Icon" className="hidden sm:block sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 xl:w-10 xl:h-10 2xl:w-10 2xl:h-10" draggable="false"/>
-              </>
+              <img
+                src={warningIcon}
+                alt="Warning Icon"
+                className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-10 lg:h-10 xl:w-10 xl:h-10 2xl:w-10 2xl:h-10"
+                draggable="false"
+              />
             )}
           </div>
         )}

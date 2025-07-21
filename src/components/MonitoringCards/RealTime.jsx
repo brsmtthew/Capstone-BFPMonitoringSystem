@@ -19,7 +19,7 @@ const RealTime = ({
       </div>
 
       {/* Cards Grid */}
-      <div className="font-montserrat grid gap-7 grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 mt-2 p-4 ">
+      <div className="font-montserrat grid gap-7 grid-cols-2 sm:grid-cols-2 xl:grid-cols-2 mt-2 p-4 ">
         {/* Health Cards */}
         {monitoringHealthData.map((data, index) => (
           <div key={`health-${index}`} className="col-span-1">
@@ -46,13 +46,17 @@ const RealTime = ({
           </div>
         ))}
       </div>
-      <div className="p-4 mt-auto">
+      <div className="p-2 sm:p-3 md:p-4 mt-auto">
         <button
-          className={`w-fit px-4 py-2 text-white rounded-lg ${
-            isSaving[gearId]
-              ? "bg-gray cursor-not-allowed"
-              : "bg-red hover:bg-hoverBtn"
-          }`}
+          className={`w-full sm:w-fit 
+                      text-[10px] sm:text-sm md:text-base 
+                      px-2 sm:px-4 py-1 sm:py-2 
+                      text-white rounded-lg
+                      ${
+                        isSaving[gearId]
+                          ? "bg-gray cursor-not-allowed"
+                          : "bg-red hover:bg-hoverBtn"
+                      }`}
           onClick={() => {
             if (isSaving[gearId]) {
               toast.warning("🛑 Please stop recording before removing.");

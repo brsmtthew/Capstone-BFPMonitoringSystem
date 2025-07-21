@@ -349,9 +349,9 @@ function DashboardBody() {
               <OverviewCard
                 title="Responder Notification History"
                 description="Previous Notifications for this Personnel">
-                <div className="max-h-40 overflow-y-auto text-center p-2">
+                <div className="max-h-40 sm:max-h-24 overflow-y-auto text-center p-2">
                   {sortedNotifications && sortedNotifications.length > 0 ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                       {sortedNotifications.map((notification) => (
                         <div
                           key={notification.id}

@@ -83,64 +83,22 @@ function Summary({
     return parts.join(" ") || "0s";
   };
 
-  const getSensorDescription = (
-    title,
-    dangerSeconds,
-    dangerLevels,
-    maxValue
-  ) => {
-    const { warn, danger } = dangerLevels;
-
-    const baseMessage = () => {
-      const suggestion = contextSuggestion();
-      if (dangerSeconds >= danger) {
-        switch (title) {
-          case "Body Temp":
-            return "🔥 Prolonged elevated body temperature — potential heatstroke risk. Recommend immediate medical assessment after the mission.";
-          case "Env Temp":
-            return "🌡️ Sustained exposure to extreme heat — may contribute to heat exhaustion. Recommend full recovery monitoring.";
-          case "Smoke Level":
-            return "🚨 Extended smoke exposure detected — high risk for respiratory irritation or injury. Strongly advise post-operation health screening.";
-          case "Toxic Gas":
-            return "☠️ High-level toxic gas exposure logged — potential risk of poisoning. Medical follow-up is essential.";
-          default:
-            return "⚠️ Prolonged exposure recorded — consider thorough medical evaluation.";
-        }
-      } else if (dangerSeconds >= warn) {
-        switch (title) {
-          case "Body Temp":
-            return "🌡️ Elevated body temperature noted — recommend hydration and routine medical checkup.";
-          case "Env Temp":
-            return "🌞 High ambient temperature exposure — ensure proper rest and hydration post-operation.";
-          case "Smoke Level":
-            return "🚬 Noticeable smoke exposure — advisable to monitor for respiratory symptoms and consider clinic evaluation.";
-          case "Toxic Gas":
-            return "🧪 Brief toxic gas exposure recorded — recommend follow-up checkup depending on symptoms.";
-          default:
-            return "⚠️ Moderate exposure recorded — medical checkup may be beneficial.";
-        }
-      } else if (suggestion) {
-        return "";
-      } else {
-        return "✅ No significant risk duration recorded for this sensor.";
-      }
-    };
-
+  const getSensorDescription = (title, dangerSeconds, dangerLevels, maxValue) => {
     const contextSuggestion = () => {
       switch (title) {
         case "Body Temp":
-          if (maxValue >= 39.6) {
-            return "⚠️ Peak core temperature exceeded 39.6°C — risk of heat-related illness. Immediate cooling and monitoring advised.";
+          if (maxValue >= 40) {
+            return "⚠️ Peak core temperature exceeded 40°C — risk of heat-related illness. Immediate cooling and monitoring advised.";
           }
           break;
         case "Env Temp":
-          if (maxValue >= 272) {
+          if (maxValue >= 70) {
             return "🔥 Environment reached up to 272°C — turnout gear performance may degrade. Ensure proper inspection of PPE.";
           }
           break;
         case "Smoke Level":
-          if (maxValue >= 200) {
-            return "🚨 Smoke levels reached 200 — exceeds NIOSH ceiling. Possible hypoxia or long-term respiratory effects.";
+          if (maxValue >= 300) {
+            return "🚨 High smoke concentration detected — inhaled particles can reduce oxygen uptake, causing dizziness, headaches, or lung irritation. Seek medical evaluation.";
           }
           break;
         case "Toxic Gas":
@@ -154,23 +112,12 @@ function Summary({
       return "";
     };
 
-    const base = baseMessage();
     const context = contextSuggestion();
-
-    if (base && context) {
-      return (
-        <ul className="list-disc list-inside text-left ml-5">
-          <li>{context}</li>
-          <li>{base}</li>
-        </ul>
-      );
-    } else if (base) {
-      return base;
-    } else if (context) {
-      return context;
-    } else {
-      return "";
-    }
+    return context ? (
+      <p className="text-left">{context}</p>
+    ) : (
+      ""
+    );
   };
 
   // Define sensors and their thresholds
@@ -178,25 +125,25 @@ function Summary({
     {
       title: "Body Temp",
       series: temperatureData,
-      threshold: 45,
+      threshold: 40,
       dangerLevels: { warn: 20, danger: 50 },
     },
     {
       title: "Smoke Level",
       series: smokeData,
-      threshold: 100,
-      dangerLevels: { warn: 20, danger: 50 },
+      threshold: 300,
+      dangerLevels: { warn: 400, danger: 600 },
     },
     {
       title: "Env Temp",
       series: enviData,
-      threshold: 50,
+      threshold: 150,
       dangerLevels: { warn: 20, danger: 50 },
     },
     {
       title: "Toxic Gas",
       series: ToxicGas,
-      threshold: 150,
+      threshold: 200,
       dangerLevels: { warn: 10, danger: 20 },
     },
   ];
@@ -204,13 +151,13 @@ function Summary({
   const isLoading = !name && !date && !time;
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col text-left max-w-full">
+    <div className="bg-white rounded-2xl shadow-xl p-6 flex flex-col text-left max-w-full font-montserrat">
       {/* Header */}
       <div className="mb-4">
         {/* Centered Sensors Overview */}
         <div className="flex justify-center mb-3">
           <div className="bg-bfpNavy px-4 py-2 rounded-lg shadow-inner">
-            <h3 className="text-white text-2xl font-bold">
+            <h3 className="text-white text-sm sm:text-sm md:text-md lg:text-lg xl:text-xl 2xl:text-2xl font-bold">
               Sensor Exposure & Risk Summary
             </h3>
           </div>
@@ -225,18 +172,18 @@ function Summary({
             </>
           ) : (
             <>
-              <h2 className="text-2xl font-semibold text-black">
+              <h2 className="text-md sm:text-md md:text-md lg:text-lg xl:text-xl 2xl:text-2xl font-semibold text-black">
                 {name || "Unknown"}{" "}
                 <span className="text-sm text-gray">
                   ({gearId || "No Gear ID"})
                 </span>
               </h2>
               {selectedMonth ? (
-                <p className="text-md text-black mt-1">
+                <p className="text-xs sm:text-xs md:text-sm lg:text-lg xl:text-lg 2xl:text-lg text-black mt-1">
                   Month: <strong>{selectedMonth}</strong>
                 </p>
               ) : (
-                <p className="text-md text-black mt-1">
+                <p className="text-xs sm:text-xs md:text-sm lg:text-lg xl:text-lg 2xl:text-lg text-black mt-1">
                   Date: {date} • {time}
                 </p>
               )}
@@ -264,10 +211,10 @@ function Summary({
                 {/* sensor icon placeholder: replace with actual icon component */}
                 {sensor.title}
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font">
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
-                  <p className="text-xs text-black uppercase">Range</p>
-                  <p className="text-2xl font-bold text-black mt-1">
+                  <p className="text-xs sm:text-xs md:text-sm lg:text-md xl:text-md 2xl:text-md text-black uppercase">Range</p>
+                  <p className="text-lg sm:text-lg md:text-md lg:text-md xl:text-2xl 2xl:text-2xl font-bold text-black mt-1">
                     {min.toFixed(1)} - {max.toFixed(1)}
                   </p>
                 </div>
@@ -276,16 +223,16 @@ function Summary({
                   <p className="text-2xl font-bold text-black mt-1">{stdDev.toFixed(2)}</p>
                 </div> */}
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
-                  <p className="text-xs text-black uppercase">Breaches</p>
-                  <p className="text-2xl font-bold text-black mt-1">
+                  <p className="text-xs sm:text-xs md:text-sm lg:text-md xl:text-md 2xl:text-md text-black uppercase">Breaches</p>
+                  <p className="text-lg sm:text-lg md:text-lg lg:text-lg xl:text-2xl 2xl:text-2xl font-bold text-black mt-1">
                     {breachCount}
                   </p>
                 </div>
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
-                  <p className="text-[10px] text-black uppercase">
+                  <p className="text-xs sm:text-xs md:text-sm lg:text-md xl:text-md 2xl:text-md text-black uppercase">
                     Risk Duration
                   </p>
-                  <p className="text-1xl font-bold text-black mt-1">
+                  <p className="text-lg sm:text-lg md:text-lg lg:text-lg xl:text-1xl 2xl:text-1xl font-bold text-black mt-1">
                     {dangerTime}
                   </p>
                 </div>

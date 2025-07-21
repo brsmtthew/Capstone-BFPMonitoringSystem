@@ -46,24 +46,59 @@ function ProfileMonitoring({ personnel }) {
     ToxicGasSensorRef.current = ToxicGasSensor;
   }, [temperature, environmentalTemperature, smokeSensor, ToxicGasSensor]);
 
-  const handleButtonClick = () => {
+  // const handleButtonClick = () => {
+  //   const gearId = personnel.gearId;
+
+  //   if (isSaving[gearId]) {
+  //     // clearSavingState(gearId);
+  //     setIsStopModalOpen(true);
+  //   } else {
+  //     // Immediate save and start interval
+  //     saveRecordings(gearId);
+  //     const intervalId = setInterval(() => saveRecordings(gearId), 5000);
+  //     setSavingState(gearId, true, intervalId);
+  //   }
+  // };
+  // const handleButtonClick = async () => {
+  //   const gearId = personnel.gearId;
+  //   if (isSaving[gearId]) {
+  //     setIsStopModalOpen(true);
+  //   } else {
+      
+  //     await saveRecordings(gearId);
+
+      
+  //     const id = setInterval(() => saveRecordings(gearId), 5000);
+  //     setSavingState(gearId, true, id);
+  //   }
+  // };
+  const handleButtonClick = async () => {
     const gearId = personnel.gearId;
 
     if (isSaving[gearId]) {
-      // clearSavingState(gearId);
       setIsStopModalOpen(true);
     } else {
-      // Immediate save and start interval
-      saveRecordings(gearId);
-      const intervalId = setInterval(() => saveRecordings(gearId), 5000);
-      setSavingState(gearId, true, intervalId);
+      // ✅ 1. Immediately show "End Recording"
+      setSavingState(gearId, true); // this will trigger the button to show "End Recording"
+
+      try {
+        // ✅ 2. Now do the first save
+        await saveRecordings(gearId);
+
+        // ✅ 3. Then set interval after successful first save
+        const id = setInterval(() => saveRecordings(gearId), 5000);
+        setSavingState(gearId, true, id); // updates intervalId
+      } catch (error) {
+        console.error("Failed to save initially:", error);
+        clearSavingState(gearId); // rollback if save fails
+      }
     }
   };
 
   return (
     <div
       className="bg-white rounded-lg shadow-lg flex flex-col 
-                    h-72 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
+                    h-80 w-full sm:w-full md:w-full lg:w-full xl:w-96 2xl:w-96 font-montserrat">
       <div className="p-2 bg-bfpNavy rounded-t-lg text-white flex items-center justify-between">
         <div className="flex flex-col">
           {personnel ? (
@@ -117,7 +152,8 @@ function ProfileMonitoring({ personnel }) {
           >
             {isSaving[personnel?.gearId] ? 'Saving Data...' : 'Save Record'}
           </button> */}
-          {userData?.role === 'admin' && (
+
+          {/* {userData?.role === 'admin' && (
             <button
               className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
                 isSaving[personnel?.gearId]
@@ -128,7 +164,28 @@ function ProfileMonitoring({ personnel }) {
             >
               {isSaving[personnel?.gearId] ? 'End Recording' : 'Start Recording'}
             </button>
+          )} */}
+
+          {userData?.role === "admin" && userData?.email !== "acemalasaga30@gmail.com" ? (
+            <button
+              className={`px-6 py-2 text-[18px] rounded-2xl text-white mb-2 transform transition duration-300 ${
+                isSaving[personnel?.gearId]
+                  ? "bg-bfpOrange hover:bg-hoverBtn"
+                  : "bg-bfpNavy hover:bg-hoverBtn"
+              }`}
+              onClick={handleButtonClick}>
+              {isSaving[personnel?.gearId] ? "End Recording" : "Start Recording"}
+            </button>
+          ) : (
+            <button
+              disabled
+              className="px-6 py-2 text-[18px] rounded-2xl text-white mb-2 bg-gray cursor-not-allowed"
+              title="Access restricted for this account.">
+              Start Recording
+            </button>
           )}
+
+
           {/* {userData?.role === "admin" &&
           userData?.email !== "malasaga252@gmail.com" ? (
             <button

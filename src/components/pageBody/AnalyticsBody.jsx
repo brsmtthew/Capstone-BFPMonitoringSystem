@@ -100,7 +100,7 @@ const AnalyticsBody = () => {
           gearId: personnelData.gearId || "",
         });
 
-        toast.success("Fetched latest personnel real-time data.");
+        // toast.success("Fetched latest personnel real-time data.");
       } else {
         toast.info("No personnel records found.");
       }

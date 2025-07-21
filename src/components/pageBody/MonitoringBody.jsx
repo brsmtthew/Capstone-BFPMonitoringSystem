@@ -149,10 +149,10 @@ function MonitoringBody() {
       const sensors = sensorData[gearId];
       if (!sensors) return;
 
-      handleSensorNotification(gearId, sensors.bodyTemperature, 45, 37.5, 'Body Temperature', 'bodyTemperature');
-      handleSensorNotification(gearId, sensors.environmentalTemperature, 50, 49, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 100, 99, 'Smoke', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 150, 149, 'Carbon Monoxide', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.bodyTemperature, 40, 37.5, 'Body Temperature', 'bodyTemperature');
+      handleSensorNotification(gearId, sensors.environmentalTemperature, 70, 40, 'Environmental Temperature', 'environmentalTemperature');
+      handleSensorNotification(gearId, sensors.smokeSensor, 300, 200, 'Smoke', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 100, 50, 'Toxic Gas', 'ToxicGasSensor');
       // handleSensorNotification(gearId, sensors.HeartRate, 100, 80, 'Heart Rate', 'HeartRate');
     })
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
@@ -172,12 +172,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.bodyTemperature >= 37.5 ? (
+      description: sensorData[person.gearId]?.bodyTemperature > 40 ? (
         <span className="text-red">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 37.5 ? HighTemp : likeIcon,
+      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? HighTemp : likeIcon,
     },
   ];
   
@@ -197,13 +197,13 @@ function MonitoringBody() {
           </span>
         ),
       description:
-        sensorData[person.gearId]?.ToxicGasSensor >= 150
+        sensorData[person.gearId]?.ToxicGasSensor > 200
           ? (
             <span className="text-red">High Gas Level Detected</span>
           ) : (
             <span className="text-green">Normal Toxic Gas</span>
           ),
-      warningIcon: sensorData[person.gearId]?.ToxicGasSensor >= 150 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.ToxicGasSensor > 200 ? flamesIcon : likeIcon,
     },
     {
       icon: maskIcon,
@@ -219,12 +219,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.smokeSensor > 100 ? (
+      description: sensorData[person.gearId]?.smokeSensor > 600 ? (
         <span className="text-red">High Smoke level Detected</span>
       ) : (
         <span className="text-green">Normal Smoke level</span>
       ),
-      warningIcon: sensorData[person.gearId]?.smokeSensor > 100 ? SmokeIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.smokeSensor > 600 ? SmokeIcon : likeIcon,
     },
     {
       icon: enviTemp,
@@ -240,12 +240,12 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.environmentalTemperature >= 50 ? (
+      description: sensorData[person.gearId]?.environmentalTemperature > 150 ? (
         <span className="text-red">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.environmentalTemperature >= 50 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.environmentalTemperature > 150 ? flamesIcon : likeIcon,
     }
   ];
 
@@ -279,7 +279,7 @@ function MonitoringBody() {
                     />
                   </div>
                   {/* Right pane: flex‑1 → fills remaining space */}
-                  <div className="w-full xl:w-96 flex flex-col gap-4">
+                  <div className="flex flex-col md:flex-row xl:flex-col gap-4">
                     <ProfileMonitoring personnel={person} />
                     <NotificationCard   personnel={person} />
                   </div>

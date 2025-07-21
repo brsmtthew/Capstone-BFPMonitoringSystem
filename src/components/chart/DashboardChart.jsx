@@ -111,7 +111,7 @@ const DashboardChart = ({ data = [], personnelInfo = {} }) => {
     <div className="h-full max-h-full w-full max-w-full bg-bfpNavy rounded-lg shadow-lg flex flex-col">
       {/* Header */}
       <div className="p-3 bg-bfpNavy rounded-t-lg text-white text-center">
-        <h3 className="text-lg font-bold">Responder Sensor Trends</h3>
+        <h3 className="text-lg font-bold">Previous Sensor Readings</h3>
         <p className="text-sm">Sensor Readings Over Time</p>
       </div>
 
