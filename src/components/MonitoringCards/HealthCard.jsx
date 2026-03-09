@@ -1,7 +1,9 @@
 import React from 'react';
 
-const HealthCard = ({ icon, title, value, description, warningIcon, children }) => {
+const HealthCard = ({ icon, title, value, description, warningIcon, criticalThreshold=0, normalThreshold=0, labelCritical, labelNormal, children }) => {
   const hasValidValue = value && typeof value === 'string';
+  const isCritical = hasValidValue && parseFloat(value) >= criticalThreshold;
+  const isNormal = hasValidValue && parseFloat(value) <= normalThreshold;
 
   return (
     <div className="h-auto w-full bg-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 ease-in-out">
@@ -28,8 +30,29 @@ const HealthCard = ({ icon, title, value, description, warningIcon, children }) 
           </span>
         </button>
       </div>
-      <div className="mt-4 flex flex-col justify-center items-center text-center p-1 sm:p-2 md:p-2 lg:p-3 xl:p-2 2xl:p-2">
-        <p className="text-[16px] sm:text-[24px] md:text-[30px] lg:text-[36px] xl:text-[38px] 2xl:text-[48px] font-bold">{value}</p>
+      <div className="flex flex-col justify-center items-center text-center p-1 sm:p-2 md:p-2 lg:p-2 xl:p-2 2xl:p-2">
+        {/* Threshold Labels */}
+        {hasValidValue && (
+          <div className="w-full flex justify-between px-4 text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px] xl:text-[14px] 2xl:text-[16px] text-gray mb-2">
+            {labelNormal && (
+              <p className="text-left">
+                <span className="font-semibold text-green">Normal:</span> {labelNormal}
+              </p>
+            )}
+            {labelCritical && (
+              <p className="text-right">
+                <span className="font-semibold text-red">Critical:</span> {labelCritical}
+              </p>
+            )}
+          </div>
+        )}
+        <p
+          className={`text-[16px] sm:text-[24px] md:text-[30px] lg:text-[36px] xl:text-[38px] 2xl:text-[48px] font-bold
+            ${isCritical ? 'text-red animate-blink' : isNormal ? 'text-black' : ''}
+          `}
+        >
+          {hasValidValue ? value : "No Data Available"}
+        </p>
         {hasValidValue && description && (
           <div className="flex items-center justify-center gap-2 mt-2">
             <p className="text-[8px] sm:text-[12px] md:text-[14px] lg:text-[16px] xl:text-[18px] 2xl:text-[18px] leading-tight">

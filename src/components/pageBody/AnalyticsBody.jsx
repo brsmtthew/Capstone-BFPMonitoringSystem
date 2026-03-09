@@ -8,8 +8,10 @@ import { db } from "../../firebase/Firebase";
 import Summary from "../chart/Summary";
 import { toast } from "react-toastify";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
+import printIcon from "./dashboardAssets/printer (1).png"
 
 const AnalyticsBody = () => {
+  const printRef = useRef(null);
   const location = useLocation();
   const [rawSubset, setRawSubset] = useState([]); // holds sliced data before outlier-filtering
   const [personnelInfo, setPersonnelInfo] = useState({
@@ -527,12 +529,19 @@ const AnalyticsBody = () => {
   }, [rawSubset, isRawShown]);
 
   return (
-    <div className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
+    <div ref={printRef} id="printSection" className="p-4 min-h-screen flex flex-col lg:bg-white font-montserrat">
       <HeaderSection
         title="ANALYTICS OVERVIEW"
         extraContent={
           <div className="flex space-x-5">
-            <div className="hidden lg:flex space-x-5">
+            <div className="hidden lg:flex space-x-3">
+              <button
+                onClick={() => window.print()}
+                className="bg-bfpNavy text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
+              >
+                <img src={printIcon} alt="Print" className="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 2xl:w-6 2xl:h-6"/>
+              </button>
+
               <select
                 value={selectedGearId}
                 onChange={handleGearChange}
@@ -602,20 +611,22 @@ const AnalyticsBody = () => {
 
       <BodyCard>
         <div className="mb-6">
-          <Summary
-            name={personnelInfo.name}
-            gearId={personnelInfo.gearId}
-            date={personnelInfo.date}
-            time={personnelInfo.time}
-            temperatureData={temperatureDataSeries}
-            smokeData={smokeDataSeries}
-            enviData={enviDataSeries}
-            ToxicGas={toxicSeries}
-            startMonth={gearDateRange.start}
-            endMonth={gearDateRange.end}
-            selectedMonth={selectedMonth}
-            outliers={outliers}
-          />
+          <div className="mb-6" id="printSummaryOnly">
+            <Summary
+              name={personnelInfo.name}
+              gearId={personnelInfo.gearId}
+              date={personnelInfo.date}
+              time={personnelInfo.time}
+              temperatureData={temperatureDataSeries}
+              smokeData={smokeDataSeries}
+              enviData={enviDataSeries}
+              ToxicGas={toxicSeries}
+              startMonth={gearDateRange.start}
+              endMonth={gearDateRange.end}
+              selectedMonth={selectedMonth}
+              outliers={outliers}
+            />
+          </div>
         </div>
         <EnvironmentChartSection
           smokeData={smokeDataSeries}

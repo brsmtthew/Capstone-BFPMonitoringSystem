@@ -214,7 +214,7 @@ function Summary({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font">
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
                   <p className="text-xs sm:text-xs md:text-sm lg:text-md xl:text-md 2xl:text-md text-black uppercase">Range</p>
-                  <p className="text-lg sm:text-lg md:text-md lg:text-md xl:text-2xl 2xl:text-2xl font-bold text-black mt-1">
+                  <p className="text-sm sm:text-sm md:text-md lg:text-md xl:text-2xl 2xl:text-2xl font-bold text-black mt-1">
                     {min.toFixed(1)} - {max.toFixed(1)}
                   </p>
                 </div>
@@ -229,7 +229,7 @@ function Summary({
                   </p>
                 </div>
                 <div className="bg-white rounded-lg border border-gray p-4 text-center">
-                  <p className="text-xs sm:text-xs md:text-sm lg:text-md xl:text-md 2xl:text-md text-black uppercase">
+                  <p className="text-xs sm:text-xs md:text-xs lg:text-xs xl:text-md 2xl:text-md text-black uppercase">
                     Risk Duration
                   </p>
                   <p className="text-lg sm:text-lg md:text-lg lg:text-lg xl:text-1xl 2xl:text-1xl font-bold text-black mt-1">
@@ -237,7 +237,7 @@ function Summary({
                   </p>
                 </div>
                 {/* add a risk duration description here */}
-                <div className="col-span-full mt-2 text-sm text-white text-center">
+                <div className="col-span-full mt-2 text-white text-center text-xs sm:text-xs md:text-xs lg:text-xs xl:text-md 2xl:text-md">
                   {getSensorDescription(
                     sensor.title,
                     dangerSeconds,

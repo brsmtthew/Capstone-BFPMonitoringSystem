@@ -29,6 +29,10 @@ const RealTime = ({
               value={data.value}
               description={data.description}
               warningIcon={data.warningIcon}
+              criticalThreshold={data.criticalThreshold} // Pass critical threshold for dynamic styling
+              normalThreshold={data.normalThreshold} // Pass normal threshold for dynamic styling
+              labelCritical={data.labelCritical} // Optional label for critical state
+              labelNormal={data.labelNormal} // Optional label for normal state
             />
           </div>
         ))}
@@ -42,6 +46,10 @@ const RealTime = ({
               value={data.value}
               description={data.description}
               warningIcon={data.warningIcon}
+              criticalThreshold={data.criticalThreshold} // Pass critical threshold for dynamic styling
+              normalThreshold={data.normalThreshold} // Pass normal threshold for dynamic styling
+              labelCritical={data.labelCritical} // Optional label for critical state
+              labelNormal={data.labelNormal} // Optional label for normal state
             />
           </div>
         ))}

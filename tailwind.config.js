@@ -11,6 +11,14 @@ export default {
         montserrat: ["Montserrat", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
       },
+      animation: {
+        blink: 'blink 1s step-start infinite',
+      },
+      keyframes: {
+        blink: {
+          '50%': { opacity: '0' },
+        },
+      },
     },
 
     colors: {

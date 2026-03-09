@@ -151,8 +151,8 @@ function MonitoringBody() {
 
       handleSensorNotification(gearId, sensors.bodyTemperature, 40, 37.5, 'Body Temperature', 'bodyTemperature');
       handleSensorNotification(gearId, sensors.environmentalTemperature, 70, 40, 'Environmental Temperature', 'environmentalTemperature');
-      handleSensorNotification(gearId, sensors.smokeSensor, 300, 200, 'Smoke', 'smokeSensor');
-      handleSensorNotification(gearId, sensors.ToxicGasSensor, 100, 50, 'Toxic Gas', 'ToxicGasSensor');
+      handleSensorNotification(gearId, sensors.smokeSensor, 600, 200, 'Smoke', 'smokeSensor');
+      handleSensorNotification(gearId, sensors.ToxicGasSensor, 200, 50, 'Toxic Gas', 'ToxicGasSensor');
       // handleSensorNotification(gearId, sensors.HeartRate, 100, 80, 'Heart Rate', 'HeartRate');
     })
   }, [sensorData, monitoredPersonnel, handleSensorNotification]);
@@ -172,12 +172,16 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.bodyTemperature > 40 ? (
-        <span className="text-red">Critical Temperature</span>
+      description: sensorData[person.gearId]?.bodyTemperature > 39 ? (
+        <span className="text-red animate-pulse">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.bodyTemperature >= 40 ? HighTemp : likeIcon,
+      warningIcon: sensorData[person.gearId]?.bodyTemperature > 39 ? HighTemp : likeIcon,
+      criticalThreshold: 40,
+      normalThreshold: 37.5,
+      labelCritical: "40°C",
+      labelNormal: "37.5°C",
     },
   ];
   
@@ -197,13 +201,17 @@ function MonitoringBody() {
           </span>
         ),
       description:
-        sensorData[person.gearId]?.ToxicGasSensor > 200
+        sensorData[person.gearId]?.ToxicGasSensor > 199
           ? (
-            <span className="text-red">High Gas Level Detected</span>
+            <span className="text-red animate-pulse">High Gas Level Detected</span>
           ) : (
             <span className="text-green">Normal Toxic Gas</span>
           ),
-      warningIcon: sensorData[person.gearId]?.ToxicGasSensor > 200 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.ToxicGasSensor > 199 ? flamesIcon : likeIcon,
+      criticalThreshold: 200,
+      normalThreshold: 50,
+      labelCritical: "200 PPM",
+      labelNormal: "50 PPM",
     },
     {
       icon: maskIcon,
@@ -219,12 +227,16 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.smokeSensor > 600 ? (
-        <span className="text-red">High Smoke level Detected</span>
+      description: sensorData[person.gearId]?.smokeSensor > 599 ? (
+        <span className="text-red animate-pulse">High Smoke level Detected</span>
       ) : (
         <span className="text-green">Normal Smoke level</span>
       ),
-      warningIcon: sensorData[person.gearId]?.smokeSensor > 600 ? SmokeIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.smokeSensor > 599 ? SmokeIcon : likeIcon,
+      criticalThreshold: 600,
+      normalThreshold: 200,
+      labelCritical: "600 PPM",
+      labelNormal: "200 PPM",
     },
     {
       icon: enviTemp,
@@ -240,12 +252,16 @@ function MonitoringBody() {
             No Data Available
           </span>
         ),
-      description: sensorData[person.gearId]?.environmentalTemperature > 150 ? (
-        <span className="text-red">Critical Temperature</span>
+      description: sensorData[person.gearId]?.environmentalTemperature > 69 ? (
+        <span className="text-red animate-pulse">Critical Temperature</span>
       ) : (
         <span className="text-green">Normal Temperature</span>
       ),
-      warningIcon: sensorData[person.gearId]?.environmentalTemperature > 150 ? flamesIcon : likeIcon,
+      warningIcon: sensorData[person.gearId]?.environmentalTemperature > 69 ? flamesIcon : likeIcon,
+      criticalThreshold: 70,
+      normalThreshold: 40,
+      labelCritical: "70°C",
+      labelNormal: "40°C",
     }
   ];
 

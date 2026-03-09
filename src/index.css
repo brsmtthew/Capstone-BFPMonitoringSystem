@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printSummaryOnly,
+  #printSummaryOnly * {
+    visibility: visible;
+  }
+
+  #printSummaryOnly {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
